@@ -8,8 +8,8 @@
 
 bool TEST_SUCCESS = true;
 #define TEST(name) \
-	if (name()) std::cout << "|O| SUCCESS: "#name << std::endl;                \
-	else std::cout << "|X|  FAILED: "#name << std::endl; TEST_SUCCESS = false;  \
+	if (name()) { std::cout << "|O| SUCCESS: "#name << std::endl; }                \
+	else { std::cout << "|X|  FAILED: "#name << std::endl; TEST_SUCCESS = false; } \
 
 int main(int argc, int *argv[])
 {

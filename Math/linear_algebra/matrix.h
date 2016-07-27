@@ -57,7 +57,7 @@ namespace math
             {
                 for (u32 row = 0; row < m; ++row)
                 {
-                    e[col][row] = (col == row) ? 1.0 : 0.0;
+                    e[col][row] = (col == row) ? T(1.0) : T(0.0);
                 }
             }
         }
