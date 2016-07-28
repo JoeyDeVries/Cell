@@ -1,8 +1,9 @@
 #include <iostream>
 
-#include "test/test_common.h"
 #include "test/test_vector.h"
 #include "test/test_matrix.h"
+#include "test/test_operations.h"
+#include "test/test_common.h"
 #include "test/test_transformations.h"
 
 
@@ -22,9 +23,14 @@ int main(int argc, int *argv[])
     TEST(MatrixConstruct);
     TEST(MatrixIndexing);
 
-	// run common math tests
+    // run matrix/vector operations math tests
+    TEST(VectorScalarOperation);
+    TEST(VectorVectorOperation);
+    TEST(VectorMatrixOperation);
+    TEST(MatrixMatrixOperation);
 
-	// run matrix/vector operations math tests
+	// run common math tests
+    
 
     // run transformations matrix/vector math tests
 

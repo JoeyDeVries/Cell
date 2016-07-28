@@ -167,6 +167,14 @@ namespace math
             };
         };
 
+        // NOTE(Joey): static frequently used vectors
+        static vector<3, T> UP;
+        static vector<3, T> DOWN;
+        static vector<3, T> LEFT;
+        static vector<3, T> RIGHT;
+        static vector<3, T> FORWARD;
+        static vector<3, T> BACK;
+
         // NOTE(Joey): constructor0: default empty constructor; default initialize all vector elements
         vector()
         {
@@ -217,6 +225,13 @@ namespace math
         }
     };
 
+    // NOTE(Joey): initialize static variables of vec3
+    template<typename T> vector<3, T>::UP      = vector<3, T>( 0.0,  1.0,  0.0);
+    template<typename T> vector<3, T>::DOWN    = vector<3, T>( 0.0, -1.0,  0.0);
+    template<typename T> vector<3, T>::LEFT    = vector<3, T>(-1.0,  0.0,  0.0);
+    template<typename T> vector<3, T>::RIGHT   = vector<3, T>( 1.0,  0.0,  0.0);
+    template<typename T> vector<3, T>::FORWARD = vector<3, T>( 0.0,  0.0, -1.0);
+    template<typename T> vector<3, T>::BACK    = vector<3, T>( 0.0,  0.0,  1.0);
 
     /* NOTE(Joey):
 

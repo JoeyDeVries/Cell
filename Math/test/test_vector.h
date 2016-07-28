@@ -15,6 +15,7 @@ bool VectorConstruct()
     math::vector<3, float> vec08(vec07.xy, 0.0f);
     math::vector<4, float> vec09(1.0f, 0.0f, 1.0f, 1.0f);
     math::vector<3, float> vec10 = vec09.rgb;
+    math::vector<3, float> vec11 = math::vector<3, float>::FORWARD;
 
 	return true;
 }
