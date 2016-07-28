@@ -53,6 +53,24 @@ namespace math
             assert(index >= 0 && index < n);
             return e[index];
         }
+
+        // NOTE(Joey): math operators (defined in operation.h)
+        // ---------------------------------------------------
+        // NOTE(Joey): negate operator
+        vector<n, T> operator-();
+        // NOTE(Joey): note that we define most operators as friend functions; aside from
+        // being more befitting to binary operators, this also has the added benefit of
+        // C++ doing automatic parameter conversion of the template specializations.
+        // This way we only have to define these friend operators once.
+        // NOTE(Joey): addition
+        friend vector<n, T> operator+(vector<n, T> lhs, T scalar);
+        friend vector<n, T> operator+(T scalar, vector<n, T> rhs);
+        friend vector<n, T> operator+(vector<n, T> lhs, vector<n, T> rhs);
+        // NOTE(Joey): subtraction
+        friend vector<n, T> operator-(vector<n, T> lhs, T scalar);
+        friend vector<n, T> operator-(vector<n, T> lhs, vector<n, T> rhs);
+        // NOTE(Joey): multiplication
+        //vector<n, T> operator*(vector<n, T> vec); // NOTE(Joey): hadamard product
     };
 
     /* NOTE(Joey): 
@@ -123,6 +141,11 @@ namespace math
             assert(index >= 0 && index < 2);
             return e[index];
         }
+
+        // NOTE(Joey): math operators (defined in operation.h)
+        // ---------------------------------------------------
+        // NOTE(Joey): negate operator
+        vector<2, T> operator-();
     };
 
     /* NOTE(Joey):
@@ -223,15 +246,20 @@ namespace math
             assert(index >= 0 && index < 3);
             return e[index];
         }
+
+        // NOTE(Joey): math operators (defined in operation.h)
+        // ---------------------------------------------------
+        // NOTE(Joey): negate operator
+        vector<3, T> operator-();
     };
 
     // NOTE(Joey): initialize static variables of vec3
-    template<typename T> vector<3, T>::UP      = vector<3, T>( 0.0,  1.0,  0.0);
-    template<typename T> vector<3, T>::DOWN    = vector<3, T>( 0.0, -1.0,  0.0);
-    template<typename T> vector<3, T>::LEFT    = vector<3, T>(-1.0,  0.0,  0.0);
-    template<typename T> vector<3, T>::RIGHT   = vector<3, T>( 1.0,  0.0,  0.0);
-    template<typename T> vector<3, T>::FORWARD = vector<3, T>( 0.0,  0.0, -1.0);
-    template<typename T> vector<3, T>::BACK    = vector<3, T>( 0.0,  0.0,  1.0);
+    template<typename T> vector<3, T> vector<3, T>::UP      = vector<3, T>( 0.0,  1.0,  0.0);
+    template<typename T> vector<3, T> vector<3, T>::DOWN    = vector<3, T>( 0.0, -1.0,  0.0);
+    template<typename T> vector<3, T> vector<3, T>::LEFT    = vector<3, T>(-1.0,  0.0,  0.0);
+    template<typename T> vector<3, T> vector<3, T>::RIGHT   = vector<3, T>( 1.0,  0.0,  0.0);
+    template<typename T> vector<3, T> vector<3, T>::FORWARD = vector<3, T>( 0.0,  0.0, -1.0);
+    template<typename T> vector<3, T> vector<3, T>::BACK    = vector<3, T>( 0.0,  0.0,  1.0);
 
     /* NOTE(Joey):
 
@@ -347,6 +375,11 @@ namespace math
             assert(index >= 0 && index < 4);
             return e[index];
         }
+
+        // NOTE(Joey): math operators (defined in operation.h)
+        // ---------------------------------------------------
+        // NOTE(Joey): negate operator
+        vector<4, T> operator-();
     };
 }
 
