@@ -96,7 +96,35 @@ bool MatrixOperation()
 
 bool VectorMatrixOperation()
 {
-    return true;
+    bool success = true;
+
+    // NOTE(Joey): vector scale transformation
+    math::matrix<3, 3, float> scale({
+                                      2.0f, 0.0f, 0.0f,
+                                      0.0f, 3.0f, 0.0f,
+                                      0.0f, 0.0f, 4.0f
+                                    });
+    math::vector<3, float> vec01({1.0f, 1.0f, 1.0f});
+    vec01 = scale * vec01;
+
+    if (vec01.x != 1.0f * 2.0f) success = false;
+    if (vec01.y != 1.0f * 3.0f) success = false;
+    if (vec01.z != 1.0f * 4.0f) success = false;
+
+    // NOTE(Joey): homogenous vector translation
+    math::matrix<4, 4, float> translation;
+    translation[3][0] = 1.0f;
+    translation[3][1] = 2.0f;
+    translation[3][2] = 3.0f;
+    math::vector<4, float> vec02({0.0f, 0.0f, 0.0f, 1.0f}); // NOTE(Joey): we need a homogenous coordinate of 1.0 in order for translation to work
+    vec02 = translation * vec02;
+
+    if (vec02.x != 0.0f + 1.0f) success = false;
+    if (vec02.y != 0.0f + 2.0f) success = false;
+    if (vec02.z != 0.0f + 3.0f) success = false;
+    if (vec02.w != 1.0f) success = false;
+
+    return success;
 }
 
 
