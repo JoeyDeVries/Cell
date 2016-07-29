@@ -25,8 +25,8 @@ int main(int argc, int *argv[])
 
     // run matrix/vector operations math tests
     TEST(VectorOperation);
-    TEST(VectorMatrixOperation);
     TEST(MatrixOperation);
+    TEST(VectorMatrixOperation);
 
 	// run common math tests
     

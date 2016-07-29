@@ -54,23 +54,10 @@ namespace math
             return e[index];
         }
 
-        // NOTE(Joey): math operators (defined in operation.h)
+        // NOTE(Joey): math member operators (defined in operation.h)
         // ---------------------------------------------------
         // NOTE(Joey): negate operator
         vector<n, T> operator-();
-        // NOTE(Joey): note that we define most operators as friend functions; aside from
-        // being more befitting to binary operators, this also has the added benefit of
-        // C++ doing automatic parameter conversion of the template specializations.
-        // This way we only have to define these friend operators once.
-        // NOTE(Joey): addition
-        friend vector<n, T> operator+(vector<n, T> lhs, T scalar);
-        friend vector<n, T> operator+(T scalar, vector<n, T> rhs);
-        friend vector<n, T> operator+(vector<n, T> lhs, vector<n, T> rhs);
-        // NOTE(Joey): subtraction
-        friend vector<n, T> operator-(vector<n, T> lhs, T scalar);
-        friend vector<n, T> operator-(vector<n, T> lhs, vector<n, T> rhs);
-        // NOTE(Joey): multiplication
-        //vector<n, T> operator*(vector<n, T> vec); // NOTE(Joey): hadamard product
     };
 
     /* NOTE(Joey): 
