@@ -29,7 +29,10 @@ int main(int argc, int *argv[])
     TEST(VectorMatrixOperation);
 
 	// run common math tests
-    
+    TEST(LerpFunctions);
+    TEST(ClampFunctions);
+    TEST(RangeFunctions);
+    TEST(StepFunctions);
 
     // run transformations matrix/vector math tests
     TEST(MatrixTransformation);

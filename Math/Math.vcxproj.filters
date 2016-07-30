@@ -45,6 +45,9 @@
     <ClInclude Include="linear_algebra\operation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="utility\common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="program.cpp">

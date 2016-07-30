@@ -1,5 +1,5 @@
-#ifndef CELL_MATRIX_H
-#define CELL_MATRIX_H
+#ifndef MATH_LINEAR_ALGEBRA_MATRIX_H
+#define MATH_LINEAR_ALGEBRA_MATRIX_H
 
 #include <initializer_list>
 #include <assert.h>

@@ -1,5 +1,5 @@
-#ifndef CELL_OPERATION_H
-#define CELL_OPERATION_H
+#ifndef MATH_LINEAR_ALGEBRA_OPERATION_H
+#define MATH_LINEAR_ALGEBRA_OPERATION_H
 
 #include "vector.h"
 #include "matrix.h"

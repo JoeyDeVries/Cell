@@ -120,6 +120,7 @@
     <ClInclude Include="test\test_operations.h" />
     <ClInclude Include="test\test_transformations.h" />
     <ClInclude Include="test\test_vector.h" />
+    <ClInclude Include="utility\common.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="program.cpp" />
