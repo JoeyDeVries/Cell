@@ -26,6 +26,14 @@ bool VectorOperation()
     if (vec2c.x != 1.0 - 3.0) success = false;
     if (vec2c.y != 2.0 - 4.0) success = false;
 
+    // NOTE(Joey): dot product
+    math::vector<3, float> veca({1.0f, 2.0f, 3.0f});
+    float result = math::dot(veca, veca);
+    // NOTE(Joey): a vector dot product with itself is equal to its length squared
+    float l = length(veca);
+    float epsilon = 0.001f; // NOTE(Joey): due to floating point precision
+    if(result - epsilon > l*l || result + epsilon < l*l) success = false;
+
     return success;
 }
 

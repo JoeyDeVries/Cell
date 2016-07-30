@@ -9,7 +9,7 @@ namespace math
     // NOTE(Joey): because this is a member operator, we have to
     // define this for each specialization.
     template <u32 n, typename T>
-    vector<n, T> vector<n, T>::operator-()
+    inline vector<n, T> vector<n, T>::operator-()
     {
         vector<n, T> result;
         for (u32 i = 0; i < n; ++i)
@@ -17,24 +17,24 @@ namespace math
         return result;
     }
     template <typename T>
-    vector<2, T> vector<2, T>::operator-()
+    inline vector<2, T> vector<2, T>::operator-()
     {
         return { -x, -y };
     }
     template <typename T>
-    vector<3, T> vector<3, T>::operator-()
+    inline vector<3, T> vector<3, T>::operator-()
     {
         return{ -x, -y, -z };
     }
     template <typename T>
-    vector<4, T> vector<4, T>::operator-()
+    inline vector<4, T> vector<4, T>::operator-()
     {
         return{ -x, -y, -z, -w };
     }
 
     // NOTE(Joey): addition
     template <u32 n, typename T>
-    vector<n, T> operator+(vector<n, T> lhs, T scalar)
+    inline vector<n, T> operator+(vector<n, T> lhs, T scalar)
     {
         vector<n, T> result;
         for (u32 i = 0; i < n; ++i)
@@ -42,7 +42,7 @@ namespace math
         return result;
     }
     template <u32 n, typename T>
-    vector<n, T> operator+(T scalar, vector<n, T> rhs)
+    inline vector<n, T> operator+(T scalar, vector<n, T> rhs)
     {
         vector<n, T> result;
         for (u32 i = 0; i < n; ++i)
@@ -50,7 +50,7 @@ namespace math
         return result;
     }
     template <u32 n, typename T>
-    vector<n, T> operator+(vector<n, T> lhs, vector<n, T> rhs)
+    inline vector<n, T> operator+(vector<n, T> lhs, vector<n, T> rhs)
     {
         vector<n, T> result;
         for (u32 i = 0; i < n; ++i)
@@ -60,7 +60,7 @@ namespace math
 
     // NOTE(Joey): subtraction
     template <u32 n, typename T>
-    vector<n, T> operator-(vector<n, T> lhs, T scalar)
+    inline vector<n, T> operator-(vector<n, T> lhs, T scalar)
     {
         vector<n, T> result;
         for (u32 i = 0; i < n; ++i)
@@ -68,7 +68,7 @@ namespace math
         return result;
     }
     template <u32 n, typename T>
-    vector<n, T> operator-(vector<n, T> lhs, vector<n, T> rhs)
+    inline vector<n, T> operator-(vector<n, T> lhs, vector<n, T> rhs)
     {
         vector<n, T> result;
         for (u32 i = 0; i < n; ++i)
@@ -78,7 +78,7 @@ namespace math
 
     // NOTE(Joey): multiplication
     template <u32 n, typename T>
-    vector<n, T> operator*(vector<n, T> lhs, T scalar)
+    inline vector<n, T> operator*(vector<n, T> lhs, T scalar)
     {
         vector<n, T> result;
         for (u32 i = 0; i < n; ++i)
@@ -86,7 +86,7 @@ namespace math
         return result;
     }
     template <u32 n, typename T>
-    vector<n, T> operator*(T scalar, vector<n, T> lhs)
+    inline vector<n, T> operator*(T scalar, vector<n, T> lhs)
     {
         vector<n, T> result;
         for (u32 i = 0; i < n; ++i)
@@ -94,7 +94,7 @@ namespace math
         return result;
     }
     template <u32 n, typename T>
-    vector<n, T> operator*(vector<n, T> lhs, vector<n, T> rhs) // NOTE(Joey): hadamard product
+    inline vector<n, T> operator*(vector<n, T> lhs, vector<n, T> rhs) // NOTE(Joey): hadamard product
     {
         vector<n, T> result;
         for (u32 i = 0; i < n; ++i)
@@ -104,7 +104,7 @@ namespace math
 
     // NOTE(Joey): division
     template <u32 n, typename T>
-    vector<n, T> operator/(vector<n, T> lhs, T scalar)
+    inline vector<n, T> operator/(vector<n, T> lhs, T scalar)
     {
         vector<n, T> result;
         for (u32 i = 0; i < n; ++i)
@@ -112,7 +112,7 @@ namespace math
         return result;
     }
     template <u32 n, typename T>
-    vector<n, T> operator/(T scalar, vector<n, T> lhs)
+    inline vector<n, T> operator/(T scalar, vector<n, T> lhs)
     {
         vector<n, T> result;
         for (u32 i = 0; i < n; ++i)
@@ -120,7 +120,7 @@ namespace math
         return result;
     }
     template <u32 n, typename T>
-    vector<n, T> operator/(vector<n, T> lhs, vector<n, T> rhs) // NOTE(Joey): hadamard product
+    inline vector<n, T> operator/(vector<n, T> lhs, vector<n, T> rhs) // NOTE(Joey): hadamard product
     {
         vector<n, T> result;
         for (u32 i = 0; i < n; ++i)
@@ -210,5 +210,47 @@ namespace math
         return result;
     }
 
+
+    // NOTE(Joey): vector geometric operations
+    // ---------------------------------------
+    template <u32 n, typename T>
+    inline T length(vector<n, T> vec)
+    {
+        T result = {};
+        for(u32 i = 0; i < n; ++i)
+            result += vec[i] * vec[i];
+        return sqrt(result);
+    }
+
+    template <u32 n, typename T>
+    inline vector<n, T>& normalize(vector<n, T> &vec)
+    {
+        T length = length(vec);
+        for(u32 i = 0; i < n; ++i)
+            vec[i] = vec[i] / length;
+        return vec;
+    }
+
+    template <u32 n, typename T>
+    inline T dot(vector<n, T> lhs, vector<n, T> rhs)
+    {
+        T result = {};
+        for(u32 i = 0; i < n; ++i)
+            result += lhs[i] * rhs[i];
+        return result;
+    }
+
+    template<u32 n, typename T>
+    inline vector<n, T> cross(vector<n, T> lhs, vector<n, T> rhs)
+    {
+        vector<n, T> result;
+
+        // TODO(Joey): only implement functions when it's 100% clear how and why
+        // they function; I know the forumla for cross product, but I first want
+        // to delve into the proof of why it works as it does before implementing
+        // it.
+
+        return result;
+    }
 }
 #endif
