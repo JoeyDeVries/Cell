@@ -1,6 +1,9 @@
 #ifndef CELL_OPERATION_H
 #define CELL_OPERATION_H
 
+#include "vector.h"
+#include "matrix.h"
+
 namespace math
 {
     // NOTE(Joey): per-vector operations
@@ -174,6 +177,25 @@ namespace math
     matrix<m, o, T> operator*(matrix<m, n, T> lhs, matrix<n, o, T> rhs)
     {
         matrix<m, o, T> result;
+        for (u32 col = 0; col < o; ++col)
+        {
+            for (u32 row = 0; row < m; ++row)
+            {
+                T value = {};
+                for (u32 j = 0; j < n; ++j) // NOTE(Joey): j equals col in math notation (i = row)
+                {
+                    value += lhs[j][row] * rhs[col][j];
+                }
+                result[col][row] = value;
+            }
+        }
+        return result;
+    }
+    
+    // NOTE(Joey): multiplication with reference matrix (store directly inside provided matrix)
+    template <u32 m, u32 n, u32 o, typename T>
+    matrix<m, o, T>& mul(matrix <m, n, T> &result, matrix<m, n, T> lhs, matrix<n, o, T> rhs)
+    {
         for (u32 col = 0; col < o; ++col)
         {
             for (u32 row = 0; row < m; ++row)

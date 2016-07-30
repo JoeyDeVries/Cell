@@ -4,6 +4,7 @@
 #include <initializer_list>
 #include <assert.h>
 
+#include "vector.h"
 
 namespace math
 {

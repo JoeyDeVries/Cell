@@ -32,6 +32,7 @@ int main(int argc, int *argv[])
     
 
     // run transformations matrix/vector math tests
+    TEST(MatrixTransformation);
 
 
 	std::cout << std::endl;
