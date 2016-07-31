@@ -4,6 +4,7 @@
 #include <initializer_list>
 #include <assert.h>
 
+
 namespace math
 {
     /* NOTE(Joey):
@@ -368,6 +369,16 @@ namespace math
         // NOTE(Joey): negate operator
         vector<4, T> operator-();
     };
+
+    typedef vector<2, float>  vec2;
+    typedef vector<3, float>  vec3;
+    typedef vector<4, float>  vec4;
+    typedef vector<2, int>    ivec2;
+    typedef vector<3, int>    ivec3;
+    typedef vector<4, int>    ivec4;
+    typedef vector<2, double> dvec2;
+    typedef vector<3, double> dvec3;
+    typedef vector<4, double> dvec4;
 }
 
 

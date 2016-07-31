@@ -6,8 +6,9 @@
 
 #include "vector.h"
 
+
 namespace math
-{
+{    
     /* NOTE(Joey):
 
       Generic m by n dimensional matrix template type version supporting matrices
@@ -87,5 +88,12 @@ namespace math
             return col[colIndex];
         }
     };
+
+    typedef matrix<2, 2, float>  mat2;
+    typedef matrix<3, 3, float>  mat3;
+    typedef matrix<4, 4, float>  mat4;
+    typedef matrix<2, 2, double> dmat2;
+    typedef matrix<3, 3, double> dmat3;
+    typedef matrix<4, 4, double> dmat4;
 }
 #endif
