@@ -48,6 +48,9 @@
     <ClInclude Include="utility\common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="trigonometry\conversions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="program.cpp">
