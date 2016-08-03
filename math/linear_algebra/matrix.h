@@ -37,7 +37,7 @@ namespace math
       There is no need for matrix template specialization.
 
     */
-    template <u32 m, u32 n, typename T>
+    template <unsigned int m, unsigned int n, typename T>
     struct matrix
     {
         union
@@ -55,9 +55,9 @@ namespace math
         // NOTE(Joey): consturctor0: default initializes matrix to identity matrix 
         matrix()
         {
-            for (u32 col = 0; col < n; ++col)
+            for (unsigned int col = 0; col < n; ++col)
             {
-                for (u32 row = 0; row < m; ++row)
+                for (unsigned int row = 0; row < m; ++row)
                 {
                     e[col][row] = (col == row) ? T(1.0) : T(0.0);
                 }
@@ -68,7 +68,7 @@ namespace math
         matrix(std::initializer_list<T> args)
         {
             assert(args.size() <= m * n);
-            u32 cols = 0, rows = 0;
+            unsigned int cols = 0, rows = 0;
             for (auto begin = args.begin(); begin != args.end(); ++begin)
             {
                 e[cols][rows++] = *begin;
@@ -82,7 +82,7 @@ namespace math
 
         // NOTE(Joey): returns a column vector, that can again be indexed with the vector subscript 
         // operator. In effect: [][] and [] indexing is possible.
-        vector<m, T>& operator[](const u32 colIndex)
+        vector<m, T>& operator[](const unsigned int colIndex)
         {
             assert(colIndex >= 0 && colIndex < n);
             return col[colIndex];

@@ -21,7 +21,7 @@ namespace math
       specify the template variables.
 
     */
-    template <u32 n, class T>
+    template <unsigned int n, class T>
     struct vector
     {
     public:
@@ -30,13 +30,13 @@ namespace math
         // NOTE(Joey): constructor0: default empty constructor; default initialize all vector elements
         vector()
         {
-            for (u32 i = 0; i < n; ++i)
+            for (unsigned int i = 0; i < n; ++i)
                 e[i] = {};
         }
         // NOTE(Joey): constructor1: one argument given: initialize all vectors elements w/ same value
         vector(T v)
         {
-            for (u32 i = 0; i < n; ++i)
+            for (unsigned int i = 0; i < n; ++i)
                 e[i] = v;
         }
         // NOTE(Joey): constructor2: use std::initializer list for accepting any number of arguments
@@ -49,7 +49,7 @@ namespace math
         }
 
         // NOTE(Joey): subscript operator
-        T& operator[] (const u32 index)
+        T& operator[] (const unsigned int index)
         {
             assert(index >= 0 && index < n);
             return e[index];
@@ -99,13 +99,13 @@ namespace math
         // NOTE(Joey): constructor0: default empty constructor; default initialize all vector elements
         vector()
         {
-            for (u32 i = 0; i < 2; ++i)
+            for (unsigned int i = 0; i < 2; ++i)
                 e[i] = {};
         }
         // NOTE(Joey): constructor1: one argument given: initialize all vectors elements w/ same value
         vector(T v)
         {
-            for (u32 i = 0; i < 2; ++i)
+            for (unsigned int i = 0; i < 2; ++i)
                 e[i] = v;
         }
         // NOTE(Joey): constructor2: use std::initializer list for accepting any number of arguments
@@ -124,7 +124,7 @@ namespace math
         }
 
         // NOTE(Joey): subscript operator
-        T& operator[] (const u32 index)
+        T& operator[] (const unsigned int index)
         {
             assert(index >= 0 && index < 2);
             return e[index];
@@ -189,13 +189,13 @@ namespace math
         // NOTE(Joey): constructor0: default empty constructor; default initialize all vector elements
         vector()
         {
-            for (u32 i = 0; i < 3; ++i)
+            for (unsigned int i = 0; i < 3; ++i)
                 e[i] = {};
         }
         // NOTE(Joey): constructor1: one argument given: initialize all vectors elements w/ same value
         vector(T v)
         {
-            for (u32 i = 0; i < 3; ++i)
+            for (unsigned int i = 0; i < 3; ++i)
                 e[i] = v;
         }
         // NOTE(Joey): constructor2: use std::initializer list for accepting any number of arguments
@@ -229,7 +229,7 @@ namespace math
         }
 
         // NOTE(Joey): subscript operator
-        T& operator[] (const u32 index)
+        T& operator[] (const unsigned int index)
         {
             assert(index >= 0 && index < 3);
             return e[index];
@@ -315,13 +315,13 @@ namespace math
         // NOTE(Joey): constructor0: default empty constructor; default initialize all vector elements
         vector()
         {
-            for (u32 i = 0; i < 4; ++i)
+            for (unsigned int i = 0; i < 4; ++i)
                 e[i] = {};
         }
         // NOTE(Joey): constructor1: one argument given: initialize all vectors elements w/ same value
         vector(T v)
         {
-            for (u32 i = 0; i < 4; ++i)
+            for (unsigned int i = 0; i < 4; ++i)
                 e[i] = v;
         }
         // NOTE(Joey): constructor2: use std::initializer list for accepting any number of arguments
@@ -358,7 +358,7 @@ namespace math
         }
 
         // NOTE(Joey): subscript operator
-        T& operator[] (const u32 index)
+        T& operator[] (const unsigned int index)
         {
             assert(index >= 0 && index < 4);
             return e[index];

@@ -10,20 +10,20 @@ namespace math
 {
     // NOTE(Joey): scale
     // -----------------
-    template <u32 n, typename T>
+    template <unsigned int n, typename T>
     matrix<n, n, T> scale(vector<n, T> scale)
     {
         matrix<n, n, T> mat;
-        for (u32 i = 0; i < n; ++i)
+        for (unsigned int i = 0; i < n; ++i)
             mat[i][i] = scale[i];
         return mat;
     }
     // NOTE(Joey): version w/ reference
-    template <u32 n, typename T>
+    template <unsigned int n, typename T>
     matrix<n, n, T>& scale(matrix<n, n, T>& result, vector<n, T> scale)
     {
         // NOTE(Joey): we can do a manual operation on the matrix scale
-        for(u32 i = 0; i < n; ++i)
+        for(unsigned int i = 0; i < n; ++i)
             result[i][i] *= scale[i];
         return result;
     }
@@ -82,7 +82,7 @@ namespace math
 
     // NOTE(Joey): view-space 
     // ----------------------
-    template <u32 m, u32 n, typename T>
+    template <unsigned int m, unsigned int n, typename T>
     matrix<m, n, T> lookAt(vector<n, T> position, vector<n, T> target, vector<n, T> up)
     {
         matrix<m, n, T> result;
@@ -92,7 +92,7 @@ namespace math
 
     // NOTE(Joey): projection
     // ----------------------
-    template <u32 m, u32 n, typename T>
+    template <unsigned int m, unsigned int n, typename T>
     matrix<m, n, T> orthographic(T left, T right, T top, T bottom, T near, T far)
     {
         matrix<m, n, T> result;
@@ -100,7 +100,7 @@ namespace math
         return result;
     }
 
-    template <u32 m, u32 n, typename T>
+    template <unsigned int m, unsigned int n, typename T>
     matrix<m, n, T> perspective(T fov, T aspect, T near, T far)
     {
         matrix<m, n, T> result;
