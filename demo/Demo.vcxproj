@@ -72,14 +72,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)\build\</OutDir>
     <IntDir>$(SolutionDir)\build\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\build;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)/lib/includes/;$(SolutionDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)/lib/;$(SolutionDir)/build;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)\build\</OutDir>
     <IntDir>$(SolutionDir)\build\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\build;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)/lib/includes/;$(SolutionDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)/lib/;$(SolutionDir)/build;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -95,7 +95,7 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Cell.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;cell.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -122,7 +122,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Cell.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;cell.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

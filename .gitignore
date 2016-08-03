@@ -31,6 +31,8 @@ Debug/
 *.la
 *.a
 *.lib
+!glfw3.lib
+!glew32s.lib
 
 # Executables
 *.exe
