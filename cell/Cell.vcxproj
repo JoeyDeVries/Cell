@@ -70,12 +70,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)/lib/includes/;$(SolutionDir);$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)\build\</OutDir>
     <IntDir>$(SolutionDir)\build\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)/lib/includes/;$(SolutionDir);$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)\build\</OutDir>
     <IntDir>$(SolutionDir)\build\$(ProjectName)\</IntDir>
   </PropertyGroup>
@@ -122,11 +122,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="mesh\mesh.cpp" />
+    <ClCompile Include="mesh\quad.cpp" />
     <ClCompile Include="ProjectLinkTest.cpp" />
+    <ClCompile Include="shading\material.cpp" />
+    <ClCompile Include="shading\shader_parser.cpp" />
+    <ClCompile Include="shading\shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mesh\mesh.h" />
+    <ClInclude Include="mesh\quad.h" />
     <ClInclude Include="ProjectLinkTest.h" />
+    <ClInclude Include="shading\material.h" />
+    <ClInclude Include="shading\shader_parser.h" />
+    <ClInclude Include="shading\shader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

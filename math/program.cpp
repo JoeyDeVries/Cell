@@ -9,12 +9,11 @@
 
 bool TEST_SUCCESS = true;
 #define TEST(name) \
-	if (name()) { std::cout << "|O| SUCCESS: "#name << std::endl; }                \
-	else { std::cout << "|X|  FAILED: "#name << std::endl; TEST_SUCCESS = false; } \
+	if (name()) { std::cout << "|O| SUCCESS: "#name << std::endl; }                       \
+	else {        std::cout << "|X|  FAILED: "#name << std::endl; TEST_SUCCESS = false; } \
 
 int main(int argc, int *argv[])
 {
-
 	// run vector math tests
 	TEST(VectorConstruct);
     TEST(VectorIndexing);
@@ -37,13 +36,11 @@ int main(int argc, int *argv[])
     // run transformations matrix/vector math tests
     TEST(MatrixTransformation);
 
-
 	std::cout << std::endl;
 	if (TEST_SUCCESS)
 		std::cout << "|O| Tests succesfully completed." << std::endl;
 	else
-		std::cout << "|X| Tests did not all complete succesfully, re-validate code" << std::endl;
-
+		std::cout << "|X| Tests did not all complete succesfully, re-validate code." << std::endl;
 
 	int c;
 	std::cin >> c;

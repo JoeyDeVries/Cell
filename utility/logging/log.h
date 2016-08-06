@@ -9,7 +9,7 @@
   A note on global functionality.
 
   It is preferred to keep your objects/classes relatively closed s.t. 
-  they're only being accessed/viewed from the classes that actually 
+  they're only being accessed/viewed from the systems that actually 
   need their service(s).
 
   Some services however are needed by most other service of the 
@@ -29,11 +29,11 @@
   functionality if required. One can slightly mitigate this by using
   the 'Service Locator' pattern.
 
-  For a logging system that likely to be required by every part of 
-  engine I chose to use a static class because while its 
-  functionality is still global, it does give me a means to keep the
-  state of all system logs private and only expose the relevant
-  logging functions to the system. 
+  For a logging system that is likely to be required by every part of 
+  engine I chose to use a static class because while its functionality 
+  is still global, it does give me a means to keep the state of all 
+  system logs private and only expose the relevant logging functions 
+  to the other systems.  
 
 */
 
@@ -62,7 +62,7 @@ class Log
 private:
     /* NOTE(Joey): 
       
-      we store all log entries in continous-memory vectors
+      we store all log entries in continuous-memory vectors
       instead of a map, as this ensures each subsequent log entry is 
       linear in memory. This makes looping over log entries cache 
       efficient. It does require that we manually specify a vector

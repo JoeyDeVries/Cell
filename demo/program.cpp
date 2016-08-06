@@ -7,9 +7,8 @@
 
 #include <math/math.h>
 #include <cell/ProjectLinkTest.h>
+#include <cell/shading/shader.h>
 #include <utility/logging/log.h>
-
-#include <Windows.h>
 
 /* NOTE(Joey):
 
@@ -83,7 +82,45 @@ int main(int argc, char *argv[])
     // NOTE(Joey): check if linking Cell static library worked properly
     int linktest = SuperCalcFunc(1337);
     Log::Message("Testing Cell Linkage: " + std::to_string(linktest), LOG_DEBUG);
-    Log::Message("Oops, imporper configuration", LOG_ERROR);
+
+    Shader testShader("shaders/test.vs", "shaders/test.fs");
+    testShader.Use();
+
+
+    float vertices[] = 
+    {
+        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+         1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+         1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+    };
+    unsigned int indices[] = 
+    {
+        0, 1, 2,
+        2, 1, 3,
+    };
+    unsigned int vbo, vao, ebo;
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    
+    glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (GLvoid*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBindVertexArray(0);
+
 
     Log::Display();
     //Log::Display(LOG_ERROR);
@@ -99,11 +136,15 @@ int main(int argc, char *argv[])
         // TODO(Joey): fill the renderer's command buffer with interesting polygons
         // TODO(Joey): call Cell's renderer
 
+        // NOTE(Joey): simple quad test code to run shader tests on
+        testShader.Use();
+        glBindVertexArray(vao);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+
         // NOTE(Joey): display log messages / diagnostics
         Log::Display();
         Log::Clear();
-
-        Sleep(16.68);
 
         glfwSwapBuffers(window);
     }
