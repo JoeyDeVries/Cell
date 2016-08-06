@@ -23,5 +23,8 @@
     <ClInclude Include="ProjectLinkTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="mesh\mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

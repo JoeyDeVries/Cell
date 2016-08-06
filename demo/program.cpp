@@ -7,7 +7,9 @@
 
 #include <math/math.h>
 #include <cell/ProjectLinkTest.h>
+#include <utility/logging/log.h>
 
+#include <Windows.h>
 
 /* NOTE(Joey):
 
@@ -19,7 +21,7 @@
   user input interaction.
 
 */
-int main(int argc, int *argv[])
+int main(int argc, char *argv[])
 {
     /* NOTE(Joey): 
 
@@ -36,37 +38,43 @@ int main(int argc, int *argv[])
       something we want Cell to manage in the future as well.
 
     */
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_RESIZABLE, true);
+    Log::Message("Initializing GLFW");
+        glfwInit();
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_RESIZABLE, true);
     
-    GLFWwindow *window = glfwCreateWindow(1280, 720, "Cell", nullptr, nullptr);
-    if (window == nullptr)
-    {
-        // TODO(Joey): logging/diagnostics
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
+        GLFWwindow *window = glfwCreateWindow(1280, 720, "Cell", nullptr, nullptr);
+        if (window == nullptr)
+        {
+            // TODO(Joey): logging/diagnostics
+            glfwTerminate();
+            return -1;
+        }
+        glfwMakeContextCurrent(window);
+    Log::Message("GLFW initialized");
 
     // TODO(Joey): initialize Cell here
 
     // NOTE(Joey): load OpenGL function pointers
-    glewExperimental = true;
-    if (glewInit() != GLEW_OK)
-    {
-        // TODO(Joey): logging/diagnostics
-        return -1;
-    }
+    Log::Message("Initializing GLEW");
+        glewExperimental = true;
+        if (glewInit() != GLEW_OK)
+        {
+            // TODO(Joey): logging/diagnostics
+            return -1;
+        }
+    Log::Message("GLEW initialized");
 
     // NOTE(Joey): configure default OpenGL state
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-    glViewport(0, 0, width, height);
+    Log::Message("Configuring OpenGL");
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+        glViewport(0, 0, width, height);
 
-    glClearColor(0.4f, 0.1f, 0.1f, 1.0f);
+        glClearColor(0.4f, 0.1f, 0.1f, 1.0f);
+    Log::Message("OpenGL configured");
 
 
     // NOTE(Joey): custom test code
@@ -74,17 +82,28 @@ int main(int argc, int *argv[])
     math::vec3 test2;
     // NOTE(Joey): check if linking Cell static library worked properly
     int linktest = SuperCalcFunc(1337);
-    std::cout << linktest << std::endl;
+    Log::Message("Testing Cell Linkage: " + std::to_string(linktest), LOG_DEBUG);
+    Log::Message("Oops, imporper configuration", LOG_ERROR);
 
+    Log::Display();
+    //Log::Display(LOG_ERROR);
+    Log::Clear();
 
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT);
 
+
         // TODO(Joey): do we need to pass input to Cell?
         // TODO(Joey): fill the renderer's command buffer with interesting polygons
         // TODO(Joey): call Cell's renderer
+
+        // NOTE(Joey): display log messages / diagnostics
+        Log::Display();
+        Log::Clear();
+
+        Sleep(16.68);
 
         glfwSwapBuffers(window);
     }

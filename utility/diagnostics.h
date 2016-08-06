@@ -7,6 +7,9 @@
 
 #include "std_types.h"
 
+
+#define CLOCK(name) diagnostics::clock clock##name(#name)
+
 namespace diagnostics
 {
     /* NOTE(Joey):
@@ -33,9 +36,6 @@ namespace diagnostics
       }
 
     */
-
-    #define CLOCK(name) clock clock##name(#name)
-
     class clock
     {
         std::string m_Name;

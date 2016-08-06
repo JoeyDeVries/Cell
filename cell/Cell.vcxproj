@@ -125,6 +125,7 @@
     <ClCompile Include="ProjectLinkTest.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="mesh\mesh.h" />
     <ClInclude Include="ProjectLinkTest.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
