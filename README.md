@@ -13,8 +13,8 @@ Cell is currently at the beginning stages of development, so expect an incomplet
 
 Feature List (complete)
 ------
-
-Feature List (work-in-progress)
+* Fully functioning (custom) math library (vectors, matrices, transformations, utility functions):
+	1. Linear algebra: n-dimensional vectors, nxn-dimensional matrices, transformations, utility.
 ------
 * Fully functioning (custom) math library (vectors, matrices, transformations, utility functions):
 	1. Linear algebra: n-dimensional vectors, nxn-dimensional matrices, transformations, utility.

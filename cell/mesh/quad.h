@@ -10,8 +10,10 @@
 */
 class Quad : public Mesh
 {
+public:
 
-
+    Quad(); // NOTE(Joey): defaults to dimensions (1, 1)
+    Quad(float width, float height);
 };
 
 #endif
