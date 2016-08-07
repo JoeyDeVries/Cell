@@ -15,6 +15,7 @@ Feature List (complete)
 ------
 * Fully functioning (custom) math library (vectors, matrices, transformations, utility functions):
 	1. Linear algebra: n-dimensional vectors, nxn-dimensional matrices, transformations, utility.
+	
 ------
 * Fully functioning (custom) math library (vectors, matrices, transformations, utility functions):
 	1. Linear algebra: n-dimensional vectors, nxn-dimensional matrices, transformations, utility.
