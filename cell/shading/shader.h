@@ -3,27 +3,29 @@
 
 #include <string>
 
-/* NOTE(Joey):
-
-  asd
-
-*/
-class Shader
+namespace Cell
 {
-public:
+    /* NOTE(Joey):
 
-private:
-    unsigned int m_ID;
+      asd
+
+    */
+    class Shader
+    {
+    public:
+
+    private:
+        unsigned int m_ID;
 
 
-public:
-    Shader(std::string vsPath, std::string fsPath);
+    public:
+        Shader(std::string vsPath, std::string fsPath);
 
-    void Use();
+        void Use();
 
-private:
-    // TODO(Joey): move all shader loading code to specialized loader
-    std::string readShader(std::ifstream &file, std::string directory);
-};
-
+    private:
+        // TODO(Joey): move all shader loading code to specialized loader
+        std::string readShader(std::ifstream &file, std::string directory);
+    };
+}
 #endif

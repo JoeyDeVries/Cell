@@ -1,47 +1,44 @@
 #include "quad.h"
 
-
-
-Quad::Quad()
+namespace Cell
 {
-    Positions = 
+    Quad::Quad()
     {
-        -1.0f,  1.0f, 0.0f,
-        -1.0f, -1.0f, 0.0f,
-         1.0f, -1.0f, 0.0f,
-         1.0f,  1.0f, 0.0f,
-    };
-    UV = {
-        0.0f, 1.0f,
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-    };
-    Indices = 
-    {
-        0, 1, 2, 3,
-    };
-    Topology = TRIANGLE_STRIP;
-}
+        Positions =
+        {
+            { -1.0f,  1.0f, 0.0f, },
+            { -1.0f, -1.0f, 0.0f, },
+            {  1.0f,  1.0f, 0.0f, },
+            {  1.0f, -1.0f, 0.0f, },
+        };
+        UV = {
+            { 0.0f, 1.0f, },
+            { 0.0f, 0.0f, },
+            { 1.0f, 1.0f, },
+            { 1.0f, 0.0f, },
+        };
+        Topology = TRIANGLE_STRIP;
 
-Quad::Quad(float width, float height)
-{
-    Positions =
+        Finalize();
+    }
+
+    Quad::Quad(float width, float height)
     {
-        -width,  height, 0.0f,
-        -width, -height, 0.0f,
-         width, -height, 0.0f,
-         width,  height, 0.0f,
-    };
-    UV = {
-        0.0f, 1.0f,
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-    };
-    Indices =
-    {
-        0, 1, 2, 3
-    };
-    Topology = TRIANGLE_STRIP;
+        Positions =
+        {
+            { -width,  height, 0.0f, },
+            { -width, -height, 0.0f, },
+            {  width,  height, 0.0f, },
+            {  width, -height, 0.0f, },
+        };
+        UV = {
+            { 0.0f, 1.0f, },
+            { 0.0f, 0.0f, },
+            { 1.0f, 1.0f, },
+            { 1.0f, 0.0f, },
+        };
+        Topology = TRIANGLE_STRIP;
+
+        Finalize();
+    }
 }
