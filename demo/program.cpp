@@ -9,6 +9,7 @@
 #include <cell/ProjectLinkTest.h>
 #include <cell/shading/shader.h>
 #include <cell/mesh/quad.h>
+#include <cell/mesh/line_strip.h>
 #include <utility/logging/log.h>
 
 /* NOTE(Joey):
@@ -86,45 +87,12 @@ int main(int argc, char *argv[])
 
     Cell::Shader testShader("shaders/test.vs", "shaders/test.fs");
     Cell::Quad quad;
-
-    //float vertices[] = 
-    //{
-    //    -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-    //    -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-    //     1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-    //     1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-    //};
-    //unsigned int indices[] = 
-    //{
-    //    0, 1, 2,
-    //    2, 1, 3,
-    //};
-    //unsigned int vbo, vao, ebo;
-    //glGenVertexArrays(1, &vao);
-    //glGenBuffers(1, &vbo);
-    //glGenBuffers(1, &ebo);
-
-    //glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    //glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    //
-    //glBindVertexArray(vao);
-    //    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    //    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
-    //    glEnableVertexAttribArray(0);
-    //    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (GLvoid*)(3 * sizeof(float)));
-    //    glEnableVertexAttribArray(1);
-
-    //    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    //glBindVertexArray(0);
-
+    Cell::LineStrip lineStrip(0.5f, 32);
 
     Log::Display();
-    //Log::Display(LOG_ERROR);
     Log::Clear();
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -140,11 +108,11 @@ int main(int argc, char *argv[])
         testShader.Use();
         glBindVertexArray(quad.m_VAO); // NOTE(Joey): placeholder for now; will be managed by renderer eventually
             glDrawArrays(GL_TRIANGLE_STRIP, 0, quad.Positions.size());
-            //glDrawElements(quad.Topology, quad.Positions.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
-        /*glBindVertexArray(vao);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);*/
+
+        glBindVertexArray(lineStrip.m_VAO);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, lineStrip.Positions.size());
+        glBindVertexArray(0);
 
         // NOTE(Joey): display log messages / diagnostics
         Log::Display();

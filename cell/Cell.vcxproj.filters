@@ -33,6 +33,9 @@
     <ClCompile Include="mesh\quad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mesh\line_strip.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ProjectLinkTest.h">
@@ -51,6 +54,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="mesh\quad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh\line_strip.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

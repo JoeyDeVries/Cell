@@ -124,6 +124,7 @@
   <ItemGroup>
     <ClCompile Include="mesh\mesh.cpp" />
     <ClCompile Include="mesh\quad.cpp" />
+    <ClCompile Include="mesh\line_strip.cpp" />
     <ClCompile Include="ProjectLinkTest.cpp" />
     <ClCompile Include="shading\material.cpp" />
     <ClCompile Include="shading\shader_parser.cpp" />
@@ -132,6 +133,7 @@
   <ItemGroup>
     <ClInclude Include="mesh\mesh.h" />
     <ClInclude Include="mesh\quad.h" />
+    <ClInclude Include="mesh\line_strip.h" />
     <ClInclude Include="ProjectLinkTest.h" />
     <ClInclude Include="shading\material.h" />
     <ClInclude Include="shading\shader_parser.h" />
