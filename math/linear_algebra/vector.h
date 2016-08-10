@@ -4,7 +4,6 @@
 #include <initializer_list>
 #include <assert.h>
 
-
 namespace math
 {
     /* NOTE(Joey):

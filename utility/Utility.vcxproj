@@ -123,9 +123,11 @@
     <ClInclude Include="diagnostics.h" />
     <ClInclude Include="logging\log.h" />
     <ClInclude Include="std_types.h" />
+    <ClInclude Include="time.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="logging\log.cpp" />
+    <ClCompile Include="time.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

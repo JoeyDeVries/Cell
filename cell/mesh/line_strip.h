@@ -9,7 +9,7 @@ namespace Cell
 
       A line strip of specified width / length.
 
-      Length equals the number of 2-triangle sets while
+      Segments equals the number of 2-triangle sets while
       width equals the width of the line. Useful for line
       systems that require a filled line strip.
 
@@ -17,7 +17,7 @@ namespace Cell
     class LineStrip : public Mesh
     {
     public:
-        LineStrip(float width, unsigned int length);
+        LineStrip(float width, unsigned int segments);
     };
 }
 #endif

@@ -9,6 +9,7 @@
 #include <cell/ProjectLinkTest.h>
 #include <cell/shading/shader.h>
 #include <cell/mesh/quad.h>
+#include <cell/mesh/plane.h>
 #include <cell/mesh/line_strip.h>
 #include <utility/logging/log.h>
 
@@ -46,7 +47,8 @@ int main(int argc, char *argv[])
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_RESIZABLE, true);
     
-        GLFWwindow *window = glfwCreateWindow(1280, 720, "Cell", nullptr, nullptr);
+        GLFWwindow *window = glfwCreateWindow(1280, 720, "Cell", nullptr, nullptr);           
+        //std::cout << *ptrToTest << std::endl;
         if (window == nullptr)
         {
             // TODO(Joey): logging/diagnostics
@@ -88,6 +90,7 @@ int main(int argc, char *argv[])
     Cell::Shader testShader("shaders/test.vs", "shaders/test.fs");
     Cell::Quad quad;
     Cell::LineStrip lineStrip(0.5f, 32);
+    Cell::Plane plane(64, 64);
 
     Log::Display();
     Log::Clear();
@@ -112,6 +115,10 @@ int main(int argc, char *argv[])
 
         glBindVertexArray(lineStrip.m_VAO);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, lineStrip.Positions.size());
+        glBindVertexArray(0);
+
+        glBindVertexArray(plane.m_VAO);
+            glDrawElements(GL_TRIANGLE_STRIP, plane.Indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         // NOTE(Joey): display log messages / diagnostics

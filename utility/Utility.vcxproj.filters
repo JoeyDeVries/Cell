@@ -24,9 +24,15 @@
     <ClInclude Include="logging\log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="logging\log.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="time.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
