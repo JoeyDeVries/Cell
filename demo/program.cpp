@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
         glfwGetFramebufferSize(window, &width, &height);
         glViewport(0, 0, width, height);
 
-        glClearColor(0.4f, 0.1f, 0.1f, 1.0f);
+        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
     Log::Message("OpenGL configured");
 
 
@@ -94,6 +94,7 @@ int main(int argc, char *argv[])
     Cell::LineStrip lineStrip(0.5f, 32);
     Cell::Plane plane(16, 16);
     Cell::Circle circle(16,16);
+    Cell::Sphere sphere(8, 8);
 
     Log::Display();
     Log::Clear();
@@ -126,6 +127,11 @@ int main(int argc, char *argv[])
 
         glBindVertexArray(circle.m_VAO);
             glDrawElements(GL_TRIANGLE_STRIP, circle.Indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+
+        glBindVertexArray(sphere.m_VAO);
+            //glDrawArrays(GL_POINTS, 0, sphere.Positions.size());
+            glDrawElements(GL_TRIANGLES, sphere.Indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         // NOTE(Joey): display log messages / diagnostics
