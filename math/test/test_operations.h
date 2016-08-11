@@ -1,6 +1,8 @@
 #ifndef MATH_TEST_OPERATIONS_H
 #define MATH_TEST_OPERATIONS_H
 
+#include "../math.h"
+
 // NOTE(Joey): test the validy of vector-vector and vector-scalar
 // operations of the custom math library.
 bool VectorOperation()

@@ -122,20 +122,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="mesh\circle.cpp" />
     <ClCompile Include="mesh\mesh.cpp" />
     <ClCompile Include="mesh\plane.cpp" />
     <ClCompile Include="mesh\quad.cpp" />
     <ClCompile Include="mesh\line_strip.cpp" />
+    <ClCompile Include="mesh\sphere.cpp" />
     <ClCompile Include="ProjectLinkTest.cpp" />
     <ClCompile Include="shading\material.cpp" />
     <ClCompile Include="shading\shader_parser.cpp" />
     <ClCompile Include="shading\shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="mesh\circle.h" />
     <ClInclude Include="mesh\mesh.h" />
     <ClInclude Include="mesh\plane.h" />
     <ClInclude Include="mesh\quad.h" />
     <ClInclude Include="mesh\line_strip.h" />
+    <ClInclude Include="mesh\sphere.h" />
     <ClInclude Include="ProjectLinkTest.h" />
     <ClInclude Include="shading\material.h" />
     <ClInclude Include="shading\shader_parser.h" />

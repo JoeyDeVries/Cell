@@ -10,6 +10,8 @@
 #include <cell/shading/shader.h>
 #include <cell/mesh/quad.h>
 #include <cell/mesh/plane.h>
+#include <cell/mesh/circle.h>
+#include <cell/mesh/sphere.h>
 #include <cell/mesh/line_strip.h>
 #include <utility/logging/log.h>
 
@@ -90,7 +92,8 @@ int main(int argc, char *argv[])
     Cell::Shader testShader("shaders/test.vs", "shaders/test.fs");
     Cell::Quad quad;
     Cell::LineStrip lineStrip(0.5f, 32);
-    Cell::Plane plane(64, 64);
+    Cell::Plane plane(16, 16);
+    Cell::Circle circle(16,16);
 
     Log::Display();
     Log::Clear();
@@ -119,6 +122,10 @@ int main(int argc, char *argv[])
 
         glBindVertexArray(plane.m_VAO);
             glDrawElements(GL_TRIANGLE_STRIP, plane.Indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+
+        glBindVertexArray(circle.m_VAO);
+            glDrawElements(GL_TRIANGLE_STRIP, circle.Indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         // NOTE(Joey): display log messages / diagnostics

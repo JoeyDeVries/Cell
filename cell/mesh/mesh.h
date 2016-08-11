@@ -21,8 +21,8 @@ namespace Cell
     */
     enum TOPOLOGY
     {
-        POINT,
-        LINE,
+        POINTS,
+        LINES,
         LINE_STRIP,
         TRIANGLES,
         TRIANGLE_STRIP,

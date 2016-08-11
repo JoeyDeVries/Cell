@@ -3,6 +3,9 @@
 
 namespace math
 {
+    // NOTE(Joey): constants
+
+
     // NOTE(Joey): interpolation
     // -------------------------
     template <typename T>

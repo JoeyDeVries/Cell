@@ -1,6 +1,7 @@
 #ifndef MATH_TEST_TRANSFORMATIONS_H
 #define MATH_TEST_TRANSFORMATIONS_H
 
+#include "../math.h"
 
 bool MatrixTransformation()
 {
