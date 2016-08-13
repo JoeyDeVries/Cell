@@ -5,7 +5,7 @@
 #include <string>
 #include <intrin.h>
 
-#include "std_types.h"
+#include "../std_types.h"
 
 
 #define CLOCK(name) diagnostics::clock clock##name(#name)

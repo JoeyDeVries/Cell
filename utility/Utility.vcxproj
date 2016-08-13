@@ -120,14 +120,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="diagnostics.h" />
+    <ClInclude Include="random\random.h" />
+    <ClInclude Include="timing\diagnostics.h" />
     <ClInclude Include="logging\log.h" />
     <ClInclude Include="std_types.h" />
-    <ClInclude Include="time.h" />
+    <ClInclude Include="timing\time.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="logging\log.cpp" />
-    <ClCompile Include="time.cpp" />
+    <ClCompile Include="random\random.cpp" />
+    <ClCompile Include="timing\time.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

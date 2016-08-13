@@ -15,16 +15,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="diagnostics.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="std_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="logging\log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="time.h">
+    <ClInclude Include="timing\diagnostics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="timing\time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="random\random.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -32,7 +35,10 @@
     <ClCompile Include="logging\log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="time.cpp">
+    <ClCompile Include="timing\time.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="random\random.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

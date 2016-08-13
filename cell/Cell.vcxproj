@@ -130,6 +130,7 @@
     <ClCompile Include="mesh\sphere.cpp" />
     <ClCompile Include="mesh\torus.cpp" />
     <ClCompile Include="ProjectLinkTest.cpp" />
+    <ClCompile Include="renderer\renderer.cpp" />
     <ClCompile Include="shading\material.cpp" />
     <ClCompile Include="shading\shader_parser.cpp" />
     <ClCompile Include="shading\shader.cpp" />
@@ -143,6 +144,7 @@
     <ClInclude Include="mesh\sphere.h" />
     <ClInclude Include="mesh\torus.h" />
     <ClInclude Include="ProjectLinkTest.h" />
+    <ClInclude Include="renderer\renderer.h" />
     <ClInclude Include="shading\material.h" />
     <ClInclude Include="shading\shader_parser.h" />
     <ClInclude Include="shading\shader.h" />
