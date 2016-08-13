@@ -5,8 +5,6 @@
 
 #include <gl/glew.h>
 
-#include <math/linear_algebra/vector.h>
-#include <math/linear_algebra/matrix.h>
 #include <utility/logging/log.h>
 
 #include "shader_parser.h"
@@ -72,16 +70,35 @@ namespace Cell
         glDeleteShader(vs);
         glDeleteShader(fs);
 
-        // NOTE(Joey): parse shader sources to retrieve all uniforms in use (with their respective locations)
-        //ShaderParser parser;
-        //parser.Parse(vsSource);
-        //parser.Parse(fsSource);
-        // TODO(Joey): I'm not sure we need a specific new class for parsing a shader, we'd probably want to
-        // do this in the future in a specialized shader loader anyways; so might as well do it here for now.
-        // NOTE(Joey): nevermind, we can query the (active, and thus not optimized) uniform/attribute state
-        // from OpenGL itself: see http://docs.gl/gl3/glGetProgram w/ pname 'GL_ACTIVE_UNIFORMS', 
-        // 'GL_ACTIVE_ATTRIBUTES' and use these counts to query the items directly w/ glGetActiveAttrib
-        // and glGetActiveUniform
+        // NOTE(Joey): query the number of active uniforms and attributes
+        int nrAttributes, nrUniforms;
+        glGetProgramiv(m_ID, GL_ACTIVE_ATTRIBUTES, &nrAttributes);
+        glGetProgramiv(m_ID, GL_ACTIVE_UNIFORMS, &nrUniforms);
+        Attributes.resize(nrAttributes);
+        Uniforms.resize(nrUniforms);
+
+        // NOTE(Joey): iterate over all active attributes
+        char buffer[128]; 
+        for (unsigned int i = 0; i < nrAttributes; ++i)
+        {
+            GLenum glType;
+            glGetActiveAttrib(m_ID, i, sizeof(buffer), 0, &Attributes[i].Size, &glType, buffer);
+            Attributes[i].Name = std::string(buffer);
+            Attributes[i].Type = SHADER_TYPE_BOOL; // TODO(Joey): think of clean way to manage type conversions of OpenGL and custom type
+
+            Attributes[i].Location = glGetAttribLocation(m_ID, buffer);
+        }
+
+        // NOTE(Joey): iterate over all active uniforms
+        for (unsigned int i = 0; i < nrUniforms; ++i)
+        {
+            GLenum glType;
+            glGetActiveUniform(m_ID, i, sizeof(buffer), 0, &Uniforms[i].Size, &glType, buffer);
+            Uniforms[i].Name = std::string(buffer); 
+            Uniforms[i].Type = SHADER_TYPE_BOOL;  // TODO(Joey): think of clean way to manage type conversions of OpenGL and custom type
+
+            Uniforms[i].Location = glGetUniformLocation(m_ID, buffer);
+        }
 
         vsFile.close();
         fsFile.close();
@@ -92,55 +109,55 @@ namespace Cell
         glUseProgram(m_ID);
     }
 
-    void SetInt(std::string location, int value)
+    void Shader::SetInt(std::string location, int value)
     {
         unsigned int loc = getUniformLocation(location);
         if (loc)
             glUniform1i(loc, value);
     }
-    void SetBool(std::string location, bool value)
+    void Shader::SetBool(std::string location, bool value)
     {
         unsigned int loc = getUniformLocation(location);
         if (loc)
             glUniform1i(loc, (int)value);
     }
-    void SetFloat(std::string location, float value)
+    void Shader::SetFloat(std::string location, float value)
     {
         unsigned int loc = getUniformLocation(location);
         if (loc)
             glUniform1f(loc, value);
     }
-    void SetVector(std::string location, math::vec2 value)
+    void Shader::SetVector(std::string location, math::vec2 value)
     {
         unsigned int loc = getUniformLocation(location);
         if (loc)
             glUniform2fv(loc, 1, &value[0]);
     }
-    void SetVector(std::string location, math::vec3 value)
+    void Shader::SetVector(std::string location, math::vec3 value)
     {
         unsigned int loc = getUniformLocation(location);
         if (loc)
             glUniform3fv(loc, 1, &value[0]);
     }
-    void SetVector(std::string location, math::vec4 value)
+    void Shader::SetVector(std::string location, math::vec4 value)
     {
         unsigned int loc = getUniformLocation(location);
         if (loc)
             glUniform4fv(loc, 1, &value[0]);
     }
-    void SetMatrix(std::string location, math::mat2 value)
+    void Shader::SetMatrix(std::string location, math::mat2 value)
     {
         unsigned int loc = getUniformLocation(location);
         if (loc)
             glUniformMatrix2fv(loc, 1, GL_FALSE, &value[0][0]);
     }
-    void SetMatrix(std::string location, math::mat3 value)
+    void Shader::SetMatrix(std::string location, math::mat3 value)
     {
         unsigned int loc = getUniformLocation(location);
         if (loc)
             glUniformMatrix3fv(loc, 1, GL_FALSE, &value[0][0]);
     }
-    void SetMatrix(std::string location, math::mat4 value)
+    void Shader::SetMatrix(std::string location, math::mat4 value)
     {
         unsigned int loc = getUniformLocation(location);
         if (loc)
@@ -174,7 +191,7 @@ namespace Cell
         return source;
     }
 
-    unsigned int getUniformLocation(std::string name)
+    unsigned int Shader::getUniformLocation(std::string name)
     {
         // TODO(Joey): read from uniform/attribute array as originally obtained from OpenGL
         return 0;
