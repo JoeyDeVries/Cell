@@ -11,24 +11,18 @@
 
 namespace Cell
 {
-    Shader::Shader(std::string vsPath, std::string fsPath)
+    Shader::Shader()
     {
-        std::ifstream vsFile, fsFile;
-        vsFile.open(vsPath);
-        fsFile.open(fsPath);
 
-        // NOTE(Joey): if either of the two files don't exist, return w/ error message
-        if (!vsFile.is_open() || !fsFile.is_open())
-        {
-            Log::Message("Shader failed to load at path: " + vsPath + " and " + fsPath, LOG_ERROR);
-            return;
-        }
+    }
 
-        // NOTE(Joey): retrieve directory (for relative paths in shader includes)
-        std::string directory = vsPath.substr(0, vsPath.find_last_of("/\\"));
-        std::string vsSource = readShader(vsFile, directory);
-        std::string fsSource = readShader(fsFile, directory);
+    Shader::Shader(std::string vsCode, std::string fsCode)
+    {      
+        Load(vsCode, fsCode);
+    }
 
+    void Shader::Load(std::string vsCode, std::string fsCode)
+    {
         // NOTE(Joey): compile both shaders and link them
         unsigned int vs = glCreateShader(GL_VERTEX_SHADER);
         unsigned int fs = glCreateShader(GL_FRAGMENT_SHADER);
@@ -36,8 +30,8 @@ namespace Cell
         int status;
         char log[512];
 
-        const char *vsSourceC = vsSource.c_str();
-        const char *fsSourceC = fsSource.c_str();
+        const char *vsSourceC = vsCode.c_str();
+        const char *fsSourceC = fsCode.c_str();
         glShaderSource(vs, 1, &vsSourceC, NULL);
         glShaderSource(fs, 1, &fsSourceC, NULL);
         glCompileShader(vs);
@@ -47,13 +41,13 @@ namespace Cell
         if (!status)
         {
             glGetShaderInfoLog(vs, 512, NULL, log);
-            Log::Message("Vertex shader compilation error at: " + vsPath + "\n" + std::string(log), LOG_ERROR);
+            Log::Message("Vertex shader compilation error at: TODO: GET SHADER NAME HERE!\n" + std::string(log), LOG_ERROR);
         }
         glGetShaderiv(fs, GL_COMPILE_STATUS, &status);
         if (!status)
         {
             glGetShaderInfoLog(fs, 512, NULL, log);
-            Log::Message("Fragment shader compilation error at: " + fsPath + "\n" + std::string(log), LOG_ERROR);
+            Log::Message("Fragment shader compilation error at: TODO: GET SHADER NAME HERE!\n" + std::string(log), LOG_ERROR);
         }
 
         glAttachShader(m_ID, vs);
@@ -78,7 +72,7 @@ namespace Cell
         Uniforms.resize(nrUniforms);
 
         // NOTE(Joey): iterate over all active attributes
-        char buffer[128]; 
+        char buffer[128];
         for (unsigned int i = 0; i < nrAttributes; ++i)
         {
             GLenum glType;
@@ -94,14 +88,11 @@ namespace Cell
         {
             GLenum glType;
             glGetActiveUniform(m_ID, i, sizeof(buffer), 0, &Uniforms[i].Size, &glType, buffer);
-            Uniforms[i].Name = std::string(buffer); 
+            Uniforms[i].Name = std::string(buffer);
             Uniforms[i].Type = SHADER_TYPE_BOOL;  // TODO(Joey): think of clean way to manage type conversions of OpenGL and custom type
 
             Uniforms[i].Location = glGetUniformLocation(m_ID, buffer);
         }
-
-        vsFile.close();
-        fsFile.close();
     }
 
     void Shader::Use()

@@ -59,7 +59,10 @@ namespace Cell
         unsigned int m_ID;
 
     public:
+        Shader();
         Shader(std::string vsPath, std::string fsPath);
+
+        void Load(std::string vsPath, std::string fsPath);
 
         void Use();
 

@@ -7,6 +7,7 @@
 
 #include <math/math.h>
 #include <cell/ProjectLinkTest.h>
+#include <cell/resources/resources.h>
 #include <cell/shading/shader.h>
 #include <cell/mesh/quad.h>
 #include <cell/mesh/plane.h>
@@ -89,7 +90,7 @@ int main(int argc, char *argv[])
     int linktest = SuperCalcFunc(1337);
     Log::Message("Testing Cell Linkage: " + std::to_string(linktest), LOG_DEBUG);
 
-    Cell::Shader testShader("shaders/test.vs", "shaders/test.fs");
+    Cell::Shader testShader = Cell::Resources::LoadShader("test", "shaders/test.vs", "shaders/test.fs");
     Cell::Quad quad;
     Cell::LineStrip lineStrip(0.5f, 32);
     Cell::Plane plane(16, 16);

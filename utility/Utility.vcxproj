@@ -121,6 +121,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="random\random.h" />
+    <ClInclude Include="string_id.h" />
     <ClInclude Include="timing\diagnostics.h" />
     <ClInclude Include="logging\log.h" />
     <ClInclude Include="std_types.h" />

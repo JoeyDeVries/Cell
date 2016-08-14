@@ -131,9 +131,15 @@
     <ClCompile Include="mesh\torus.cpp" />
     <ClCompile Include="ProjectLinkTest.cpp" />
     <ClCompile Include="renderer\renderer.cpp" />
+    <ClCompile Include="resources\mesh_loader.cpp" />
+    <ClCompile Include="resources\resources.cpp" />
+    <ClCompile Include="resources\shader_loader.cpp" />
+    <ClCompile Include="resources\texture_loader.cpp" />
     <ClCompile Include="shading\material.cpp" />
     <ClCompile Include="shading\shader_parser.cpp" />
     <ClCompile Include="shading\shader.cpp" />
+    <ClCompile Include="shading\Texture.cpp" />
+    <ClCompile Include="stb\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mesh\circle.h" />
@@ -145,9 +151,15 @@
     <ClInclude Include="mesh\torus.h" />
     <ClInclude Include="ProjectLinkTest.h" />
     <ClInclude Include="renderer\renderer.h" />
+    <ClInclude Include="resources\mesh_loader.h" />
+    <ClInclude Include="resources\resources.h" />
+    <ClInclude Include="resources\shader_loader.h" />
+    <ClInclude Include="resources\texture_loader.h" />
     <ClInclude Include="shading\material.h" />
     <ClInclude Include="shading\shader_parser.h" />
     <ClInclude Include="shading\shader.h" />
+    <ClInclude Include="shading\texture.h" />
+    <ClInclude Include="stb\stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

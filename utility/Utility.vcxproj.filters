@@ -30,6 +30,9 @@
     <ClInclude Include="random\random.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="string_id.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="logging\log.cpp">

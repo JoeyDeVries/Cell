@@ -3,6 +3,8 @@
 #include "../mesh/mesh.h"
 #include "../shading/material.h"
 
+#include "../resources/resources.h"
+
 namespace Cell
 {
     Renderer::Renderer()
@@ -30,6 +32,8 @@ namespace Cell
 
         */
 
+
+        
     }
 
     void Renderer::SetTarget()
