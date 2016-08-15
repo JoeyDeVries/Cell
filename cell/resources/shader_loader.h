@@ -12,7 +12,6 @@ namespace Cell
 
       A static helper class that does the relevant file IO to retrieve 
 
-
     */
     class ShaderLoader
     {

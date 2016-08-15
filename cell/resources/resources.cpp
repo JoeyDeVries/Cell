@@ -32,11 +32,11 @@ namespace Cell
         return Resources::m_Shaders[id];
     }
 
-    Texture& Resources::LoadTexture(std::string name, std::string path)
+    Texture& Resources::LoadTexture(std::string name, std::string path, GLenum type, GLenum format)
     {
-        unsigned int id = SID(name);
-        Texture texture;
+        Texture texture = TextureLoader::Load(path, type, format);
 
+        unsigned int id = SID(name);
         Resources::m_Textures[id] = texture;
         return Resources::m_Textures[id];
     }

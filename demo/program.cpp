@@ -9,6 +9,7 @@
 #include <cell/ProjectLinkTest.h>
 #include <cell/resources/resources.h>
 #include <cell/shading/shader.h>
+#include <cell/shading/texture.h>
 #include <cell/mesh/quad.h>
 #include <cell/mesh/plane.h>
 #include <cell/mesh/circle.h>
@@ -71,7 +72,10 @@ int main(int argc, char *argv[])
             // TODO(Joey): logging/diagnostics
             return -1;
         }
+       glGetError();
+
     Log::Message("GLEW initialized");
+
 
     // NOTE(Joey): configure default OpenGL state
     Log::Message("Configuring OpenGL");
@@ -97,10 +101,14 @@ int main(int argc, char *argv[])
     Cell::Circle circle(16,16);
     Cell::Sphere sphere(8, 8);
 
+    Cell::Texture testTexture = Cell::Resources::LoadTexture("test", "textures/checkerboard.png", GL_TEXTURE_2D, GL_RGB);
+    testShader.Use();
+    testShader.SetInt("testTexture", 0);
+
     Log::Display();
     Log::Clear();
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -114,26 +122,29 @@ int main(int argc, char *argv[])
 
         // NOTE(Joey): simple quad test code to run shader tests on
         testShader.Use();
+        testTexture.Bind(0);
+        std::cout << glGetError() << std::endl;
+
         glBindVertexArray(quad.m_VAO); // NOTE(Joey): placeholder for now; will be managed by renderer eventually
             glDrawArrays(GL_TRIANGLE_STRIP, 0, quad.Positions.size());
         glBindVertexArray(0);
 
-        glBindVertexArray(lineStrip.m_VAO);
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, lineStrip.Positions.size());
-        glBindVertexArray(0);
+        //glBindVertexArray(lineStrip.m_VAO);
+        //    glDrawArrays(GL_TRIANGLE_STRIP, 0, lineStrip.Positions.size());
+        //glBindVertexArray(0);
 
-        glBindVertexArray(plane.m_VAO);
-            glDrawElements(GL_TRIANGLE_STRIP, plane.Indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        //glBindVertexArray(plane.m_VAO);
+        //    glDrawElements(GL_TRIANGLE_STRIP, plane.Indices.size(), GL_UNSIGNED_INT, 0);
+        //glBindVertexArray(0);
 
-        glBindVertexArray(circle.m_VAO);
-            glDrawElements(GL_TRIANGLE_STRIP, circle.Indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        //glBindVertexArray(circle.m_VAO);
+        //    glDrawElements(GL_TRIANGLE_STRIP, circle.Indices.size(), GL_UNSIGNED_INT, 0);
+        //glBindVertexArray(0);
 
-        glBindVertexArray(sphere.m_VAO);
-            //glDrawArrays(GL_POINTS, 0, sphere.Positions.size());
-            glDrawElements(GL_TRIANGLES, sphere.Indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        //glBindVertexArray(sphere.m_VAO);
+        //    //glDrawArrays(GL_POINTS, 0, sphere.Positions.size());
+        //    glDrawElements(GL_TRIANGLES, sphere.Indices.size(), GL_UNSIGNED_INT, 0);
+        //glBindVertexArray(0);
 
         // NOTE(Joey): display log messages / diagnostics
         Log::Display();

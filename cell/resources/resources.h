@@ -48,7 +48,7 @@ namespace Cell
         static void Init();
 
         static Shader&  LoadShader(std::string name, std::string vsPath, std::string fsPath);
-        static Texture& LoadTexture(std::string name, std::string path);
+        static Texture& LoadTexture(std::string name, std::string path, GLenum type = GL_TEXTURE_2D, GLenum format = GL_RGBA);
         static Mesh&    LoadMesh(std::string name, std::string path);
     };
 }

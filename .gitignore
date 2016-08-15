@@ -1,6 +1,10 @@
 # Folders
-Build/
-Debug/
+build/*
+!build/shaders
+!build/textures
+!build/meshes
+
+debug/
 .vs/
 
 # VS files
