@@ -10,7 +10,10 @@ namespace Cell
     }
     Texture::~Texture()
     {
-        glDeleteTextures(1, &m_ID);
+        // TODO(Joey): this doesn't work as texture objects get frequently passed around over the
+        // stack at which variables are copied and destructors are called; either manage the lifetime
+        // over a single container, or do explicit texture cleanup.
+        //glDeleteTextures(1, &m_ID);
     }
 
     void Texture::Generate(unsigned int width, GLenum dataFormat, unsigned char *data)

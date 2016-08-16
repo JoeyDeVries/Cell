@@ -17,6 +17,8 @@
 #include <cell/mesh/line_strip.h>
 #include <utility/logging/log.h>
 
+void APIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, void *userParam);
+
 /* NOTE(Joey):
 
   This is a demo program set up to demonstrate the graphic fidelity
@@ -49,6 +51,7 @@ int main(int argc, char *argv[])
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
         glfwWindowHint(GLFW_RESIZABLE, true);
     
         GLFWwindow *window = glfwCreateWindow(1280, 720, "Cell", nullptr, nullptr);           
@@ -63,6 +66,7 @@ int main(int argc, char *argv[])
     Log::Message("GLFW initialized");
 
     // TODO(Joey): initialize Cell here
+    //Cell::Init();
 
     // NOTE(Joey): load OpenGL function pointers
     Log::Message("Initializing GLEW");
@@ -75,6 +79,22 @@ int main(int argc, char *argv[])
        glGetError();
 
     Log::Message("GLEW initialized");
+
+    // TODO(Joey): move to Cell initialization; will by initialized by default if windowing library
+    // requests a Debug context; otherwise we simply ignore debug output.
+    Log::Message("Initializing debug Output.");
+    int flags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+    {
+        // NOTE(Joey): we succesfully requested a debug context, now initialize
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(glDebugOutput, nullptr);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, true);
+    }
+
+    Log::Message("Debug output initialized.");
 
 
     // NOTE(Joey): configure default OpenGL state
@@ -123,28 +143,27 @@ int main(int argc, char *argv[])
         // NOTE(Joey): simple quad test code to run shader tests on
         testShader.Use();
         testTexture.Bind(0);
-        std::cout << glGetError() << std::endl;
 
         glBindVertexArray(quad.m_VAO); // NOTE(Joey): placeholder for now; will be managed by renderer eventually
             glDrawArrays(GL_TRIANGLE_STRIP, 0, quad.Positions.size());
         glBindVertexArray(0);
 
-        //glBindVertexArray(lineStrip.m_VAO);
-        //    glDrawArrays(GL_TRIANGLE_STRIP, 0, lineStrip.Positions.size());
-        //glBindVertexArray(0);
+        glBindVertexArray(lineStrip.m_VAO);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, lineStrip.Positions.size());
+        glBindVertexArray(0);
 
-        //glBindVertexArray(plane.m_VAO);
-        //    glDrawElements(GL_TRIANGLE_STRIP, plane.Indices.size(), GL_UNSIGNED_INT, 0);
-        //glBindVertexArray(0);
+        glBindVertexArray(plane.m_VAO);
+            glDrawElements(GL_TRIANGLE_STRIP, plane.Indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
 
-        //glBindVertexArray(circle.m_VAO);
-        //    glDrawElements(GL_TRIANGLE_STRIP, circle.Indices.size(), GL_UNSIGNED_INT, 0);
-        //glBindVertexArray(0);
+        glBindVertexArray(circle.m_VAO);
+            glDrawElements(GL_TRIANGLE_STRIP, circle.Indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
 
-        //glBindVertexArray(sphere.m_VAO);
-        //    //glDrawArrays(GL_POINTS, 0, sphere.Positions.size());
-        //    glDrawElements(GL_TRIANGLES, sphere.Indices.size(), GL_UNSIGNED_INT, 0);
-        //glBindVertexArray(0);
+        glBindVertexArray(sphere.m_VAO);
+            //glDrawArrays(GL_POINTS, 0, sphere.Positions.size());
+            glDrawElements(GL_TRIANGLES, sphere.Indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
 
         // NOTE(Joey): display log messages / diagnostics
         Log::Display();
@@ -158,4 +177,55 @@ int main(int argc, char *argv[])
     glfwTerminate();
 
     return 0;
+}
+
+
+// NOTE(Joey): process OpenGL's debug output
+// TODO(Joey): this should be included in Cell
+void APIENTRY glDebugOutput(GLenum source,
+    GLenum type,
+    GLuint id,
+    GLenum severity,
+    GLsizei length,
+    const GLchar *message,
+    void *userParam)
+{
+    // ignore non-significant error/warning codes
+    if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+
+    std::string logMessage = "Debug output: (" + std::to_string(id) + "): " + message + "\n";
+
+    switch (source)
+    {
+    case GL_DEBUG_SOURCE_API:             logMessage += "Source: API"; break;
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   logMessage += "Source: Window System"; break;
+    case GL_DEBUG_SOURCE_SHADER_COMPILER: logMessage += "Source: Shader Compiler"; break;
+    case GL_DEBUG_SOURCE_THIRD_PARTY:     logMessage += "Source: Third Party"; break;
+    case GL_DEBUG_SOURCE_APPLICATION:     logMessage += "Source: Application"; break;
+    case GL_DEBUG_SOURCE_OTHER:           logMessage += "Source: Other"; break;
+    } logMessage += "\n";
+
+    switch (type)
+    {
+    case GL_DEBUG_TYPE_ERROR:               logMessage += "Type: Error"; break;
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: logMessage += "Type: Deprecated Behaviour"; break;
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  logMessage += "Type: Undefined Behaviour"; break;
+    case GL_DEBUG_TYPE_PORTABILITY:         logMessage += "Type: Portability"; break;
+    case GL_DEBUG_TYPE_PERFORMANCE:         logMessage += "Type: Performance"; break;
+    case GL_DEBUG_TYPE_MARKER:              logMessage += "Type: Marker"; break;
+    case GL_DEBUG_TYPE_PUSH_GROUP:          logMessage += "Type: Push Group"; break;
+    case GL_DEBUG_TYPE_POP_GROUP:           logMessage += "Type: Pop Group"; break;
+    case GL_DEBUG_TYPE_OTHER:               logMessage += "Type: Other"; break;
+    } logMessage += "\n";
+
+    switch (severity)
+    {
+    case GL_DEBUG_SEVERITY_HIGH:         logMessage += "Severity: high"; break;
+    case GL_DEBUG_SEVERITY_MEDIUM:       logMessage += "Severity: medium"; break;
+    case GL_DEBUG_SEVERITY_LOW:          logMessage += "Severity: low"; break;
+    case GL_DEBUG_SEVERITY_NOTIFICATION: logMessage += "Severity: notification"; break;
+    } logMessage += "\n";
+    logMessage += "\n";
+
+    Log::Message(logMessage, type == GL_DEBUG_TYPE_ERROR ? LOG_ERROR : LOG_WARNING);
 }
