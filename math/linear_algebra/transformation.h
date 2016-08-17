@@ -82,28 +82,28 @@ namespace math
 
     // NOTE(Joey): view-space 
     // ----------------------
-    template <unsigned int m, unsigned int n, typename T>
-    matrix<m, n, T> lookAt(vector<n, T> position, vector<n, T> target, vector<n, T> up)
+    template <typename T>
+    matrix<4, 4, T> lookAt(vector<3, T> position, vector<3, T> target, vector<3, T> up)
     {
-        matrix<m, n, T> result;
+        matrix<4, 4 T> result;
 
         return result;
     }
 
     // NOTE(Joey): projection
     // ----------------------
-    template <unsigned int m, unsigned int n, typename T>
-    matrix<m, n, T> orthographic(T left, T right, T top, T bottom, T near, T far)
+    template <typename T>
+    matrix<4, 4, T> orthographic(T left, T right, T top, T bottom, T near, T far)
     {
-        matrix<m, n, T> result;
+        matrix<4, 4, T> result;
 
         return result;
     }
 
-    template <unsigned int m, unsigned int n, typename T>
-    matrix<m, n, T> perspective(T fov, T aspect, T near, T far)
+    template <typename T>
+    matrix<4, 4, T> perspective(T fov, T aspect, T near, T far)
     {
-        matrix<m, n, T> result;
+        matrix<4, 4, T> result;
 
         return result;
     }

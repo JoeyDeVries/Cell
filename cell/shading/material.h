@@ -21,9 +21,15 @@ namespace Cell
         Shader *Shader;
 
         // lighting
-        Texture *Albedo;
+        union {
+            Texture *Albedo;
+            Texture *Diffuse;
+        };
+        union {
+            Texture *MetalRoughness; // NOTE(Joey): metal: RGB channel; roughness: A channel
+            Texture *Specular;
+        };
         Texture *Normal;
-        Texture *Specular;
         Texture *Occlusion;
 
         math::vec4 Color;

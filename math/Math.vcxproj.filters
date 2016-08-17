@@ -51,6 +51,12 @@
     <ClInclude Include="trigonometry\conversions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="geometry\rectangle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="geometry\cube.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="program.cpp">

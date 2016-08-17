@@ -31,9 +31,26 @@ namespace Cell
           For this reason we use a library called ...
 
         */
-
-
+        // [...] 
         
+
+        /* NOTE(Joey): 
+
+          Next up is initializing debug output. Debug output allows us to
+          give a callback error reporting function to OpenGL that OpenGL
+          will call each time an internal error occurs with detailed 
+          information about the error. This helps us to easily catch
+          errors from within OpenGL itself saving us from long hours
+          of debugging. For more info see:
+          http://learnopengl.com/#!In-Practice/Debugging
+
+          Note that debug output will only be initialized if the 
+          windowing library initialized an OpenGL context with the
+          debug output bit flag set; otherwise this functionality
+          is simply ignored.
+
+        */
+        // [...]
     }
 
     void Renderer::SetTarget()

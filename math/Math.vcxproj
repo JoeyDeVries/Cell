@@ -122,6 +122,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="geometry\cube.h" />
+    <ClInclude Include="geometry\rectangle.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="linear_algebra\matrix.h" />
     <ClInclude Include="linear_algebra\operation.h" />
