@@ -9,7 +9,10 @@ namespace Cell
 {
     /* NOTE(Joey):
 
-      Camera
+      Basic root camera. Only does relevant camera calculations 
+      with manual forced direction setters. This camera should
+      only be used in code and not respond to user input; the
+      derived cameras are for user/player interaction.
 
     */
     // TODO(Joey): do we want the camera to be a SceneNode as well so we can attach it to other entities?

@@ -45,15 +45,16 @@ void Log::Display(LOG_TYPE type)
         {
             if (!filter || (filter && i == type))
             {
-                std::cout << divider << std::endl;
+             /*   std::cout << divider << std::endl;
                 std::cout << LOG_TYPE_NAME[i] << std::endl;
-                std::cout << divider << std::endl;
+                std::cout << divider << std::endl;*/
                 for (unsigned int j = 0; j < m_LogEntries[i].size(); ++j)
                 {
-                    //std::cout << std::setw(7) << LOG_TYPE_NAME[i] << ": " << m_LogEntries[i][j] << std::endl;
-                    std::cout << " - "  << m_LogEntries[i][j] << std::endl;
+                    std::cout << std::setw(7) << LOG_TYPE_NAME[i] << ": " << m_LogEntries[i][j] << std::endl;
+                    //std::cout << " - "  << m_LogEntries[i][j] << std::endl;
                 }
-                std::cout << divider << std::endl << std::endl;
+                std::cout << std::endl;
+                //std::cout << divider << std::endl << std::endl;
             }
         }
     }

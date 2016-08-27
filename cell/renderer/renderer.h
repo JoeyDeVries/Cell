@@ -40,6 +40,8 @@ namespace Cell
         void PushRender(Mesh &mesh, Material &material);
 
         void Render();
+
+        //void RenderToCubemap(SceneNode *root, Cubemap *cubemap, unsigned int faceWidth, unsigned int faceHeight, math::vec3 position);
     };
 }
 

@@ -138,7 +138,7 @@
     <ClCompile Include="resources\resources.cpp" />
     <ClCompile Include="resources\shader_loader.cpp" />
     <ClCompile Include="resources\texture_loader.cpp" />
-    <ClCompile Include="scene\node.cpp" />
+    <ClCompile Include="scene\scene_node.cpp" />
     <ClCompile Include="scene\scene.cpp" />
     <ClCompile Include="shading\material.cpp" />
     <ClCompile Include="shading\shader_parser.cpp" />
@@ -163,7 +163,7 @@
     <ClInclude Include="resources\resources.h" />
     <ClInclude Include="resources\shader_loader.h" />
     <ClInclude Include="resources\texture_loader.h" />
-    <ClInclude Include="scene\node.h" />
+    <ClInclude Include="scene\scene_node.h" />
     <ClInclude Include="scene\scene.h" />
     <ClInclude Include="shading\material.h" />
     <ClInclude Include="shading\shader_parser.h" />
