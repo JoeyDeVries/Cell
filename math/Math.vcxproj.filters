@@ -57,9 +57,27 @@
     <ClInclude Include="geometry\cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="geometry\plane.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="trigonometry\polar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="trigonometry\spherical.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="program.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="geometry\plane.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="trigonometry\polar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="trigonometry\spherical.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

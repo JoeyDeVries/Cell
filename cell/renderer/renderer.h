@@ -1,23 +1,22 @@
 #ifndef CELL_RENDERER_H
 #define CELL_RENDERER_H
 
-
-
-
 namespace Cell
 {
     /* NOTE(Joey):
 
-    Forward declare the types, s.t. we don't need to include the
-    required header files here. Seeing as most objects throughout Cell will
-    link to renderer.h we want to reduce as much unnecesary additional
-    header code as much as possible (saves in compilation times). And seeing
-    as we only need the typename for the function specifications this works
-    just fine.
+      Forward declare the types, s.t. we don't need to include the
+      required header files here. Seeing as most objects throughout Cell will
+      link to renderer.h we want to reduce as much unnecesary additional
+      header code as much as possible (saves in compilation times). And seeing
+      as we only need the typename for the function specifications this works
+      just fine.
 
     */
     class Mesh;
     class Material;
+    class SceneNode;
+    class Camera;
 
     /* NOTE(Joey):
 
@@ -29,6 +28,8 @@ namespace Cell
     */
     class Renderer
     {
+    private:
+        Camera *m_Camera;
     public:
         Renderer();
 
@@ -36,8 +37,11 @@ namespace Cell
 
         void SetTarget(/*FrameBuffer/RenderTexture target*/);
 
+        Camera* GetCamera();
+        void    SetCamera(Camera *camera);
 
         void PushRender(Mesh &mesh, Material &material);
+        void PushRender(SceneNode *node);
 
         void Render();
 

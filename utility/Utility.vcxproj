@@ -120,6 +120,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="floating_point.h" />
     <ClInclude Include="random\random.h" />
     <ClInclude Include="string_id.h" />
     <ClInclude Include="timing\diagnostics.h" />

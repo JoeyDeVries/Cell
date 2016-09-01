@@ -29,8 +29,11 @@ namespace math
         // NOTE(Joey): constructor0: default empty constructor; default initialize all vector elements
         vector()
         {
-            for (unsigned int i = 0; i < n; ++i)
-                e[i] = {};
+            // NOTE(Joey): the empty constructor frequently gets called (when declaring large lists of
+            // vectors for instance) so default initializing them can be expensive as in almost all 
+            // cases we'll be setting them to different values anyways.
+            /*for (unsigned int i = 0; i < n; ++i)
+                e[i] = {};*/
         }
         // NOTE(Joey): constructor1: one argument given: initialize all vectors elements w/ same value
         vector(T v)

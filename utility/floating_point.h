@@ -5,8 +5,8 @@
 
 /* NOTE(Joey):
 
-Define a set of utility functions that deal with or
-circumvent IEEE 754 floating point precision issues.
+  Define a set of utility functions that deal with or
+  circumvent IEEE 754 floating point precision issues.
 
 */
 namespace floating_point
@@ -14,25 +14,25 @@ namespace floating_point
 
     /* NOTE(Joey):
 
-    When comparing two floating point values one can use
-    an epsilon value to mitigate the precision issues of
-    a floating point. However, this is an absolute value
-    while the magnitude of error on floating point values
-    is not absolute (the error of precision increases as
-    the magnitude of the value increases).
-
-    We thus compare two floating points within a given
-    'relative' interval instead of an 'absolute' fixed
-    interval epsilon.
-
-    We can compute the relative interval by dividing the
-    difference of a and b by b and see if the absolute
-    value is less than or equal to epsilon. We can remove
-    the division by multiplying the epsilon by b.
-
-    For a more detailled description: see 1.4.7 in
-    'Essential mathematics for Games and Interactive
-    Applications'.
+      When comparing two floating point values one can use
+      an epsilon value to mitigate the precision issues of
+      a floating point. However, this is an absolute value
+      while the magnitude of error on floating point values
+      is not absolute (the error of precision increases as
+      the magnitude of the value increases).
+      
+      We thus compare two floating points within a given
+      'relative' interval instead of an 'absolute' fixed
+      interval epsilon.
+      
+      We can compute the relative interval by dividing the
+      difference of a and b by b and see if the absolute
+      value is less than or equal to epsilon. We can remove
+      the division by multiplying the epsilon by b.
+      
+      For a more detailled description: see 1.4.7 in
+      'Essential mathematics for Games and Interactive
+      Applications'.
 
     */
     inline bool compare(float a, float b, float epsilon)

@@ -15,11 +15,12 @@ namespace math
       of any type. The matrix type follows in functionality conventions from the
       mathematical literature. By default we will only be using floating point
       matrices, but having a generic version allows us to potentially use
-      double precision matrices as well (or even intger matrices).
+      double precision matrices as well (or even integer matrices).
 
       The matrices are stored in column-major order, the resulting transformations
       will also assume column-major order, keeping matrix-vector multiplications
-      with the matrix on the left side of the equation.
+      with the matrix on the left side of the equation and representing vectors
+      as column vectors (post-multiplication).
 
       Matrix numbering by math conventions:
       |  0  1  2  3 |
@@ -28,7 +29,7 @@ namespace math
       | 12 13 14 15 |
       Column-major layout in memory:
       [ 0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15 ]
-      Matrix numbering if we access column-major memory sequentelly in the array:
+      Matrix numbering if we access column-major memory sequentially in the array:
       |  0  4  8 12 |
       |  1  5  9 13 |
       |  2  6 10 14 |

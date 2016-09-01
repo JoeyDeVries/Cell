@@ -123,6 +123,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="geometry\cube.h" />
+    <ClInclude Include="geometry\plane.h" />
     <ClInclude Include="geometry\rectangle.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="linear_algebra\matrix.h" />
@@ -135,10 +136,15 @@
     <ClInclude Include="test\test_transformations.h" />
     <ClInclude Include="test\test_vector.h" />
     <ClInclude Include="trigonometry\conversions.h" />
+    <ClInclude Include="trigonometry\polar.h" />
+    <ClInclude Include="trigonometry\spherical.h" />
     <ClInclude Include="utility\common.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="geometry\plane.cpp" />
     <ClCompile Include="program.cpp" />
+    <ClCompile Include="trigonometry\polar.cpp" />
+    <ClCompile Include="trigonometry\spherical.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

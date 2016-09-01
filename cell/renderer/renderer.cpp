@@ -2,6 +2,8 @@
 
 #include "../mesh/mesh.h"
 #include "../shading/material.h"
+#include "../scene/scene_node.h"
+#include "../camera/camera.h"
 
 #include "../resources/resources.h"
 
@@ -28,7 +30,7 @@ namespace Cell
           that we have to query for the function's memory location for 
           each and every one of these functions. 
 
-          For this reason we use a library called ...
+          For this reason we use a library called ... (glad?)
 
         */
         // [...] 
@@ -58,7 +60,22 @@ namespace Cell
 
     }
 
+    Camera* Renderer::GetCamera()
+    {
+        return m_Camera;
+    }
+
+    void Renderer::SetCamera(Camera *camera)
+    {
+        m_Camera = camera;
+    }
+
     void Renderer::PushRender(Mesh &mesh, Material &material)
+    {
+
+    }
+
+    void Renderer::PushRender(SceneNode *node)
     {
 
     }
