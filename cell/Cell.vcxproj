@@ -133,6 +133,7 @@
     <ClCompile Include="mesh\sphere.cpp" />
     <ClCompile Include="mesh\torus.cpp" />
     <ClCompile Include="ProjectLinkTest.cpp" />
+    <ClCompile Include="renderer\command_buffer.cpp" />
     <ClCompile Include="renderer\renderer.cpp" />
     <ClCompile Include="resources\mesh_loader.cpp" />
     <ClCompile Include="resources\resources.cpp" />
@@ -158,7 +159,9 @@
     <ClInclude Include="mesh\sphere.h" />
     <ClInclude Include="mesh\torus.h" />
     <ClInclude Include="ProjectLinkTest.h" />
+    <ClInclude Include="renderer\command_buffer.h" />
     <ClInclude Include="renderer\renderer.h" />
+    <ClInclude Include="renderer\render_command.h" />
     <ClInclude Include="resources\mesh_loader.h" />
     <ClInclude Include="resources\resources.h" />
     <ClInclude Include="resources\shader_loader.h" />

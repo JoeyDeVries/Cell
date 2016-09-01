@@ -17,10 +17,16 @@ namespace Cell
         delete m_Root;
     }
 
-    void Scene::Update()
+    void Scene::UpdateTransforms()
     {
-        m_Root->Update();
+        m_Root->UpdateTransform();
     }
+
+    SceneNode* Scene::GetRootNode()
+    {
+        return m_Root;
+    }
+
 
 
     SceneNode* Scene::MakeScene()

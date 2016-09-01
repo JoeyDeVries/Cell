@@ -22,6 +22,9 @@ namespace Cell
       parent node.
 
     */
+    // TODO(Joey): tag each node with some unique ID. I suggest doing this with
+    // a hashed string ID to maintain readability while also keeping strong
+    // performance characteristics; comparing ints is much faster than strings!
     class SceneNode
     {
         friend Scene;
@@ -51,12 +54,12 @@ namespace Cell
         SceneNode *GetChildren();
 
         // NOTE(Joey): returns the transform of the current node
-        math::mat4& GetTransform();
+        math::mat4 GetTransform();
 
         // NOTE(Joey): re-calculates this node and its children's
         // transform components if its parent or the node itself
         // is dirty.
-        void Update();
+        void UpdateTransform();
     };
 }
 #endif

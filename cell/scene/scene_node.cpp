@@ -33,12 +33,12 @@ namespace Cell
         return m_Next;
     }
 
-    math::mat4& SceneNode::GetTransform()
+    math::mat4 SceneNode::GetTransform()
     {
         return m_Transform;
     }
 
-    void SceneNode::Update()
+    void SceneNode::UpdateTransform()
     {
         // NOTE(Joey): first scale, then rotate, then translation
         // NOTE(Joey): we only do this if the node itself or its parent
@@ -52,7 +52,8 @@ namespace Cell
             // well.
             for (SceneNode *child = m_Next; child; child = child->m_Next)
             {
-                child->Update();
+                child->m_Dirty = true;
+                child->UpdateTransform();
             }
         }
     }

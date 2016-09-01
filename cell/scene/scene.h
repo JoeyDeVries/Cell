@@ -48,8 +48,9 @@ namespace Cell
 
         // NOTE(Joey): updates all of the scene nodes' transforms (and
         // their children) if any of them are flagged as dirty.
-        void Update();
+        void UpdateTransforms();
 
+        SceneNode *GetRootNode();
 
 
         // NOTE(Joey): static helper function that directly builds an

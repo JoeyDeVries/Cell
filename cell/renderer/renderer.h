@@ -1,6 +1,10 @@
 #ifndef CELL_RENDERER_H
 #define CELL_RENDERER_H
 
+#include <math/linear_algebra/matrix.h>
+
+#include "command_buffer.h"
+
 namespace Cell
 {
     /* NOTE(Joey):
@@ -15,6 +19,7 @@ namespace Cell
     */
     class Mesh;
     class Material;
+    class Scene;
     class SceneNode;
     class Camera;
 
@@ -29,7 +34,9 @@ namespace Cell
     class Renderer
     {
     private:
-        Camera *m_Camera;
+        CommandBuffer m_CommandBuffer;
+
+        Camera       *m_Camera;
     public:
         Renderer();
 
@@ -40,8 +47,9 @@ namespace Cell
         Camera* GetCamera();
         void    SetCamera(Camera *camera);
 
-        void PushRender(Mesh &mesh, Material &material);
+        void PushRender(Mesh *mesh, Material *material, math::mat4 transform);
         void PushRender(SceneNode *node);
+        void PushRender(Scene *scene);
 
         void Render();
 
