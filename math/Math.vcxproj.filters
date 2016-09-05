@@ -66,6 +66,9 @@
     <ClInclude Include="trigonometry\spherical.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="linear_algebra\quaternion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="program.cpp">

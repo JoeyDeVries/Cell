@@ -17,8 +17,6 @@ namespace Cell
         Clear();
     }
 
-    // NOTE(Joey): pushes render state relevant to a single render call
-    // to the command buffer.
     void CommandBuffer::Push(Mesh *mesh, Material *material, math::mat4 transform)
     {
         RenderCommand command = {};
@@ -28,8 +26,6 @@ namespace Cell
         m_RenderCommands.push_back(command);
     }
 
-    // NOTE(Joey): clears the command buffer; usually done after issuing
-    // all the stored render commands.
     void CommandBuffer::Clear()
     {
         m_RenderCommands.clear();
@@ -42,17 +38,11 @@ namespace Cell
         //return a.Material->
         return true;
     }
-
-    // NOTE(Joey): sorts the command buffer; first by shader, then by 
-    // texture bind.
     void CommandBuffer::Sort()
     {
         std::sort(m_RenderCommands.begin(), m_RenderCommands.end(), customRenderSort);
     }
 
-    // NOTE(Joey): returns the list of render commands. For minimizing
-    // state changes it is advised to first call Sort() before retrieving
-    // and issuing the render commands.
     std::vector<RenderCommand> CommandBuffer::GetRenderCommands()
     {
         return m_RenderCommands;
