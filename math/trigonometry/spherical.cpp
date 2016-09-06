@@ -25,7 +25,7 @@ namespace math
         return vec3(
             rho * sin(phi) * cos(theta), // NOTE(Joey); project phi onto xy plane and then polar coordinate conversion (r*cos(theta))
             rho * sin(phi) * sin(theta), // NOTE(Joey); project phi onto xy plane and then polar coordinate conversion (r*sin(theta))
-            rho * cos(theta)             
+            rho * cos(phi)             
         );
     }
 

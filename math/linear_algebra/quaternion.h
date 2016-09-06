@@ -28,7 +28,15 @@ namespace math
     */
     struct quaternion
     {
-        float x, y, z, w;
+        float w;
+        union
+        {
+            struct 
+            {
+                float x, y, z;
+            };
+            vec3 r;
+        };
 
         // NOTE(Joey): construct a zero quaternion rotation
         quaternion() : w(0.0f), x(0.0f), y(0.0f), z(0.0f) 
@@ -52,7 +60,7 @@ namespace math
             z = axis.z * sin(halfAngle);
         }
         // NOTE(Joey): convert from axis-angle format (with w being 0.0f)
-        quaternion(vec3 axis) 
+        explicit quaternion(vec3 axis) 
         {
             w = 0.0f;
             x = axis.x;
@@ -115,6 +123,29 @@ namespace math
         vec3  v = rhs.w*v2 + lhs.w*v1 + cross(v2, v1);
 
         return quaternion(w, v.x, v.y, v.z);
+    }
+
+    // NOTE(Joey): rotates a vector p by quaternion q. 
+    // This rotation equals: q * p * q^-1. To multiply q with p we transform p 
+    // to a pure quaternion (0, p) with a 0 angle and default multiplication.
+    // We won't take that exact equation here; instead we use a more efficient 
+    // multiplication which is the expanded equation: 
+    // (2w^2 - 1)*p + 2*dot(v, p)*r _ 2*w*cross(v, p) 
+    // TODO(Joey): this one is important; make sure to test extensively in unit tests!
+    inline vec3 operator*(quaternion quat, vec3 vec)
+    {
+        // TODO(Joey): assert that we're dealing with a unity vector
+
+        float w2 = quat.w*quat.w;
+
+        return (w2*w2 - 1.0f)*vec + 2.0f*dot(quat.r, vec)*quat.r + w2*cross(quat.r, vec);
+    }
+
+    // NOTE(Joey): the quaternion is assumed to be normalized (length of 1)
+    inline quaternion inverse(quaternion quat)
+    {
+        // TODO(Joey): assert that we're dealing with a unity vector
+        return quaternion(quat.w, -quat.x, -quat.y, -quat.z);
     }
 
     // NOTE(Joey): conversions
