@@ -45,9 +45,9 @@ namespace math
     template <unsigned int n, typename T>
     inline vector<n, T>& normalize(vector<n, T> &vec)
     {
-        T length = length(vec);
+        T len = length(vec);
         for(unsigned int i = 0; i < n; ++i)
-            vec[i] = vec[i] / length;
+            vec[i] = vec[i] / len;
         return vec;
     }
 

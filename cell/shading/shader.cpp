@@ -103,55 +103,55 @@ namespace Cell
     void Shader::SetInt(std::string location, int value)
     {
         unsigned int loc = getUniformLocation(location);
-        if (loc)
+        if (loc >= 0)
             glUniform1i(loc, value);
     }
     void Shader::SetBool(std::string location, bool value)
     {
         unsigned int loc = getUniformLocation(location);
-        if (loc)
+        if (loc >= 0)
             glUniform1i(loc, (int)value);
     }
     void Shader::SetFloat(std::string location, float value)
     {
         unsigned int loc = getUniformLocation(location);
-        if (loc)
+        if (loc >= 0)
             glUniform1f(loc, value);
     }
     void Shader::SetVector(std::string location, math::vec2 value)
     {
         unsigned int loc = getUniformLocation(location);
-        if (loc)
+        if (loc >= 0)
             glUniform2fv(loc, 1, &value[0]);
     }
     void Shader::SetVector(std::string location, math::vec3 value)
     {
         unsigned int loc = getUniformLocation(location);
-        if (loc)
+        if (loc >= 0)
             glUniform3fv(loc, 1, &value[0]);
     }
     void Shader::SetVector(std::string location, math::vec4 value)
     {
         unsigned int loc = getUniformLocation(location);
-        if (loc)
+        if (loc >= 0)
             glUniform4fv(loc, 1, &value[0]);
     }
     void Shader::SetMatrix(std::string location, math::mat2 value)
     {
         unsigned int loc = getUniformLocation(location);
-        if (loc)
+        if (loc >= 0)
             glUniformMatrix2fv(loc, 1, GL_FALSE, &value[0][0]);
     }
     void Shader::SetMatrix(std::string location, math::mat3 value)
     {
         unsigned int loc = getUniformLocation(location);
-        if (loc)
+        if (loc >= 0)
             glUniformMatrix3fv(loc, 1, GL_FALSE, &value[0][0]);
     }
     void Shader::SetMatrix(std::string location, math::mat4 value)
     {
         unsigned int loc = getUniformLocation(location);
-        if (loc)
+        if (loc >= 0)
             glUniformMatrix4fv(loc, 1, GL_FALSE, &value[0][0]);
     }
 
@@ -185,7 +185,8 @@ namespace Cell
     unsigned int Shader::getUniformLocation(std::string name)
     {
         // TODO(Joey): read from uniform/attribute array as originally obtained from OpenGL
-        return 0;
+        return glGetUniformLocation(m_ID, name.c_str());
+        //return 0;
     }
 
 

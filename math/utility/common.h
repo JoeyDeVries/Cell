@@ -62,6 +62,10 @@ namespace math
 
     // NOTE(Joey): range (conversion)
     // ------------------------------
+    template <typename T> normalizeIntoRange(T x, T start, T end)
+    {
+        return (x - start) / (end - start);
+    }
 
 
     // NOTE(Joey): step functions 

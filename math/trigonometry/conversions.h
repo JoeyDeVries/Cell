@@ -5,6 +5,7 @@ namespace math
 {
     const float PI  = 3.14159265359;
     const float TAU = 6.28318530717;
+
    /*   
     float Deg2Rad(float degrees)
     {

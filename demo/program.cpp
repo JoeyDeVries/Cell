@@ -4,7 +4,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-
 #include <math/math.h>
 #include <cell/ProjectLinkTest.h>
 #include <cell/resources/resources.h>
@@ -99,6 +98,8 @@ int main(int argc, char *argv[])
 
     // NOTE(Joey): configure default OpenGL state
     Log::Message("Configuring OpenGL");
+        glEnable(GL_DEPTH_TEST);
+
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
         glViewport(0, 0, width, height);
@@ -119,7 +120,7 @@ int main(int argc, char *argv[])
     Cell::LineStrip lineStrip(0.5f, 32);
     Cell::Plane plane(16, 16);
     Cell::Circle circle(16,16);
-    Cell::Sphere sphere(8, 8);
+    Cell::Sphere sphere(64, 64);
 
     Cell::Texture testTexture = Cell::Resources::LoadTexture("test", "textures/checkerboard.png", GL_TEXTURE_2D, GL_RGB);
     testShader.Use();
@@ -130,10 +131,15 @@ int main(int argc, char *argv[])
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    // NOTE(Joey): create view/projection matrix
+    math::mat4 projection = math::perspective(60.0f, 1280.0f / 720.0f, 0.3f, 100.0f);
+    //math::mat4 projection = math::orthographic(-1.0f, 1.0f, 1.0f, -1.0f, 0.3f, 100.0f);
+    math::mat4 model = math::translate(math::vec3(0.0, 0.0, 0.0));
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
         // TODO(Joey): do we need to pass input to Cell?
@@ -144,21 +150,31 @@ int main(int argc, char *argv[])
         testShader.Use();
         testTexture.Bind(0);
 
-        glBindVertexArray(quad.m_VAO); // NOTE(Joey): placeholder for now; will be managed by renderer eventually
+        float radius = 2.0f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;
+        math::mat4 view = math::lookAt(math::vec3(camX, 0.0f, camZ), math::vec3(0.0f), math::vec3::UP);
+
+        testShader.SetMatrix("projection", projection);
+        testShader.SetMatrix("view", view);
+        testShader.SetMatrix("model", model);
+        testShader.SetFloat("time", glfwGetTime());
+
+        glBindVertexArray(quad.m_VAO); // NOTE(Joey): placeholder for no w; will be managed by renderer eventually
             glDrawArrays(GL_TRIANGLE_STRIP, 0, quad.Positions.size());
         glBindVertexArray(0);
 
-        glBindVertexArray(lineStrip.m_VAO);
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, lineStrip.Positions.size());
-        glBindVertexArray(0);
+        //glBindVertexArray(lineStrip.m_VAO);
+        //    glDrawArrays(GL_TRIANGLE_STRIP, 0, lineStrip.Positions.size());
+        //glBindVertexArray(0);
 
-        glBindVertexArray(plane.m_VAO);
-            glDrawElements(GL_TRIANGLE_STRIP, plane.Indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        //glBindVertexArray(plane.m_VAO);
+        //    glDrawElements(GL_TRIANGLE_STRIP, plane.Indices.size(), GL_UNSIGNED_INT, 0);
+        //glBindVertexArray(0);
 
-        glBindVertexArray(circle.m_VAO);
-            glDrawElements(GL_TRIANGLE_STRIP, circle.Indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        //glBindVertexArray(circle.m_VAO);
+        //    glDrawElements(GL_TRIANGLE_STRIP, circle.Indices.size(), GL_UNSIGNED_INT, 0);
+        //glBindVertexArray(0);
 
         glBindVertexArray(sphere.m_VAO);
             //glDrawArrays(GL_POINTS, 0, sphere.Positions.size());

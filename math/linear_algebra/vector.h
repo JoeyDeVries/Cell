@@ -364,7 +364,7 @@ namespace math
         {
             assert(index >= 0 && index < 4);
             return e[index];
-        }
+        }     
 
         // NOTE(Joey): math operators (defined in operation.h)
         // ---------------------------------------------------

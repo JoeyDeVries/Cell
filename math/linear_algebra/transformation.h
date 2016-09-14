@@ -83,11 +83,25 @@ namespace math
     // NOTE(Joey): view-space 
     // ----------------------
     template <typename T>
-    matrix<4, 4, T> lookAt(vector<3, T> position, vector<3, T> target, vector<3, T> up)
+    matrix<4, 4, T> lookAt(vector<3, T> position, vector<3, T> target, vector<3, T> worldUp)
     {
-        matrix<4, 4 T> result;
+        matrix<4, 4, T> frame;
+        matrix<4, 4, T> translate;
 
-        return result;
+        vec3 direction = -normalize(target - position);
+        vec3     right = normalize(cross(direction, worldUp));
+        vec3        up = cross(right, direction);
+
+        frame[0].xyz = right;
+        frame[1].xyz = up;
+        frame[2].xyz = direction;
+        // NOTE(Joey): we want the inverse of the rotation part, which is equal to its
+        // transpose as the matrix's column vectors represent a orthogonal basis.
+        frame = transpose(frame);
+
+        translate[3].xyz = -position;
+
+        return frame*translate;
     }
 
     // NOTE(Joey): projection
@@ -97,6 +111,17 @@ namespace math
     {
         matrix<4, 4, T> result;
 
+        result[0][0] = 2.0f / (right - left);
+        
+        result[1][1] = 2.0f / (top - bottom);
+
+        result[2][2] = -2.0f / (far - near);
+
+        result[3][0] = -(right + left) / (right - left);
+        result[3][1] = -(top + bottom) / (top - bottom);
+        result[3][2] = -(far + near) / (far - near);
+        result[3][3] = 1.0f;
+
         return result;
     }
 
@@ -104,6 +129,22 @@ namespace math
     matrix<4, 4, T> perspective(T fov, T aspect, T near, T far)
     {
         matrix<4, 4, T> result;
+
+        float top    = near * tan(PI / 180.0f * fov / 2.0);
+        float bottom = -top;
+        float right  = top * aspect;
+        float left   = -right;
+
+        result[0][0] = 2.0f*near / (right - left);
+
+        result[1][1] = 2.0f*near / (top - bottom);
+
+        result[2][0] = (right + left) / (right - left);
+        result[2][1] = (top + bottom) / (top - bottom);
+        result[2][2] = (near + far) / (near - far);
+        result[2][3] = -1.0f;
+
+        result[3][2] = 2.0f*near*far / (near - far);
 
         return result;
     }
