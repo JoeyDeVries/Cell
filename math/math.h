@@ -13,4 +13,7 @@
 #include "trigonometry/polar.h"
 #include "trigonometry/spherical.h"
 
+// NOTE(Joey): common operations
+#include "utility/common.h"
+
 #endif

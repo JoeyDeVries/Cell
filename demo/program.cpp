@@ -15,8 +15,18 @@
 #include <cell/mesh/sphere.h>
 #include <cell/mesh/line_strip.h>
 #include <utility/logging/log.h>
+#include <cell/camera/fly_camera.h>
 
 void APIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, void *userParam);
+
+void framebufferSizeFunc(GLFWwindow *window, int width, int height);
+void keyFunc(GLFWwindow *window, int key, int scancode, int action, int mods);
+void mousePosFunc(GLFWwindow *window, double xpos, double ypos);
+
+Cell::FlyCamera camera(math::vec3(0.0f, 0.0f, -3.0f), math::vec3(0.0f, 0.0f, -1.0f));
+float deltaTime     = 0.0f;
+float lastFrameTime = 0.0f;
+bool keysPressed[1024];
 
 /* NOTE(Joey):
 
@@ -62,6 +72,13 @@ int main(int argc, char *argv[])
             return -1;
         }
         glfwMakeContextCurrent(window);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  
+
+        // NOTE(Joey): register callbacks
+        glfwSetFramebufferSizeCallback(window, framebufferSizeFunc);
+        glfwSetKeyCallback(window, keyFunc);
+        glfwSetCursorPosCallback(window, mousePosFunc);
+
     Log::Message("GLFW initialized");
 
     // TODO(Joey): initialize Cell here
@@ -134,6 +151,7 @@ int main(int argc, char *argv[])
     // NOTE(Joey): create view/projection matrix
     math::mat4 projection = math::perspective(60.0f, 1280.0f / 720.0f, 0.3f, 100.0f);
     //math::mat4 projection = math::orthographic(-1.0f, 1.0f, 1.0f, -1.0f, 0.3f, 100.0f);
+    // TODO(Joey): verify view matrix/projection w/ GLM!
     math::mat4 model = math::translate(math::vec3(0.0, 0.0, 0.0));
 
     while (!glfwWindowShouldClose(window))
@@ -141,6 +159,22 @@ int main(int argc, char *argv[])
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        float currentFrameTime = glfwGetTime();
+        deltaTime     = lastFrameTime - currentFrameTime;
+        lastFrameTime = currentFrameTime;
+
+        // TODO(Joey): replace by input manager that maps any window input to a 
+        // custom defined format.
+        if (keysPressed[GLFW_KEY_W] || keysPressed[GLFW_KEY_UP])
+            camera.InputKey(deltaTime, Cell::CAMERA_FORWARD);
+        if (keysPressed[GLFW_KEY_S] || keysPressed[GLFW_KEY_DOWN])
+            camera.InputKey(deltaTime, Cell::CAMERA_BACK);
+        if (keysPressed[GLFW_KEY_A] || keysPressed[GLFW_KEY_LEFT])
+            camera.InputKey(deltaTime, Cell::CAMERA_LEFT);
+        if (keysPressed[GLFW_KEY_D] || keysPressed[GLFW_KEY_RIGHT])
+            camera.InputKey(deltaTime, Cell::CAMERA_RIGHT);
+
+        camera.Update(deltaTime);
 
         // TODO(Joey): do we need to pass input to Cell?
         // TODO(Joey): fill the renderer's command buffer with interesting polygons
@@ -156,7 +190,7 @@ int main(int argc, char *argv[])
         math::mat4 view = math::lookAt(math::vec3(camX, 0.0f, camZ), math::vec3(0.0f), math::vec3::UP);
 
         testShader.SetMatrix("projection", projection);
-        testShader.SetMatrix("view", view);
+        testShader.SetMatrix("view", camera.View);
         testShader.SetMatrix("model", model);
         testShader.SetFloat("time", glfwGetTime());
 
@@ -193,6 +227,43 @@ int main(int argc, char *argv[])
     glfwTerminate();
 
     return 0;
+}
+
+void framebufferSizeFunc(GLFWwindow *window, int width, int height)
+{
+    // TODO(Joey): reset viewport, but remain proper aspect ratio
+}
+
+void keyFunc(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    if (key >= 0 && key < 1024)
+    {
+        if (action == GLFW_PRESS)
+            keysPressed[key] = true;
+        else if (action == GLFW_RELEASE)
+            keysPressed[key] = false;
+    }
+}
+
+bool firstMouse = true;
+float lastX = 640.0f;
+float lastY = 360.0f;
+void mousePosFunc(GLFWwindow *window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;  // Reversed since y-coordinates go from bottom to left
+
+    lastX = xpos;
+    lastY = ypos;
+
+    camera.InputMouse(deltaTime, xoffset, yoffset);
 }
 
 

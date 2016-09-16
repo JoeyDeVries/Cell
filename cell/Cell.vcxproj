@@ -123,7 +123,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="camera\camera.cpp" />
-    <ClCompile Include="camera\fps_camera.cpp" />
+    <ClCompile Include="camera\fly_camera.cpp" />
     <ClCompile Include="camera\camera_frustum.cpp" />
     <ClCompile Include="mesh\circle.cpp" />
     <ClCompile Include="mesh\mesh.cpp" />
@@ -149,7 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera\camera.h" />
-    <ClInclude Include="camera\fps_camera.h" />
+    <ClInclude Include="camera\fly_camera.h" />
     <ClInclude Include="camera\camera_frustum.h" />
     <ClInclude Include="mesh\circle.h" />
     <ClInclude Include="mesh\mesh.h" />

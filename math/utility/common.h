@@ -9,16 +9,16 @@ namespace math
     // NOTE(Joey): interpolation
     // -------------------------
     template <typename T>
-    inline T lerp(T a, T, b, float t)
+    inline T lerp(T a, T b, float t)
     {
         return (1.0 - a) * t + b * t;
     }
 
-    template <u32 n, typename T>
+    template <unsigned int n, typename T>
     inline vector<n, T> lerp(vector<n, T> a, vector<n, T> b, float t)
     {
         vector<n, T> result;
-        for(u32 i = 0; i < n; ++i)
+        for(unsigned int i = 0; i < n; ++i)
             result[i] = lerp(a[i], b[i], t);
         return result;
     }
@@ -42,27 +42,28 @@ namespace math
         return clamp(val, 0.0, 1.0);
     }
 
-    template <u32 n, typename T>
+    template <unsigned int n, typename T>
     inline T clamp(vector<n, T> val, T min, T max)
     {
         vector<n, T> result;
-        for(u32 i = 0; i < n; ++i)
+        for(unsigned int i = 0; i < n; ++i)
             result[i] = clamp(val[i], min, max);
         return result;
     }
 
-    template <u32 n, typename T>
+    template <unsigned int n, typename T>
     inline T clamp01(vector<n, T> val, T min, T max)
     {
         vector<n, T> result;
-        for (u32 i = 0; i < n; ++i)
+        for (unsigned int i = 0; i < n; ++i)
             result[i] = clamp01(val[i], min, max);
         return result;
     }
 
     // NOTE(Joey): range (conversion)
     // ------------------------------
-    template <typename T> normalizeIntoRange(T x, T start, T end)
+    template <typename T> 
+    inline T normalizeIntoRange(T x, T start, T end)
     {
         return (x - start) / (end - start);
     }
