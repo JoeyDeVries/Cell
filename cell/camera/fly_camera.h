@@ -20,9 +20,9 @@ namespace Cell
 		float Yaw;
 		float Pitch;
 	
-		float MovementSpeed   =   1.0f;
-		float MouseSensitivty = 250.0f;
-		float Damping         =   1.0f;
+		float MovementSpeed   = 2.0f;
+		float MouseSensitivty = 0.1f;
+		float Damping         = 5.0f;
 	private:
 		math::vec3 m_TargetPosition;
 		math::vec3 m_WorldUp;
@@ -33,7 +33,7 @@ namespace Cell
         virtual void Update(float dt);
 
         virtual void InputKey(float dt, CAMERA_MOVEMENT direction);
-        virtual void InputMouse(float dt, float deltaX, float deltaY);
+        virtual void InputMouse(float deltaX, float deltaY);
     };
 }
 #endif

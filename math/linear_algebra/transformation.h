@@ -88,17 +88,21 @@ namespace math
         matrix<4, 4, T> frame;
         matrix<4, 4, T> translate;
 
-        vec3 direction = -normalize(target - position);
-        vec3     right = normalize(cross(direction, worldUp));
-        vec3        up = cross(right, direction);
+        vec3 forward = normalize(target - position);
+        vec3 right   = normalize(cross(forward, worldUp));
+        vec3 up      = cross(right, forward);
 
         frame[0].xyz = right;
         frame[1].xyz = up;
-        frame[2].xyz = direction;
-        // NOTE(Joey): we want the inverse of the rotation part, which is equal to its
-        // transpose as the matrix's column vectors represent a orthogonal basis.
+        // NOTE(Joey): negative forward as we're looking towards negative z-axis
+        frame[2].xyz = -forward; 
+        // NOTE(Joey): we want the inverse of the rotation part, which is equal
+        // to its transpose as the matrix's column vectors represent a 
+        // orthogonal basis.
         frame = transpose(frame);
 
+        // NOTE(Joey): the inverse of the translation matrix is just its 
+        // translation vector negated.
         translate[3].xyz = -position;
 
         return frame*translate;
@@ -130,21 +134,23 @@ namespace math
     {
         matrix<4, 4, T> result;
 
-        float top    = near * tan(PI / 180.0f * fov / 2.0);
+        float top    =  near * tan(PI / 180.0f * fov / 2.0);
         float bottom = -top;
-        float right  = top * aspect;
-        float left   = -right;
+        float right  =  top * aspect;
+        float left   = -top * aspect;
 
-        result[0][0] = 2.0f*near / (right - left);
+        result[0][0] = (2.0f*near) / (right - left);
 
-        result[1][1] = 2.0f*near / (top - bottom);
+        result[1][1] = (2.0f*near) / (top - bottom);
 
-        result[2][0] = (right + left) / (right - left);
-        result[2][1] = (top + bottom) / (top - bottom);
-        result[2][2] = (near + far) / (near - far);
+        //result[2][0] = (right + left) / (right - left);
+        //result[2][1] = (top + bottom) / (top - bottom);
+        result[2][2] = -(far + near) / (far - near); // NOTE(Joey): same as: (n + f) / (n - f)
         result[2][3] = -1.0f;
 
-        result[3][2] = 2.0f*near*far / (near - far);
+        result[3][2] = -(2.0f*near*far) / (far - near); // NOTE(Joey): same as 2nf / (n-f)
+        result[3][3] = 0.0f;
+        
 
         return result;
     }

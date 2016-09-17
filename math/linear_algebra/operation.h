@@ -76,9 +76,9 @@ namespace math
     {
         vector<3, T> result;
 
-        result.x = lhs.y*rhs.z - rhs.y*lhs.z;
-        result.y = lhs.z*rhs.x - rhs.z*lhs.x;
-        result.z = lhs.x*rhs.y - rhs.x*lhs.y;
+        result.x = lhs.y*rhs.z - lhs.z*rhs.y;
+        result.y = lhs.z*rhs.x - lhs.x*rhs.z;
+        result.z = lhs.x*rhs.y - lhs.y*rhs.x;
 
         return result;
     }

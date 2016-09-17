@@ -11,7 +11,7 @@ namespace math
     template <typename T>
     inline T lerp(T a, T b, float t)
     {
-        return (1.0 - a) * t + b * t;
+        return (1.0 - t) * a + b * t;
     }
 
     template <unsigned int n, typename T>
@@ -30,8 +30,8 @@ namespace math
     {
         T result = val;       
 
-        if      (val <= min) result = min;
-        else if (val >= max) result = max;
+        if      (val < min) result = min;
+        else if (val > max) result = max;
 
         return result;
     }
@@ -39,7 +39,7 @@ namespace math
     template <typename T>
     inline T clamp01(T val)
     {
-        return clamp(val, 0.0, 1.0);
+        return clamp<T>(val, 0.0, 1.0);
     }
 
     template <unsigned int n, typename T>

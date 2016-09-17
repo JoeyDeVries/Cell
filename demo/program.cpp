@@ -23,7 +23,7 @@ void framebufferSizeFunc(GLFWwindow *window, int width, int height);
 void keyFunc(GLFWwindow *window, int key, int scancode, int action, int mods);
 void mousePosFunc(GLFWwindow *window, double xpos, double ypos);
 
-Cell::FlyCamera camera(math::vec3(0.0f, 0.0f, -3.0f), math::vec3(0.0f, 0.0f, -1.0f));
+Cell::FlyCamera camera(math::vec3(0.0f, 0.0f, 3.0f), math::vec3(0.0f, 0.0f, -1.0f));
 float deltaTime     = 0.0f;
 float lastFrameTime = 0.0f;
 bool keysPressed[1024];
@@ -151,7 +151,6 @@ int main(int argc, char *argv[])
     // NOTE(Joey): create view/projection matrix
     math::mat4 projection = math::perspective(60.0f, 1280.0f / 720.0f, 0.3f, 100.0f);
     //math::mat4 projection = math::orthographic(-1.0f, 1.0f, 1.0f, -1.0f, 0.3f, 100.0f);
-    // TODO(Joey): verify view matrix/projection w/ GLM!
     math::mat4 model = math::translate(math::vec3(0.0, 0.0, 0.0));
 
     while (!glfwWindowShouldClose(window))
@@ -160,7 +159,7 @@ int main(int argc, char *argv[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         float currentFrameTime = glfwGetTime();
-        deltaTime     = lastFrameTime - currentFrameTime;
+        deltaTime     = currentFrameTime - lastFrameTime;
         lastFrameTime = currentFrameTime;
 
         // TODO(Joey): replace by input manager that maps any window input to a 
@@ -184,13 +183,10 @@ int main(int argc, char *argv[])
         testShader.Use();
         testTexture.Bind(0);
 
-        float radius = 2.0f;
-        float camX = sin(glfwGetTime()) * radius;
-        float camZ = cos(glfwGetTime()) * radius;
-        math::mat4 view = math::lookAt(math::vec3(camX, 0.0f, camZ), math::vec3(0.0f), math::vec3::UP);
-
         testShader.SetMatrix("projection", projection);
         testShader.SetMatrix("view", camera.View);
+
+
         testShader.SetMatrix("model", model);
         testShader.SetFloat("time", glfwGetTime());
 
@@ -263,7 +259,7 @@ void mousePosFunc(GLFWwindow *window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
 
-    camera.InputMouse(deltaTime, xoffset, yoffset);
+    camera.InputMouse(xoffset, yoffset);
 }
 
 
