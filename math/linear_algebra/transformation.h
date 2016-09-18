@@ -23,7 +23,27 @@ namespace math
     matrix<n, n, T>& scale(matrix<n, n, T>& result, vector<n, T> scale)
     {
         // NOTE(Joey): we can do a manual operation on the matrix scale
-        for(unsigned int i = 0; i < n; ++i)
+        for (unsigned int i = 0; i < n; ++i)
+            result[i][i] *= scale[i];
+        return result;
+    }
+
+    // NOTE(Joey): specialization on affine matrices with matrix and scale
+    // vector having different dimensions
+    template <typename T>
+    matrix<4, 4, T> scale(vector<3, T> scale)
+    {
+        matrix<4, 4, T> mat;
+        for (unsigned int i = 0; i < 3; ++i)
+            mat[i][i] = scale[i];
+        return mat;
+    }
+    // NOTE(Joey): version w/ reference
+    template <typename T>
+    matrix<4, 4, T>& scale(matrix<4, 4, T>& result, vector<3, T> scale)
+    {
+        // NOTE(Joey): we can do a manual operation on the matrix scale
+        for(unsigned int i = 0; i < 3; ++i)
             result[i][i] *= scale[i];
         return result;
     }
@@ -134,7 +154,7 @@ namespace math
     {
         matrix<4, 4, T> result;
 
-        float top    =  near * tan(PI / 180.0f * fov / 2.0);
+        float top    =  near * tan(fov / 2.0);
         float bottom = -top;
         float right  =  top * aspect;
         float left   = -top * aspect;

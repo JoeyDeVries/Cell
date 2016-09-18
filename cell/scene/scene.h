@@ -56,10 +56,10 @@ namespace Cell
         // NOTE(Joey): static helper function that directly builds an
         // empty scene node. Other sub-engines can directly add children
         // to this empty scene node (w/ identity matrix as transform).
-        static SceneNode *MakeScene();
+        static SceneNode *MakeSceneNode();
         // NOTE(Joey): similar to the MakeScene function, but directly
         // builds a node w/ attached mesh and material.
-        static SceneNode *MakeScene(Mesh *mesh, Material *material);
+        static SceneNode *MakeSceneNode(Mesh *mesh, Material *material);
     };
 }
 #endif

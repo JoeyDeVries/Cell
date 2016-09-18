@@ -19,7 +19,7 @@ namespace Cell
 
     void Scene::UpdateTransforms()
     {
-        m_Root->UpdateTransform();
+        //m_Root->UpdateTransform();
     }
 
     SceneNode* Scene::GetRootNode()
@@ -29,19 +29,19 @@ namespace Cell
 
 
 
-    SceneNode* Scene::MakeScene()
+    SceneNode* Scene::MakeSceneNode()
     {
         SceneNode *node = new SceneNode;
 
         return node;
     }
 
-    SceneNode* Scene::MakeScene(Mesh *mesh, Material *material)
+    SceneNode* Scene::MakeSceneNode(Mesh *mesh, Material *material)
     {
         SceneNode *node = new SceneNode;
 
-        node->m_Mesh = mesh;
-        node->m_Material = material;
+        node->Mesh = mesh;
+        node->Material = material;
 
         return node;
     }

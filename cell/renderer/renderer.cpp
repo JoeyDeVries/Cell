@@ -78,12 +78,26 @@ namespace Cell
         m_CommandBuffer.Push(mesh, material, transform);
     }
 
+    // TODO(Joey): transform to iterative function
+    void pushChildrenRecursive(CommandBuffer *commandBuffer, SceneNode *node)
+    {
+        unsigned int childCount = node->GetChildCount();
+        for (unsigned int i = 0; i < childCount; ++i)
+        {
+            SceneNode *child = node->GetChild(i);
+            commandBuffer->Push(child->Mesh, child->Material, child->GetTransform());
+
+            pushChildrenRecursive(commandBuffer, child);
+        }
+    }
+
     void Renderer::PushRender(SceneNode *node)
     {
         // NOTE(Joey): traverse through all the scene nodes and for each node:
         // push its render state to the command buffer together with a 
         // calculated transform matrix.
-
+        m_CommandBuffer.Push(node->Mesh, node->Material, node->GetTransform());
+        pushChildrenRecursive(&m_CommandBuffer, node);
     }
 
     void Renderer::PushRender(Scene *scene)
@@ -95,6 +109,8 @@ namespace Cell
 
     void Renderer::Render()
     {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         // NOTE(Joey): begin with a forward renderer context for rendering of
         // the command buffer, later switch to a deferred render pipeline once
         // all sub-systems in place work properly.
@@ -107,25 +123,30 @@ namespace Cell
         for (unsigned int i = 0; i < renderCommands.size(); ++i)
         {
             Material *material = renderCommands[i].Material;
-            Mesh *mesh = renderCommands[i].Mesh;
+            Mesh     *mesh     = renderCommands[i].Mesh;
             
             // TODO(Joey): only use shader and set per-shader specific uniforms
             // (ViewProjection) if state requires change; otherwise ignore.
             material->Shader->Use();
             material->Shader->SetMatrix("projection", m_Camera->Projection);
-            material->Shader->SetMatrix("view", m_Camera->View);
+            material->Shader->SetMatrix("view",       m_Camera->View);
+            material->Shader->SetMatrix("model",      renderCommands[i].Transform);
 
-            material->Shader->SetMatrix("model", renderCommands[i].Transform);
+            // NOTE(Joey): set material textures
+            material->Albedo->Bind(0);
 
-            if (renderCommands[i].Mesh->Indices.size() > 0)
+            // NOTE(Joey): bind OpenGL render state
+            glBindVertexArray(mesh->m_VAO);
+            if (mesh->Indices.size() > 0)
             {
                 // TODO(Joey): parse the proper OpenGL type from the mesh->Toplogy property
-                glDrawElements(mesh->Topology == TRIANGLE_STRIP ? GL_TRIANGLE_STRIP : GL_TRIANGLES, mesh->Indices.size(), GL_UNSIGNED_BYTE, 0);
+                glDrawElements(mesh->Topology == TRIANGLE_STRIP ? GL_TRIANGLE_STRIP : GL_TRIANGLES, mesh->Indices.size(), GL_UNSIGNED_INT, 0);
             }
             else
             {
                 glDrawArrays(mesh->Topology == TRIANGLE_STRIP ? GL_TRIANGLE_STRIP : GL_TRIANGLES, 0, mesh->Positions.size());
             }
+            glBindVertexArray(0); // NOTE(Joey): consider skipping this call without damaging the render pipeline
         }
 
         // NOTE(Joey): clear the command buffer s.t. the next frame/call can

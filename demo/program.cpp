@@ -17,6 +17,8 @@
 #include <cell/mesh/torus.h>
 #include <utility/logging/log.h>
 #include <cell/camera/fly_camera.h>
+#include <cell/scene/scene.h>
+#include <cell/renderer/renderer.h>
 
 void APIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, void *userParam);
 
@@ -28,6 +30,7 @@ Cell::FlyCamera camera(math::vec3(0.0f, 0.0f, 3.0f), math::vec3(0.0f, 0.0f, -1.0
 float deltaTime     = 0.0f;
 float lastFrameTime = 0.0f;
 bool keysPressed[1024];
+bool wireframe = false;
 
 /* NOTE(Joey):
 
@@ -127,6 +130,9 @@ int main(int argc, char *argv[])
 
 
     // NOTE(Joey): custom test code
+    Cell::Renderer renderer;
+    renderer.SetCamera(&camera);
+
     math::mat3 test;
     math::vec3 test2;
     // NOTE(Joey): check if linking Cell static library worked properly
@@ -143,17 +149,24 @@ int main(int argc, char *argv[])
 
     Cell::Texture testTexture = Cell::Resources::LoadTexture("test", "textures/checkerboard.png", GL_TEXTURE_2D, GL_RGB);
     testShader.Use();
-    testShader.SetInt("testTexture", 0);
+    testShader.SetInt("testTexture", 0); // TODO(Joey): keep this in shader logic? Or move to material?
 
     Log::Display();
     Log::Clear();
 
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
     // NOTE(Joey): create view/projection matrix
-    math::mat4 projection = math::perspective(60.0f, 1280.0f / 720.0f, 0.3f, 100.0f);
+    math::mat4 projection = math::perspective(math::Deg2Rad(60.0f), 1280.0f / 720.0f, 0.3f, 100.0f);
+    camera.SetPerspective(math::Deg2Rad(60.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
     //math::mat4 projection = math::orthographic(-1.0f, 1.0f, 1.0f, -1.0f, 0.3f, 100.0f);
     math::mat4 model = math::translate(math::vec3(0.0, 0.0, 0.0));
+
+    // NOTE(Joey): set up default scene w/ materials
+    Cell::Material defaultMaterial;
+    defaultMaterial.Shader = &testShader;
+    defaultMaterial.Albedo = &testTexture;
+
+    Cell::SceneNode *sceneNode = Cell::Scene::MakeSceneNode(&torus, &defaultMaterial);
+    sceneNode->AddChild(Cell::Scene::MakeSceneNode(&sphere, &defaultMaterial));
 
     while (!glfwWindowShouldClose(window))
     {
@@ -164,6 +177,7 @@ int main(int argc, char *argv[])
         deltaTime     = currentFrameTime - lastFrameTime;
         lastFrameTime = currentFrameTime;
 
+        // TODO(Joey): do we need to pass input to Cell?
         // TODO(Joey): replace by input manager that maps any window input to a 
         // custom defined format.
         if (keysPressed[GLFW_KEY_W] || keysPressed[GLFW_KEY_UP])
@@ -175,14 +189,24 @@ int main(int argc, char *argv[])
         if (keysPressed[GLFW_KEY_D] || keysPressed[GLFW_KEY_RIGHT])
             camera.InputKey(deltaTime, Cell::CAMERA_RIGHT);
 
+        if (keysPressed[GLFW_KEY_Z]) {
+            wireframe = !wireframe;
+            glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+        }
+
+        // NOTE(Joey): update render logic
         camera.Update(deltaTime);
 
-        // TODO(Joey): do we need to pass input to Cell?
         // TODO(Joey): fill the renderer's command buffer with interesting polygons
+        sceneNode->Scale = math::vec3(1.5f + sin(glfwGetTime()) * 0.25f);
+        sceneNode->GetChild(0)->Position.x = cos(glfwGetTime()) * 2.0f;
+        renderer.PushRender(sceneNode);
+
         // TODO(Joey): call Cell's renderer
+        renderer.Render();
 
         // NOTE(Joey): simple quad test code to run shader tests on
-        testShader.Use();
+    /*    testShader.Use();
         testTexture.Bind(0);
 
         testShader.SetMatrix("projection", projection);
@@ -190,11 +214,11 @@ int main(int argc, char *argv[])
 
 
         testShader.SetMatrix("model", model);
-        testShader.SetFloat("time", glfwGetTime());
+        testShader.SetFloat("time", glfwGetTime());*/
 
-        glBindVertexArray(quad.m_VAO); // NOTE(Joey): placeholder for no w; will be managed by renderer eventually
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, quad.Positions.size());
-        glBindVertexArray(0);
+        //glBindVertexArray(quad.m_VAO); // NOTE(Joey): placeholder for no w; will be managed by renderer eventually
+        //    glDrawArrays(GL_TRIANGLE_STRIP, 0, quad.Positions.size());
+        //glBindVertexArray(0);
 
         //glBindVertexArray(lineStrip.m_VAO);
         //    glDrawArrays(GL_TRIANGLE_STRIP, 0, lineStrip.Positions.size());
@@ -208,14 +232,14 @@ int main(int argc, char *argv[])
         //    glDrawElements(GL_TRIANGLE_STRIP, circle.Indices.size(), GL_UNSIGNED_INT, 0);
         //glBindVertexArray(0);
 
-        glBindVertexArray(sphere.m_VAO);
-            //glDrawArrays(GL_POINTS, 0, sphere.Positions.size());
-            glDrawElements(GL_TRIANGLES, sphere.Indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        //glBindVertexArray(sphere.m_VAO);
+        //    //glDrawArrays(GL_POINTS, 0, sphere.Positions.size());
+        //    glDrawElements(GL_TRIANGLES, sphere.Indices.size(), GL_UNSIGNED_INT, 0);
+        //glBindVertexArray(0);
 
-        glBindVertexArray(torus.m_VAO);
+    /*    glBindVertexArray(torus.m_VAO);
             glDrawElements(GL_TRIANGLES, torus.Indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        glBindVertexArray(0);*/
 
         // NOTE(Joey): display log messages / diagnostics
         Log::Display();

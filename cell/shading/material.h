@@ -22,33 +22,37 @@ namespace Cell
 
         // lighting
         union {
-            Texture *Albedo;
-            Texture *Diffuse;
+            Texture *Albedo;  // NOTE(Joey): texture unit 0
+            Texture *Diffuse; // NOTE(Joey): texture unit 0
         };
         union {
             Texture *MetalRoughness; // NOTE(Joey): metal: RGB channel; roughness: A channel
-            Texture *Specular;
+            Texture *Specular;       // NOTE(Joey): texture unit 1
         };
-        Texture *Normal;
-        Texture *Occlusion;
+        Texture *Normal;    // NOTE(Joey): texture unit 2
+        Texture *Occlusion; // NOTE(Joey): texture unit 3
+        Texture *Emission;  // NOTE(Joey): texture unit 4
 
-        math::vec4 Color;
+        math::vec4 Color = math::vec4(1.0f);
 
         // depth state
-        bool DepthTest;
-        bool DepthWrite;
-        GLenum DepthCompare;
+        bool   DepthTest    = true;
+        bool   DepthWrite   = true;
+        GLenum DepthCompare = GL_LESS;
 
-        // blending state
-        bool Blend;
-        GLenum BlendSrc;
-        GLenum BlendDst;
-        GLenum BlendEquation;
+        // stencil state
 
         // face culling state
-        bool Cull;
-        GLenum CullWindingOrder;
-        GLenum CullFace;
+        bool   Cull             = false;
+        GLenum CullFace         = GL_BACK;
+        GLenum CullWindingOrder = GL_CCW;
+
+        // blending state
+        bool   Blend           = false;
+        GLenum BlendSrc      = GL_SRC_ALPHA;
+        GLenum BlendDst      = GL_ONE_MINUS_SRC_ALPHA;
+        GLenum BlendEquation = GL_FUNC_ADD;
+
     private:
 
     public:

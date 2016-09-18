@@ -1,6 +1,8 @@
 #ifndef CELL_SCENE_SCENE_NODE_H
 #define CELL_SCENE_SCENE_NODE_H
 
+#include <vector>
+
 #include <math/math.h>
 
 namespace Cell
@@ -29,17 +31,22 @@ namespace Cell
     {
         friend Scene;
     public:
-        math::vec3 Position;
-        //math::quat Rotation; // TODO(Joey): implement quaternions in math library
-        math::vec3 Scale;
-    private:
-        SceneNode  *m_Next;
-
         // NOTE(Joey): each node contains relevant render state
-        Mesh        *m_Mesh;
-        Material    *m_Material;
-        math::mat4   m_Transform;
+        Mesh        *Mesh;
+        Material    *Material;
+        
+        math::vec3 Position = math::vec3(0.0f);
+        //math::quat Rotation; // TODO(Joey): implement quaternions in math library
+        math::vec3 Scale    = math::vec3(1.0f);
 
+
+    private:
+        std::vector<SceneNode*> m_Children;
+        SceneNode *m_Parent;
+
+        // NOTE(Joey): per-node transform (w/ parent-child relationship)
+        math::mat4  m_Transform;
+        
         // NOTE(Joey): mark the current node's tranform as dirty if it needs to be
         // re-calculated this frame.
         bool m_Dirty;
@@ -51,15 +58,19 @@ namespace Cell
         // NOTE(Joey): child management
         void AddChild(SceneNode *node);
         // void RemoveChild(); // TODO(Joey): think of proper way to unqiuely idetnfiy child nodes (w/ incrementing node ID or stringed hash ID?)
-        SceneNode *GetChildren();
+        std::vector<SceneNode*> GetChildren();
+        unsigned int            GetChildCount();
+        SceneNode              *GetChild(unsigned int index);
+        SceneNode              *GetParent();
 
-        // NOTE(Joey): returns the transform of the current node
+        // NOTE(Joey): returns the transform of the current node combined with
+        // its parent(s)' transform.
         math::mat4 GetTransform();
 
         // NOTE(Joey): re-calculates this node and its children's
         // transform components if its parent or the node itself
         // is dirty.
-        void UpdateTransform();
+        //void UpdateTransform();
     };
 }
 #endif
