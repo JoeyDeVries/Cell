@@ -3,27 +3,31 @@
 
 namespace math
 {
-    const float PI  = 3.14159265359;
-    const float TAU = 6.28318530717;
+    const float PI  = 3.14159265359f;
+    const float TAU = 6.28318530717f;
 
-   /*   
-    float Deg2Rad(float degrees)
+    // NOTE(To self): when declaring functions in a header file, and multiple 
+    // compiled objects include this header file each compilation object will
+    // have this function and thus there will be multiple objs with the same
+    // function which generates 'already defined in ....obj' errors. Make sure
+    // these are inline s.t. this won't occur.
+    inline float Deg2Rad(float degrees)
     {
         return degrees / 180.0f * PI;
     }
-    double Deg2Rad(double degrees)
+    inline double Deg2Rad(double degrees)
     {
         return degrees / 180.0 * PI;
-    }*/
+    }
 
-    //float Rad2Deg(float radians)
-    //{
-    //    return radians / PI * 180.0f;
-    //}
-    //double Rad2Deg(double radians)
-    //{
-    //    return radians / PI * 180.0;
-    //}
+    inline float Rad2Deg(float radians)
+    {
+        return radians / PI * 180.0f;
+    }
+    inline double Rad2Deg(double radians)
+    {
+        return radians / PI * 180.0;
+    }
 }
 
 #endif
