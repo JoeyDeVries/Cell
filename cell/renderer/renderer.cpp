@@ -8,6 +8,8 @@
 
 #include "../resources/resources.h"
 
+#include <stack>
+
 namespace Cell
 {
     Renderer::Renderer()
@@ -78,26 +80,26 @@ namespace Cell
         m_CommandBuffer.Push(mesh, material, transform);
     }
 
-    // TODO(Joey): transform to iterative function
-    void pushChildrenRecursive(CommandBuffer *commandBuffer, SceneNode *node)
-    {
-        unsigned int childCount = node->GetChildCount();
-        for (unsigned int i = 0; i < childCount; ++i)
-        {
-            SceneNode *child = node->GetChild(i);
-            commandBuffer->Push(child->Mesh, child->Material, child->GetTransform());
-
-            pushChildrenRecursive(commandBuffer, child);
-        }
-    }
-
     void Renderer::PushRender(SceneNode *node)
     {
         // NOTE(Joey): traverse through all the scene nodes and for each node:
         // push its render state to the command buffer together with a 
         // calculated transform matrix.
         m_CommandBuffer.Push(node->Mesh, node->Material, node->GetTransform());
-        pushChildrenRecursive(&m_CommandBuffer, node);
+
+        // NOTE(Joey): originally a recursive function but transformed to 
+        // iterative version by maintaining a stack.
+        std::stack<SceneNode*> childStack;
+        for (unsigned int i = 0; i < node->GetChildCount(); ++i)
+            childStack.push(node->GetChild(i));
+        while (!childStack.empty())
+        {
+            SceneNode *child = childStack.top();
+            childStack.pop();
+            m_CommandBuffer.Push(child->Mesh, child->Material, child->GetTransform());
+            for(unsigned int i = 0; i < child->GetChildCount(); ++i)
+                childStack.push(child->GetChild(i));
+        }
     }
 
     void Renderer::PushRender(Scene *scene)
