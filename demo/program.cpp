@@ -14,6 +14,7 @@
 #include <cell/mesh/circle.h>
 #include <cell/mesh/sphere.h>
 #include <cell/mesh/line_strip.h>
+#include <cell/mesh/torus.h>
 #include <utility/logging/log.h>
 #include <cell/camera/fly_camera.h>
 
@@ -138,6 +139,7 @@ int main(int argc, char *argv[])
     Cell::Plane plane(16, 16);
     Cell::Circle circle(16,16);
     Cell::Sphere sphere(64, 64);
+    Cell::Torus torus(2.0f, 0.6f, 32, 32);
 
     Cell::Texture testTexture = Cell::Resources::LoadTexture("test", "textures/checkerboard.png", GL_TEXTURE_2D, GL_RGB);
     testShader.Use();
@@ -209,6 +211,10 @@ int main(int argc, char *argv[])
         glBindVertexArray(sphere.m_VAO);
             //glDrawArrays(GL_POINTS, 0, sphere.Positions.size());
             glDrawElements(GL_TRIANGLES, sphere.Indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+
+        glBindVertexArray(torus.m_VAO);
+            glDrawElements(GL_TRIANGLES, torus.Indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         // NOTE(Joey): display log messages / diagnostics

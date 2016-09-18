@@ -43,12 +43,13 @@ namespace math
     }
 
     template <unsigned int n, typename T>
-    inline vector<n, T>& normalize(vector<n, T> &vec)
+    inline vector<n, T> normalize(vector<n, T> vec)
     {
+        vector<n, T> result;
         T len = length(vec);
         for(unsigned int i = 0; i < n; ++i)
-            vec[i] = vec[i] / len;
-        return vec;
+            result[i] = vec[i] / len;
+        return result;
     }
 
     template <unsigned int n, typename T>

@@ -54,11 +54,11 @@ namespace Cell
             int Size;
             unsigned int Location;
         };
-        unsigned int m_ID;
 
         std::vector<Uniform>         Uniforms;
         std::vector<VertexAttribute> Attributes;
     private:
+        unsigned int m_ID;
 
     public:
         Shader();
@@ -80,7 +80,6 @@ namespace Cell
         //void SetTexture1D();
         //void SetTexture2D();
         //void SetTexture3D();
-
     private:
         // TODO(Joey): move all shader loading code to specialized loader
         std::string readShader(std::ifstream &file, std::string directory);
