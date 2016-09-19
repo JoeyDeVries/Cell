@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
     Cell::Plane plane(16, 16);
     Cell::Circle circle(16,16);
     Cell::Sphere sphere(64, 64);
-    Cell::Torus torus(2.0f, 0.6f, 32, 32);
+    Cell::Torus torus(2.0f, 0.4f, 32, 32);
 
     Cell::Texture testTexture = Cell::Resources::LoadTexture("test", "textures/checkerboard.png", GL_TEXTURE_2D, GL_RGB);
     testShader.Use();
@@ -154,19 +154,33 @@ int main(int argc, char *argv[])
     Log::Display();
     Log::Clear();
 
-    // NOTE(Joey): create view/projection matrix
-    math::mat4 projection = math::perspective(math::Deg2Rad(60.0f), 1280.0f / 720.0f, 0.3f, 100.0f);
+    // NOTE(Joey): configure camera
     camera.SetPerspective(math::Deg2Rad(60.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
-    //math::mat4 projection = math::orthographic(-1.0f, 1.0f, 1.0f, -1.0f, 0.3f, 100.0f);
-    math::mat4 model = math::translate(math::vec3(0.0, 0.0, 0.0));
 
     // NOTE(Joey): set up default scene w/ materials
     Cell::Material defaultMaterial;
     defaultMaterial.Shader = &testShader;
     defaultMaterial.Albedo = &testTexture;
 
-    Cell::SceneNode *sceneNode = Cell::Scene::MakeSceneNode(&torus, &defaultMaterial);
-    sceneNode->AddChild(Cell::Scene::MakeSceneNode(&sphere, &defaultMaterial));
+    Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, &defaultMaterial);
+    Cell::SceneNode *secondTorus = Cell::Scene::MakeSceneNode(&torus, &defaultMaterial);
+    Cell::SceneNode *thirdTorus  = Cell::Scene::MakeSceneNode(&torus, &defaultMaterial);
+    Cell::SceneNode *sphereNode  = Cell::Scene::MakeSceneNode(&sphere, &defaultMaterial);
+
+    mainTorus->AddChild(secondTorus);
+    secondTorus->AddChild(thirdTorus);
+    thirdTorus->AddChild(sphereNode);
+
+    mainTorus->Scale    = math::vec3(2.0f);
+    mainTorus->Position = math::vec3(0.0f, 2.0f, 0.0f);
+    secondTorus->Scale  = math::vec3(0.65f);
+    thirdTorus->Scale   = math::vec3(0.65f);
+    sphereNode->Scale   = math::vec3(1.35f);
+
+    Cell::SceneNode *floor = Cell::Scene::MakeSceneNode(&plane, &defaultMaterial);
+    floor->Rotation        = math::vec4(1.0f, 0.0f, 0.0f, math::Deg2Rad(90.0f));
+    floor->Scale           = math::vec3(10.0f);
+    floor->Position        = math::vec3(0.0f, -2.0f, 0.0f);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -198,49 +212,17 @@ int main(int argc, char *argv[])
         camera.Update(deltaTime);
 
         // TODO(Joey): fill the renderer's command buffer with interesting polygons
-        sceneNode->Scale = math::vec3(1.5f + sin(glfwGetTime()) * 0.25f);
-        sceneNode->GetChild(0)->Position.x = cos(glfwGetTime()) * 2.0f;
-        renderer.PushRender(sceneNode);
+        mainTorus->Rotation   = math::vec4(math::vec3(1.0f, 0.0f, 0.0f), glfwGetTime());
+        secondTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
+        thirdTorus->Rotation  = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
+        sphereNode->Rotation  = math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime());
+
+        renderer.PushRender(mainTorus);
+        renderer.PushRender(floor);
 
         // TODO(Joey): call Cell's renderer
         renderer.Render();
-
-        // NOTE(Joey): simple quad test code to run shader tests on
-    /*    testShader.Use();
-        testTexture.Bind(0);
-
-        testShader.SetMatrix("projection", projection);
-        testShader.SetMatrix("view", camera.View);
-
-
-        testShader.SetMatrix("model", model);
-        testShader.SetFloat("time", glfwGetTime());*/
-
-        //glBindVertexArray(quad.m_VAO); // NOTE(Joey): placeholder for no w; will be managed by renderer eventually
-        //    glDrawArrays(GL_TRIANGLE_STRIP, 0, quad.Positions.size());
-        //glBindVertexArray(0);
-
-        //glBindVertexArray(lineStrip.m_VAO);
-        //    glDrawArrays(GL_TRIANGLE_STRIP, 0, lineStrip.Positions.size());
-        //glBindVertexArray(0);
-
-        //glBindVertexArray(plane.m_VAO);
-        //    glDrawElements(GL_TRIANGLE_STRIP, plane.Indices.size(), GL_UNSIGNED_INT, 0);
-        //glBindVertexArray(0);
-
-        //glBindVertexArray(circle.m_VAO);
-        //    glDrawElements(GL_TRIANGLE_STRIP, circle.Indices.size(), GL_UNSIGNED_INT, 0);
-        //glBindVertexArray(0);
-
-        //glBindVertexArray(sphere.m_VAO);
-        //    //glDrawArrays(GL_POINTS, 0, sphere.Positions.size());
-        //    glDrawElements(GL_TRIANGLES, sphere.Indices.size(), GL_UNSIGNED_INT, 0);
-        //glBindVertexArray(0);
-
-    /*    glBindVertexArray(torus.m_VAO);
-            glDrawElements(GL_TRIANGLES, torus.Indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);*/
-
+   
         // NOTE(Joey): display log messages / diagnostics
         Log::Display();
         Log::Clear();

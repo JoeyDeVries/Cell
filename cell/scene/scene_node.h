@@ -37,6 +37,7 @@ namespace Cell
         
         math::vec3 Position = math::vec3(0.0f);
         //math::quat Rotation; // TODO(Joey): implement quaternions in math library
+        math::vec4 Rotation; // NOTE(Joey): axis-angle for now; test w/ quaternions soon!
         math::vec3 Scale    = math::vec3(1.0f);
 
 

@@ -13,7 +13,7 @@ namespace Cell
         {
             for (int x = 0; x <= xSegments; ++x)
             {
-                Positions.push_back(math::vec3(dX * x, dY * y, 0.0f));
+                Positions.push_back(math::vec3(dX * x * 2.0f - 1.0f, dY * y * 2.0f - 1.0f, 0.0f));
                 UV.push_back(math::vec2(dX * x, 1.0f - y * dY));
             }
         }

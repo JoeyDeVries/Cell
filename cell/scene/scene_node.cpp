@@ -60,6 +60,7 @@ namespace Cell
         // TODO(Joey): generate transform here:
         m_Transform = math::translate(Position);
         m_Transform = math::scale(m_Transform, Scale);
+        m_Transform = math::rotate(m_Transform, Rotation.xyz, Rotation.w);
 
         // NOTE(Joey): multiply parent transform with current transform.
         if(m_Parent)

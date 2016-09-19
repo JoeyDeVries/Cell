@@ -20,7 +20,7 @@ namespace Cell
 		float Yaw;
 		float Pitch;
 	
-		float MovementSpeed   = 2.0f;
+		float MovementSpeed   = 5.0f;
 		float MouseSensitivty = 0.1f;
 		float Damping         = 5.0f;
 	private:

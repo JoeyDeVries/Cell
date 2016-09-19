@@ -25,12 +25,13 @@ bool MatrixTransformation()
     if (vec05.y != 2.0f * 4.0f) success = false;
 
     // NOTE(Joey): rotate
-    math::matrix<3, 3, float> rotate = math::rotate({ 0.0f, 1.0f, 0.0f }, 6.28f);
-    math::vector<3, float>     vec06 = rotate * vec02;
+    // TODO(Joey): make it work with 4x4 matrices
+    //math::matrix<3, 3, float> rotate = math::rotate({ 0.0f, 1.0f, 0.0f }, 6.28f);
+    //math::vector<3, float>     vec06 = rotate * vec02;
 
-    rotate = math::matrix<3, 3, float>();
-    math::rotate(rotate, { 0.0f, 1.0f, 0.0f }, 6.28f);
-    math::vector<3, float> vec07 = rotate * vec02;
+    //rotate = math::matrix<3, 3, float>();
+    //math::rotate(rotate, { 0.0f, 1.0f, 0.0f }, 6.28f);
+    //math::vector<3, float> vec07 = rotate * vec02;
 
  /*   if (vec06.x != 0.0f) success = false;
     if (vec06.y != 0.0f) success = false;

@@ -15,11 +15,15 @@ Feature List (complete)
 ------
 * Fully functioning (custom) math library (vectors, matrices, transformations, utility functions):
 	1. Linear algebra: n-dimensional vectors, nxn-dimensional matrices, transformations, utility. 
+	2. Trigonemetry: unit circle utility functions, radian/degree conversions.
 
+3. Define Mesh object and encompassing Model class.
+	1. Define set of basic shape mesh generation; plane, cube, disk, sphere, cylinder, torus (donut)
+	
 Feature List (work-in-progress)
 ------
 * Fully functioning (custom) math library (vectors, matrices, transformations, utility functions):
-	2. Trigonemetry: unit circle utility functions, radian/degree conversions.
+	
 	3. Utility functions: lerp, step, smoothstep, smootherstep, clamp etc.
 	4. Convert math to compiler intrinsics (SSE2); SIMD applicable (keep SIMD in CPU registers w/ [__vectorcall](http://www.codersnotes.com/notes/maths-lib-2016/))?
 * Engine utility namespace:

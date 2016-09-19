@@ -52,32 +52,37 @@ namespace math
     // --------------------
     // NOTE(Joey): getting a direct rotation matrix is only allowed on 3 dimensions
     template <typename T>
-    matrix<3, 3, T> rotate(vector<3, T> axis, T radians)
+    matrix<4, 4, T> rotate(vector<3, T> axis, T angle)
     {
-        matrix<3, 3, T> mat;
-        return mat;
+        matrix<4, 4, T> result;
+
+        float c = cos(angle);
+        float s = sin(angle);
+        float t = 1.0f - c;
+
+        result[0][0] = t*axis.x*axis.x + c;
+        result[0][1] = t*axis.x*axis.y + s*axis.z;
+        result[0][2] = t*axis.x*axis.z - s*axis.y;
+
+        result[1][0] = t*axis.x*axis.y - s*axis.z;
+        result[1][1] = t*axis.y*axis.y + c;
+        result[1][2] = t*axis.y*axis.z + s*axis.x;
+
+        result[2][0] = t*axis.x*axis.z + s*axis.y;
+        result[2][1] = t*axis.y*axis.z - s*axis.x;
+        result[2][2] = t*axis.z*axis.z + c;
+
+        return result;
     }
-
-    // TODO(Joey): find mathematical proof of rotation matrix around any axis
+   
     template <typename T>
-    matrix<3, 3, T>& rotate(matrix<3, 3, T> &result, vector<3, T> axis, T radians)
+    matrix<4, 4, T>& rotate(matrix<4, 4, T> &result, vector<3, T> axis, T angle)
     {
-        matrix<3, 3, T> mat;
-
-        result = mat * result;
+        matrix<4, 4, T> rot = rotate(axis, angle);
+        result = result * rot;
         return result;
     }
 
-    // TODO(Joey): think of clean API way to seperate 4 dimensional vector in 3 
-    // dimensions before storing it back as 4 dimensional vector.
-    template <typename T>
-    matrix<4, 4, T>& rotate(matrix<4, 4, T> &result, vector<3, T> axis, T radians)
-    {
-        matrix<3, 3, T> mat;
-
-        result = result * mat;
-        return result;
-    }
 
     // NOTE(Joey): translation
     // -----------------------
