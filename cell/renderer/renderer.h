@@ -37,6 +37,8 @@ namespace Cell
         CommandBuffer m_CommandBuffer;
 
         Camera       *m_Camera;
+
+        //std::map<std::string, Material*> m_Materials;
     public:
         Renderer();
 
@@ -50,6 +52,9 @@ namespace Cell
         void PushRender(Mesh *mesh, Material *material, math::mat4 transform);
         void PushRender(SceneNode *node);
         void PushRender(Scene *scene);
+
+        //Material* NewMaterial(std::string name); // NOTE(Joey): will by default material when created
+        //Material *GetMaterial(std::String name);
 
         void Render();
 

@@ -164,5 +164,8 @@
     <ClInclude Include="camera\fly_camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="shading\shading_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

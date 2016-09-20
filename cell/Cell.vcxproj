@@ -171,6 +171,7 @@
     <ClInclude Include="shading\material.h" />
     <ClInclude Include="shading\shader_parser.h" />
     <ClInclude Include="shading\shader.h" />
+    <ClInclude Include="shading\shading_types.h" />
     <ClInclude Include="shading\texture.h" />
     <ClInclude Include="stb\stb_image.h" />
   </ItemGroup>

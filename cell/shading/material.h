@@ -3,8 +3,11 @@
 
 #include <GL/glew.h>
 
+#include <map>
+
 #include <math/math.h>
 
+#include "shading_types.h"
 #include "shader.h"
 #include "texture.h"
 
@@ -17,21 +20,12 @@ namespace Cell
     */
     class Material
     {
+    private:
+        // shader state
+        std::map<std::string, UniformValue>        m_Uniforms;
+        std::map<std::string, UniformValueSampler> m_SamplerUniforms; // NOTE(Joey): process samplers differently 
     public:
         Shader *Shader;
-
-        // lighting
-        union {
-            Texture *Albedo;  // NOTE(Joey): texture unit 0
-            Texture *Diffuse; // NOTE(Joey): texture unit 0
-        };
-        union {
-            Texture *MetalRoughness; // NOTE(Joey): metal: RGB channel; roughness: A channel
-            Texture *Specular;       // NOTE(Joey): texture unit 1
-        };
-        Texture *Normal;    // NOTE(Joey): texture unit 2
-        Texture *Occlusion; // NOTE(Joey): texture unit 3
-        Texture *Emission;  // NOTE(Joey): texture unit 4
 
         math::vec4 Color = math::vec4(1.0f);
 
@@ -54,8 +48,21 @@ namespace Cell
         GLenum BlendEquation = GL_FUNC_ADD;
 
     private:
-
+      
     public:
+        void SetBool(std::string name,    bool value);
+        void SetInt(std::string name,     int value);
+        void SetFloat(std::string name,   float value);
+        void SetTexture(std::string name, Texture *value, unsigned int unit = 0);
+        void SetVector(std::string name,  math::vec2 value);
+        void SetVector(std::string name,  math::vec3 value);
+        void SetVector(std::string name,  math::vec4 value);
+        void SetMatrix(std::string name,  math::mat2 value);
+        void SetMatrix(std::string name,  math::mat3 value);
+        void SetMatrix(std::string name,  math::mat4 value);
+
+        std::map<std::string, UniformValue>*        GetUniforms();
+        std::map<std::string, UniformValueSampler>* GetSamplerUniforms();
     };
 }
 #endif

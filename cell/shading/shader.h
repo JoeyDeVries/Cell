@@ -7,6 +7,8 @@
 #include <math/linear_algebra/vector.h>
 #include <math/linear_algebra/matrix.h>
 
+#include "shading_types.h"
+
 namespace Cell
 {
 
@@ -20,41 +22,6 @@ namespace Cell
     class Shader
     {
     public:
-        // TODO(Joey): move these in their own header file
-        // but first determine their proper usage before
-        // isolating them.
-        enum SHADER_TYPE
-        {
-            SHADER_TYPE_BOOL,
-            SHADER_TYPE_INT,
-            SHADER_TYPE_FLOAT,
-            SHADER_TYPE_SAMPLER1D,
-            SHADER_TYPE_SAMPLER2D,
-            SHADER_TYPE_SAMPLER3D,
-            SHADER_TYPE_VEC2,
-            SHADER_TYPE_VEC3,
-            SHADER_TYPE_VEC4,
-            SHADER_TYPE_MAT2,
-            SHADER_TYPE_MAT3,
-            SHADER_TYPE_MAT4,
-        };
-
-        struct Uniform
-        {
-            SHADER_TYPE Type;
-            std::string Name;
-            int Size;
-            unsigned int Location;
-        };
-
-        struct VertexAttribute
-        {
-            SHADER_TYPE Type;
-            std::string Name;
-            int Size;
-            unsigned int Location;
-        };
-
         std::vector<Uniform>         Uniforms;
         std::vector<VertexAttribute> Attributes;
     private:
@@ -62,9 +29,9 @@ namespace Cell
 
     public:
         Shader();
-        Shader(std::string vsPath, std::string fsPath);
+        Shader(std::string vsCode, std::string fsCode);
 
-        void Load(std::string vsPath, std::string fsPath);
+        void Load(std::string vsCode, std::string fsCode);
 
         void Use();
 
@@ -81,12 +48,9 @@ namespace Cell
         //void SetTexture2D();
         //void SetTexture3D();
     private:
-        // TODO(Joey): move all shader loading code to specialized loader
-        std::string readShader(std::ifstream &file, std::string directory);
-
         // NOTE(Joey): retrieves uniform location from pre-stored uniform locations and
         // reports an error if a non-uniform is set.
-        unsigned int getUniformLocation(std::string name);
+        int getUniformLocation(std::string name);
     };
 }
 #endif

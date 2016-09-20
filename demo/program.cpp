@@ -148,8 +148,6 @@ int main(int argc, char *argv[])
     Cell::Torus torus(2.0f, 0.4f, 32, 32);
 
     Cell::Texture testTexture = Cell::Resources::LoadTexture("test", "textures/checkerboard.png", GL_TEXTURE_2D, GL_RGB);
-    testShader.Use();
-    testShader.SetInt("testTexture", 0); // TODO(Joey): keep this in shader logic? Or move to material?
 
     Log::Display();
     Log::Clear();
@@ -160,7 +158,8 @@ int main(int argc, char *argv[])
     // NOTE(Joey): set up default scene w/ materials
     Cell::Material defaultMaterial;
     defaultMaterial.Shader = &testShader;
-    defaultMaterial.Albedo = &testTexture;
+    defaultMaterial.SetTexture("testTexture", &testTexture, 0);
+    defaultMaterial.SetFloat("_time", 0.1337f);
 
     Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, &defaultMaterial);
     Cell::SceneNode *secondTorus = Cell::Scene::MakeSceneNode(&torus, &defaultMaterial);
@@ -172,7 +171,7 @@ int main(int argc, char *argv[])
     thirdTorus->AddChild(sphereNode);
 
     mainTorus->Scale    = math::vec3(2.0f);
-    mainTorus->Position = math::vec3(0.0f, 2.0f, 0.0f);
+    mainTorus->Position = math::vec3(0.0f, 2.5f, 0.0f);
     secondTorus->Scale  = math::vec3(0.65f);
     thirdTorus->Scale   = math::vec3(0.65f);
     sphereNode->Scale   = math::vec3(1.35f);

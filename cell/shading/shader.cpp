@@ -1,13 +1,13 @@
 #include "shader.h"
 
-#include <fstream>
-#include <string>
-
-#include <gl/glew.h>
+#include "shader_parser.h"
 
 #include <utility/logging/log.h>
 
-#include "shader_parser.h"
+#include <gl/glew.h>
+
+#include <fstream>
+#include <string>
 
 namespace Cell
 {
@@ -102,91 +102,86 @@ namespace Cell
 
     void Shader::SetInt(std::string location, int value)
     {
-        unsigned int loc = getUniformLocation(location);
+        int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniform1i(loc, value);
+        else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
     }
     void Shader::SetBool(std::string location, bool value)
     {
-        unsigned int loc = getUniformLocation(location);
+        int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniform1i(loc, (int)value);
+        else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
     }
     void Shader::SetFloat(std::string location, float value)
     {
-        unsigned int loc = getUniformLocation(location);
+        int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniform1f(loc, value);
+        else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
     }
     void Shader::SetVector(std::string location, math::vec2 value)
     {
-        unsigned int loc = getUniformLocation(location);
+        int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniform2fv(loc, 1, &value[0]);
+        else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
     }
     void Shader::SetVector(std::string location, math::vec3 value)
     {
-        unsigned int loc = getUniformLocation(location);
+        int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniform3fv(loc, 1, &value[0]);
+        else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
     }
     void Shader::SetVector(std::string location, math::vec4 value)
     {
-        unsigned int loc = getUniformLocation(location);
+        int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniform4fv(loc, 1, &value[0]);
+        else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
     }
     void Shader::SetMatrix(std::string location, math::mat2 value)
     {
-        unsigned int loc = getUniformLocation(location);
+        int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniformMatrix2fv(loc, 1, GL_FALSE, &value[0][0]);
+        else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
     }
     void Shader::SetMatrix(std::string location, math::mat3 value)
     {
-        unsigned int loc = getUniformLocation(location);
+        int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniformMatrix3fv(loc, 1, GL_FALSE, &value[0][0]);
+        else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
     }
     void Shader::SetMatrix(std::string location, math::mat4 value)
     {
-        unsigned int loc = getUniformLocation(location);
+        int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniformMatrix4fv(loc, 1, GL_FALSE, &value[0][0]);
+        else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
     }
 
-    std::string Shader::readShader(std::ifstream &file, std::string directory)
-    {
-        std::string source, line;
-        while (std::getline(file, line))
-        {
-            // NOTE(Joey): if we encounter an #include line, include other shader source
-            if (line.substr(0, 8) == "#include")
-            {
-                // TODO(Joey): write a trim function that trims any character (trim whitespace and ;)
-                std::string includePath = directory + "/" + line.substr(9);
-                std::ifstream includeFile(includePath);
-                if (includeFile.is_open())
-                {
-                    // NOTE(Joey): we recursively read the shader file to support any shader include depth
-                    source += readShader(includeFile, directory);
-                }
-                else
-                {
-                    Log::Message("Shader include: " + includePath + " failed to open.", LOG_ERROR);
-                }
-            }
-            else
-                source += line + "\n";
-        }
-        return source;
-    }
-
-    unsigned int Shader::getUniformLocation(std::string name)
+    int Shader::getUniformLocation(std::string name)
     {
         // TODO(Joey): read from uniform/attribute array as originally obtained from OpenGL
-        return glGetUniformLocation(m_ID, name.c_str());
-        //return 0;
+        for (unsigned int i = 0; i < Uniforms.size(); ++i)
+        {
+            if(Uniforms[i].Name == name)
+                return Uniforms[i].Location;
+        }
+        return -1;
     }
 
 

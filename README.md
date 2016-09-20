@@ -17,13 +17,20 @@ Feature List (complete)
 	1. Linear algebra: n-dimensional vectors, nxn-dimensional matrices, transformations, utility. 
 	2. Trigonemetry: unit circle utility functions, radian/degree conversions.
 
+0. Configure and enable debugging and logging utility.
+1. Shader object w/ custom pre-processor (defines, includes):
+	1. Include other shader files.
+	4. Parse active vertex attributes and uniform variables, retrieve location and store in shader object.
+	5. Easy to use state configuration per shader.
 3. Define Mesh object and encompassing Model class.
 	1. Define set of basic shape mesh generation; plane, cube, disk, sphere, cylinder, torus (donut)
+
+6. Create Render Buffer, draw commands encapsulated in push to render buffer w/ relevant state:
+	1. Define list of render push commands (material, mesh)
 	
 Feature List (work-in-progress)
 ------
-* Fully functioning (custom) math library (vectors, matrices, transformations, utility functions):
-	
+* Fully functioning (custom) math library (vectors, matrices, transformations, utility functions):	
 	3. Utility functions: lerp, step, smoothstep, smootherstep, clamp etc.
 	4. Convert math to compiler intrinsics (SSE2); SIMD applicable (keep SIMD in CPU registers w/ [__vectorcall](http://www.codersnotes.com/notes/maths-lib-2016/))?
 * Engine utility namespace:
@@ -33,19 +40,15 @@ Feature List (work-in-progress)
 	4. TrueType fonts to font character sheet (Use STB_TrueType).
 * Flexible OpenGL initialization.
 	
-Feature List (todo)
-------
-0. Configure and enable debugging and logging utility.
 1. Shader object w/ custom pre-processor (defines, includes):
-	1. Include other shader files.
 	2. Support multiple build paths.
-	3. Re-compilation during runtime?
-	4. Parse active vertex attributes and uniform variables, retrieve location and store in shader object.
-	5. Easy to use state configuration per shader.
+	3. Re-compilation during runtime?	
 2. Material pipeline; configure render state in materials, together with shader, uniform configuration and samplers used.
 	1. Allow for easy access of materials and storage; include set of default materials (default material, glass material etc.)
+
+Feature List (todo)
+------
 3. Define Mesh object and encompassing Model class.
-	1. Define set of basic shape mesh generation; plane, cube, disk, sphere, cylinder, torus (donut)
 	2. Load artist defined 3D models w/ Assimp (pre-process to custom binary format?).
 4. Add Camera functionality; add multiple camera variations: FPS, FlightSim, ArcBall.
 5. Flexible Framebuffer configuration utility:
@@ -67,6 +70,9 @@ Feature List (todo)
 	9. Per-object motion blur.
 	10. Number of lights optimization.
 8. Fully functioning PBR render pipeline.
+	1. Calculate diffuse integral and store into cubemap at any given location in the scene.
+	2. Prefilter environment map w/ integral and store into cubemap at same location as diffuse integral.
+	3. Pre-calculate active BRDF in 2D LUT (approach by Unreal for split sum approximation).
 9. Optimization:
 	1. Per-object Frustum culling.
 	2. Spatial partitioning.

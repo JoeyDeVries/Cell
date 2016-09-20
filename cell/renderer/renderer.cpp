@@ -8,6 +8,8 @@
 
 #include "../resources/resources.h"
 
+#include <utility/logging/log.h>
+
 #include <stack>
 
 namespace Cell
@@ -129,13 +131,59 @@ namespace Cell
             
             // TODO(Joey): only use shader and set per-shader specific uniforms
             // (ViewProjection) if state requires change; otherwise ignore.
+            // NOTE(Joey): set default uniforms that are always configured 
+            // regardless of shader configuration (see them as a default set of
+            // shader uniform variables always there).
             material->Shader->Use();
             material->Shader->SetMatrix("projection", m_Camera->Projection);
             material->Shader->SetMatrix("view",       m_Camera->View);
             material->Shader->SetMatrix("model",      renderCommands[i].Transform);
 
-            // NOTE(Joey): set material textures
-            material->Albedo->Bind(0);
+            // NOTE(Joey): bind/active uniform sampler/texture objects
+            auto *samplers = material->GetSamplerUniforms();
+            for (auto it = samplers->begin(); it != samplers->end(); ++it)
+            {
+                it->second.Value->Bind(it->second.Unit);
+            }
+
+            // NOTE(Joey): set uniform state of material
+            auto *uniforms = material->GetUniforms();
+            for (auto it = uniforms->begin(); it != uniforms->end(); ++it)
+            {
+                switch (it->second.Type)
+                {
+                case SHADER_TYPE_BOOL:
+                    material->Shader->SetBool(it->first, it->second.Bool);
+                    break;
+                case SHADER_TYPE_INT:
+                    material->Shader->SetInt(it->first, it->second.Int);
+                    break;
+                case SHADER_TYPE_FLOAT:
+                    material->Shader->SetFloat(it->first, it->second.Float);
+                    break;
+                case SHADER_TYPE_VEC2:
+                    material->Shader->SetVector(it->first, it->second.Vec2);
+                    break;
+                case SHADER_TYPE_VEC3:
+                    material->Shader->SetVector(it->first, it->second.Vec3);
+                    break;
+                case SHADER_TYPE_VEC4:
+                    material->Shader->SetVector(it->first, it->second.Vec4);
+                    break;
+                case SHADER_TYPE_MAT2:
+                    material->Shader->SetMatrix(it->first, it->second.Mat2);
+                    break;
+                case SHADER_TYPE_MAT3:
+                    material->Shader->SetMatrix(it->first, it->second.Mat3);
+                    break;
+                case SHADER_TYPE_MAT4:
+                    material->Shader->SetMatrix(it->first, it->second.Mat4);
+                    break;
+                default:
+                    Log::Message("Unrecognized Uniform type set.", LOG_ERROR);
+                    break;
+                }
+            }
 
             // NOTE(Joey): bind OpenGL render state
             glBindVertexArray(mesh->m_VAO);
