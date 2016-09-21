@@ -145,6 +145,7 @@
     <ClCompile Include="shading\shader_parser.cpp" />
     <ClCompile Include="shading\shader.cpp" />
     <ClCompile Include="shading\Texture.cpp" />
+    <ClCompile Include="shading\texture_cube.cpp" />
     <ClCompile Include="stb\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -173,6 +174,7 @@
     <ClInclude Include="shading\shader.h" />
     <ClInclude Include="shading\shading_types.h" />
     <ClInclude Include="shading\texture.h" />
+    <ClInclude Include="shading\texture_cube.h" />
     <ClInclude Include="stb\stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

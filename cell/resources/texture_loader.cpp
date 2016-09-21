@@ -16,6 +16,7 @@ namespace Cell
         // NOTE(Joey): flip textures on their y coordinate while loading
         stbi_set_flip_vertically_on_load(true);
 
+        // TODO(Joey): load float textures? stbi_loadf
         int width, height, nrComponents;
         unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0);
         if (data)
@@ -29,9 +30,9 @@ namespace Cell
                 dataFormat = GL_RGBA;
 
             if(Type == GL_TEXTURE_1D)
-                texture.Generate(width, dataFormat, data);
+                texture.Generate(width, dataFormat, GL_UNSIGNED_BYTE, data);
             else if (Type == GL_TEXTURE_2D)
-                texture.Generate(width, height, dataFormat, data);
+                texture.Generate(width, height, dataFormat, GL_UNSIGNED_BYTE, data);
             stbi_image_free(data);
         }
         else

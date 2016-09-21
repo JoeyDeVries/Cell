@@ -24,7 +24,6 @@ Feature List (complete)
 	5. Easy to use state configuration per shader.
 3. Define Mesh object and encompassing Model class.
 	1. Define set of basic shape mesh generation; plane, cube, disk, sphere, cylinder, torus (donut)
-
 6. Create Render Buffer, draw commands encapsulated in push to render buffer w/ relevant state:
 	1. Define list of render push commands (material, mesh)
 	

@@ -131,6 +131,9 @@ namespace Cell
             
             // TODO(Joey): only use shader and set per-shader specific uniforms
             // (ViewProjection) if state requires change; otherwise ignore.
+            // TODO(Joey): replace w/ uniform buffer objects for 'known' 
+            // uniforms that are shared among material runs (like projection/
+            // view); do a similar setup for lighting.
             // NOTE(Joey): set default uniforms that are always configured 
             // regardless of shader configuration (see them as a default set of
             // shader uniform variables always there).

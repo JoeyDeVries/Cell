@@ -16,11 +16,11 @@ namespace Cell
         //glDeleteTextures(1, &m_ID);
     }
 
-    void Texture::Generate(unsigned int width, GLenum dataFormat, unsigned char *data)
+    void Texture::Generate(unsigned int width, GLenum dataFormat, GLenum type, unsigned char *data)
     {
         assert(Type == GL_TEXTURE_1D);
         Bind();
-            glTexImage1D(Type, 0, Format, width, 0, dataFormat, GL_UNSIGNED_BYTE, data);
+            glTexImage1D(Type, 0, Format, width, 0, dataFormat, type, data);
             glTexParameteri(Type, GL_TEXTURE_MIN_FILTER, FilterMin);
             glTexParameteri(Type, GL_TEXTURE_MAG_FILTER, FilterMax);
             glTexParameteri(Type, GL_TEXTURE_WRAP_S, WrapS);
@@ -29,11 +29,11 @@ namespace Cell
         Unbind();
     }
 
-    void Texture::Generate(unsigned int width, unsigned int height, GLenum dataFormat, unsigned char *data)
+    void Texture::Generate(unsigned int width, unsigned int height, GLenum dataFormat, GLenum type, unsigned char *data)
     {
         assert(Type == GL_TEXTURE_2D);
         Bind();
-            glTexImage2D(Type, 0, Format, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
+            glTexImage2D(Type, 0, Format, width, height, 0, dataFormat, type, data);
             glTexParameteri(Type, GL_TEXTURE_MIN_FILTER, FilterMin);
             glTexParameteri(Type, GL_TEXTURE_MAG_FILTER, FilterMax);
             glTexParameteri(Type, GL_TEXTURE_WRAP_S, WrapS);
@@ -43,11 +43,11 @@ namespace Cell
         Unbind();
     }
 
-    void Texture::Generate(unsigned int width, unsigned int height, unsigned int depth, GLenum dataFormat, unsigned char *data)
+    void Texture::Generate(unsigned int width, unsigned int height, unsigned int depth, GLenum dataFormat, GLenum type, unsigned char *data)
     {
         assert(Type == GL_TEXTURE_3D);
         Bind();
-            glTexImage3D(Type, 0, Format, width, height, depth, 0, dataFormat, GL_UNSIGNED_BYTE, data);
+            glTexImage3D(Type, 0, Format, width, height, depth, 0, dataFormat, type, data);
             glTexParameteri(Type, GL_TEXTURE_MIN_FILTER, FilterMin);
             glTexParameteri(Type, GL_TEXTURE_MAG_FILTER, FilterMax);
             glTexParameteri(Type, GL_TEXTURE_WRAP_S, WrapS);
@@ -56,11 +56,6 @@ namespace Cell
             if (Mipmapping)
                 glGenerateMipmap(Type);
         Unbind();
-    }
-
-    void Texture::Generate(unsigned int width, unsigned int height, GLenum dataFormat, unsigned char **data)
-    {
-
     }
 
     void Texture::Bind(int unit)

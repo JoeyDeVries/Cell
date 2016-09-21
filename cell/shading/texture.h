@@ -30,13 +30,11 @@ namespace Cell
         ~Texture();
 
         // NOTE(Joey): 1D texture generation
-        void Generate(unsigned int width, GLenum dataFormat, unsigned char *data);
+        void Generate(unsigned int width, GLenum dataFormat, GLenum type, unsigned char *data);
         // NOTE(Joey): 2D texture generation
-        void Generate(unsigned int width, unsigned int height, GLenum dataFormat, unsigned char *data);
+        void Generate(unsigned int width, unsigned int height, GLenum dataFormat, GLenum type, unsigned char *data);
         // NOTE(Joey): 3D texture generation
-        void Generate(unsigned int width, unsigned int height, unsigned int depth, GLenum dataFormat, unsigned char *data);
-        // TODO(Joey): Cubemap texture generation
-        void Generate(unsigned int width, unsigned int height, GLenum dataFormat, unsigned char **data);
+        void Generate(unsigned int width, unsigned int height, unsigned int depth, GLenum dataFormat, GLenum type, unsigned char *data);
 
         void Bind(int unit = -1);
         void Unbind();
