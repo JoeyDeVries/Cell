@@ -35,6 +35,8 @@ namespace Cell
 
         void Use();
 
+        bool HasUniform(std::string name);
+
         void SetInt   (std::string location, int   value);
         void SetBool  (std::string location, bool  value);
         void SetFloat (std::string location, float value);
@@ -47,6 +49,7 @@ namespace Cell
         //void SetTexture1D();
         //void SetTexture2D();
         //void SetTexture3D();
+
     private:
         // NOTE(Joey): retrieves uniform location from pre-stored uniform locations and
         // reports an error if a non-uniform is set.

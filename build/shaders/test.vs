@@ -5,6 +5,7 @@ layout (location = 2) in vec3 normal;
 
 out vec3 color;
 out vec2 TexCoords;
+out vec3 WorldPos;
 out vec3 Normal;
 
 uniform mat4 projection;
@@ -18,7 +19,8 @@ void main()
 {
 	color = pos;
 	TexCoords = texCoords;
-	Normal = normal;
+	WorldPos = vec3(model * vec4(pos, 1.0f));
+	Normal = mat3(model) * normal;
 	
-	gl_Position =  projection * view * model * vec4(pos, 1.0f);
+	gl_Position =  projection * view * vec4(WorldPos, 1.0);
 }

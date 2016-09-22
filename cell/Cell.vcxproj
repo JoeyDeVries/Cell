@@ -125,6 +125,8 @@
     <ClCompile Include="camera\camera.cpp" />
     <ClCompile Include="camera\fly_camera.cpp" />
     <ClCompile Include="camera\camera_frustum.cpp" />
+    <ClCompile Include="lighting\directional_light.cpp" />
+    <ClCompile Include="lighting\point_light.cpp" />
     <ClCompile Include="mesh\circle.cpp" />
     <ClCompile Include="mesh\mesh.cpp" />
     <ClCompile Include="mesh\plane.cpp" />
@@ -152,6 +154,8 @@
     <ClInclude Include="camera\camera.h" />
     <ClInclude Include="camera\fly_camera.h" />
     <ClInclude Include="camera\camera_frustum.h" />
+    <ClInclude Include="lighting\directional_light.h" />
+    <ClInclude Include="lighting\point_light.h" />
     <ClInclude Include="mesh\circle.h" />
     <ClInclude Include="mesh\mesh.h" />
     <ClInclude Include="mesh\plane.h" />

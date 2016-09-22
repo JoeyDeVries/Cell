@@ -3,6 +3,8 @@
 
 #include <math/linear_algebra/matrix.h>
 
+#include "../lighting/point_light.h"
+#include "../lighting/directional_light.h"
 #include "command_buffer.h"
 
 namespace Cell
@@ -39,6 +41,10 @@ namespace Cell
         Camera       *m_Camera;
 
         //std::map<std::string, Material*> m_Materials;
+
+        // render state
+        std::vector<DirectionalLight*> m_DirectionalLights;
+        std::vector<PointLight*>       m_PointLights;
     public:
         Renderer();
 
@@ -52,6 +58,9 @@ namespace Cell
         void PushRender(Mesh *mesh, Material *material, math::mat4 transform);
         void PushRender(SceneNode *node);
         void PushRender(Scene *scene);
+
+        void PushLight(DirectionalLight *light);
+        void PushLight(PointLight       *light);
 
         //Material* NewMaterial(std::string name); // NOTE(Joey): will by default material when created
         //Material *GetMaterial(std::String name);

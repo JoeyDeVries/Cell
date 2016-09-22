@@ -127,6 +127,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="program.cpp" />
+    <ClCompile Include="scenes\pbr_test.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="scenes\pbr_test.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

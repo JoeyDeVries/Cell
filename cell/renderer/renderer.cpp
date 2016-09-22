@@ -111,6 +111,16 @@ namespace Cell
         PushRender(scene->GetRootNode());
     }
 
+    void Renderer::PushLight(DirectionalLight *light)
+    {
+        m_DirectionalLights.push_back(light);
+    }
+
+    void Renderer::PushLight(PointLight       *light)
+    {
+        m_PointLights.push_back(light);
+    }
+
     void Renderer::Render()
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -141,6 +151,30 @@ namespace Cell
             material->Shader->SetMatrix("projection", m_Camera->Projection);
             material->Shader->SetMatrix("view",       m_Camera->View);
             material->Shader->SetMatrix("model",      renderCommands[i].Transform);
+            // NOTE(Joey): lighting setup: also move to uniform buffer object 
+            // in future
+            for (unsigned int i = 0; i < m_DirectionalLights.size() && i < 4; ++i) // NOTE(Joey): no more than 4 directional lights
+            {
+                std::string uniformName = "DirLight" + std::to_string(i) + "_Dir";
+                if (material->Shader->HasUniform(uniformName))
+                {
+                    material->Shader->SetVector(uniformName, m_DirectionalLights[i]->Direction);
+                    material->Shader->SetVector("DirLight" + std::to_string(i) + "_Col", m_DirectionalLights[i]->Color);
+                }
+                else
+                    break; // NOTE(Joey): if DirLight2 doesn't exist we assume that DirLight3 and 4,5,6 should also exist; stop searching
+            }
+            for (unsigned int i = 0; i < m_PointLights.size() && i < 8; ++i) // NOTE(Joey): constrained to max 8 point lights for now in forward context
+            {
+                std::string uniformName = "PointLight" + std::to_string(i) + "_Pos";
+                if (material->Shader->HasUniform(uniformName))
+                {
+                    material->Shader->SetVector(uniformName, m_PointLights[i]->Position);
+                    material->Shader->SetVector("PointLight" + std::to_string(i) + "_Col", m_PointLights[i]->Color);
+                }
+                else
+                    break; // NOTE(Joey): if PointLight2 doesn't exist we assume that PointLight3 and 4,5,6 should also exist; stop searching
+            }
 
             // NOTE(Joey): bind/active uniform sampler/texture objects
             auto *samplers = material->GetSamplerUniforms();
@@ -205,6 +239,10 @@ namespace Cell
         // NOTE(Joey): clear the command buffer s.t. the next frame/call can
         // start from an empty slate again.
         m_CommandBuffer.Clear();
+
+        // NOTE(Joey): clear render state
+        m_DirectionalLights.clear();
+        m_PointLights.clear();
 
     }
 }

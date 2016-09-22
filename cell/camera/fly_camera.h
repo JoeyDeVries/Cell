@@ -20,9 +20,9 @@ namespace Cell
 		float Yaw;
 		float Pitch;
 	
-		float MovementSpeed   = 5.0f;
-		float MouseSensitivty = 0.1f;
-		float Damping         = 5.0f;
+		float MovementSpeed   = 10.0f;
+		float MouseSensitivty =  0.1f;
+		float Damping         =  5.0f;
 	private:
 		math::vec3 m_TargetPosition;
 		math::vec3 m_WorldUp;

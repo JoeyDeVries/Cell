@@ -19,6 +19,9 @@
 #include <cell/camera/fly_camera.h>
 #include <cell/scene/scene.h>
 #include <cell/renderer/renderer.h>
+#include <cell/lighting/point_light.h>
+
+#include "scenes/pbr_test.h"
 
 void APIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, void *userParam);
 
@@ -26,7 +29,7 @@ void framebufferSizeFunc(GLFWwindow *window, int width, int height);
 void keyFunc(GLFWwindow *window, int key, int scancode, int action, int mods);
 void mousePosFunc(GLFWwindow *window, double xpos, double ypos);
 
-Cell::FlyCamera camera(math::vec3(0.0f, 0.0f, 3.0f), math::vec3(0.0f, 0.0f, -1.0f));
+Cell::FlyCamera camera(math::vec3(0.0f, 0.0f, 5.0f), math::vec3(0.0f, 0.0f, -1.0f));
 float deltaTime     = 0.0f;
 float lastFrameTime = 0.0f;
 bool keysPressed[1024];
@@ -147,7 +150,8 @@ int main(int argc, char *argv[])
     Cell::Sphere sphere(64, 64);
     Cell::Torus torus(2.0f, 0.4f, 32, 32);
 
-    Cell::Texture testTexture = Cell::Resources::LoadTexture("test", "textures/checkerboard.png", GL_TEXTURE_2D, GL_RGB);
+    //Cell::Texture testTexture = Cell::Resources::LoadTexture("test", "textures/checkerboard.png", GL_TEXTURE_2D, GL_RGB);
+    Cell::Texture testTexture = Cell::Resources::LoadTexture("test", "textures/scuffed plastic/roughness.png", GL_TEXTURE_2D, GL_RGB);
 
     Log::Display();
     Log::Clear();
@@ -159,7 +163,6 @@ int main(int argc, char *argv[])
     Cell::Material defaultMaterial;
     defaultMaterial.Shader = &testShader;
     defaultMaterial.SetTexture("testTexture", &testTexture, 0);
-    defaultMaterial.SetFloat("_time", 0.1337f);
 
     Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, &defaultMaterial);
     Cell::SceneNode *secondTorus = Cell::Scene::MakeSceneNode(&torus, &defaultMaterial);
@@ -177,9 +180,13 @@ int main(int argc, char *argv[])
     sphereNode->Scale   = math::vec3(1.35f);
 
     Cell::SceneNode *floor = Cell::Scene::MakeSceneNode(&plane, &defaultMaterial);
-    floor->Rotation        = math::vec4(1.0f, 0.0f, 0.0f, math::Deg2Rad(90.0f));
+    floor->Rotation        = math::vec4(1.0f, 0.0f, 0.0f, math::Deg2Rad(-90.0f));
     floor->Scale           = math::vec3(10.0f);
     floor->Position        = math::vec3(0.0f, -2.0f, 0.0f);
+
+    // scene management:
+    //ScenePbrTest scene(&renderer, &camera);
+    //scene.Init();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -218,6 +225,11 @@ int main(int argc, char *argv[])
 
         renderer.PushRender(mainTorus);
         renderer.PushRender(floor);
+
+        Cell::PointLight light;
+        light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);
+        light.Color = math::vec3(1.0f, 0.7f, 0.7f);
+        renderer.PushLight(&light);
 
         // TODO(Joey): call Cell's renderer
         renderer.Render();

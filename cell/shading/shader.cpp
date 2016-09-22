@@ -100,6 +100,16 @@ namespace Cell
         glUseProgram(m_ID);
     }
 
+    bool Shader::HasUniform(std::string name)
+    {
+        for (unsigned int i = 0; i < Uniforms.size(); ++i)
+        {
+            if(Uniforms[i].Name == name)
+                return true;
+        }
+        return false;
+    }
+
     void Shader::SetInt(std::string location, int value)
     {
         int loc = getUniformLocation(location);
