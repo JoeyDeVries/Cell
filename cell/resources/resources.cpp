@@ -34,7 +34,7 @@ namespace Cell
 
     Texture& Resources::LoadTexture(std::string name, std::string path, GLenum type, GLenum format)
     {
-        Texture texture = TextureLoader::Load(path, type, format);
+        Texture texture = TextureLoader::LoadTexture(path, type, format);
 
         unsigned int id = SID(name);
         Resources::m_Textures[id] = texture;

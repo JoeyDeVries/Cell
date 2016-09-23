@@ -96,6 +96,9 @@
     <ClCompile Include="lighting\directional_light.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="scene\background.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ProjectLinkTest.h">
@@ -183,6 +186,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="lighting\directional_light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\background.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

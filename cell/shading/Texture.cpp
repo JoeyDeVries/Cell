@@ -6,7 +6,7 @@ namespace Cell
 {
     Texture::Texture()
     {
-        glGenTextures(1, &m_ID);
+        
     }
     Texture::~Texture()
     {
@@ -16,45 +16,69 @@ namespace Cell
         //glDeleteTextures(1, &m_ID);
     }
 
-    void Texture::Generate(unsigned int width, GLenum dataFormat, GLenum type, unsigned char *data)
+    void Texture::Generate(unsigned int width, GLenum format, GLenum type, unsigned char *data)
     {
-        assert(Type == GL_TEXTURE_1D);
+        glGenTextures(1, &m_ID);
+
+        Width = width;
+        Height = 0;
+        Depth = 0;
+        Format = format;
+        Type = type;
+
+        assert(Target == GL_TEXTURE_1D);
         Bind();
-            glTexImage1D(Type, 0, Format, width, 0, dataFormat, type, data);
-            glTexParameteri(Type, GL_TEXTURE_MIN_FILTER, FilterMin);
-            glTexParameteri(Type, GL_TEXTURE_MAG_FILTER, FilterMax);
-            glTexParameteri(Type, GL_TEXTURE_WRAP_S, WrapS);
+            glTexImage1D(Target, 0, format, width, 0, format, type, data);
+            glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, FilterMin);
+            glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, FilterMax);
+            glTexParameteri(Target, GL_TEXTURE_WRAP_S, WrapS);
             if(Mipmapping)
-                glGenerateMipmap(Type);
+                glGenerateMipmap(Target);
         Unbind();
     }
 
-    void Texture::Generate(unsigned int width, unsigned int height, GLenum dataFormat, GLenum type, unsigned char *data)
+    void Texture::Generate(unsigned int width, unsigned int height, GLenum format, GLenum type, unsigned char *data)
     {
-        assert(Type == GL_TEXTURE_2D);
+        glGenTextures(1, &m_ID);
+
+        Width = width;
+        Height = height;
+        Depth = 0;
+        Format = format;
+        Type = type;
+        
+        assert(Target == GL_TEXTURE_2D);
         Bind();
-            glTexImage2D(Type, 0, Format, width, height, 0, dataFormat, type, data);
-            glTexParameteri(Type, GL_TEXTURE_MIN_FILTER, FilterMin);
-            glTexParameteri(Type, GL_TEXTURE_MAG_FILTER, FilterMax);
-            glTexParameteri(Type, GL_TEXTURE_WRAP_S, WrapS);
-            glTexParameteri(Type, GL_TEXTURE_WRAP_T, WrapT);
+            glTexImage2D(Target, 0, format, width, height, 0, format, type, data);
+            glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, FilterMin);
+            glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, FilterMax);
+            glTexParameteri(Target, GL_TEXTURE_WRAP_S, WrapS);
+            glTexParameteri(Target, GL_TEXTURE_WRAP_T, WrapT);
             if (Mipmapping)
-                glGenerateMipmap(Type);
+                glGenerateMipmap(Target);
         Unbind();
     }
 
-    void Texture::Generate(unsigned int width, unsigned int height, unsigned int depth, GLenum dataFormat, GLenum type, unsigned char *data)
+    void Texture::Generate(unsigned int width, unsigned int height, unsigned int depth, GLenum format, GLenum type, unsigned char *data)
     {
-        assert(Type == GL_TEXTURE_3D);
+        glGenTextures(1, &m_ID);
+
+        Width = width;
+        Height = height;
+        Depth = depth;
+        Format = format;
+        Type = type;
+
+        assert(Target == GL_TEXTURE_3D);
         Bind();
-            glTexImage3D(Type, 0, Format, width, height, depth, 0, dataFormat, type, data);
-            glTexParameteri(Type, GL_TEXTURE_MIN_FILTER, FilterMin);
-            glTexParameteri(Type, GL_TEXTURE_MAG_FILTER, FilterMax);
-            glTexParameteri(Type, GL_TEXTURE_WRAP_S, WrapS);
-            glTexParameteri(Type, GL_TEXTURE_WRAP_T, WrapT);
-            glTexParameteri(Type, GL_TEXTURE_WRAP_R, WrapR);
+            glTexImage3D(Target, 0, format, width, height, depth, 0, format, type, data);
+            glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, FilterMin);
+            glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, FilterMax);
+            glTexParameteri(Target, GL_TEXTURE_WRAP_S, WrapS);
+            glTexParameteri(Target, GL_TEXTURE_WRAP_T, WrapT);
+            glTexParameteri(Target, GL_TEXTURE_WRAP_R, WrapR);
             if (Mipmapping)
-                glGenerateMipmap(Type);
+                glGenerateMipmap(Target);
         Unbind();
     }
 
@@ -62,11 +86,11 @@ namespace Cell
     {
         if(unit >= 0)
             glActiveTexture(GL_TEXTURE0 + unit);
-        glBindTexture(Type, m_ID);
+        glBindTexture(Target, m_ID);
     }
 
     void Texture::Unbind()
     {
-        glBindTexture(Type, 0);
+        glBindTexture(Target, 0);
     }
 }

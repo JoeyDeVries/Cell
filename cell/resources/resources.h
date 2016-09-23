@@ -11,6 +11,7 @@
 #include "../shading/shader.h"
 #include "../shading/material.h"
 #include "../shading/texture.h"
+#include "../shading/texture_cube.h"
 #include "../mesh/mesh.h"
 
 #include "shader_loader.h"
@@ -34,11 +35,6 @@ namespace Cell
         // TODO(Joey): we can't store meshes directly as loaded models often contain more than 1 mesh
         // so we have to store them directlry into a scene graph or intermediate structure.
         static std::map<unsigned int, Mesh>    m_Meshes;
-
-        // loader helpers
-        static ShaderLoader  m_ShaderLoader;
-        static TextureLoader m_TextureLoader;
-        static MeshLoader    m_MeshLoader;
     public:
 
     private:

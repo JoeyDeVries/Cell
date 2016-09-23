@@ -13,36 +13,31 @@ namespace Cell
     }
 
     // NOTE(Joey): cubemap texture generation
-    void TextureCube::Generate(unsigned int width, unsigned int height, GLenum dataFormat, GLenum type, unsigned char **data)
+    void TextureCube::GenerateFace(GLenum face, unsigned int width, unsigned int height, GLenum format, GLenum type, unsigned char *data)
     {
-        size_t stride = 1;
-        if(type == GL_SHORT || type == GL_UNSIGNED_SHORT || type == GL_HALF_FLOAT)
-            stride = 2;
-        if(type == GL_FLOAT) 
-            stride = 4;
+        // TODO(Joey): better way to generate cubemap (not per-face perhaps, but a total call?)
+        if(FaceWidth == 0)
+            glGenTextures(1, &m_ID);
+
+        FaceWidth = width;
+        FaceHeight = height;
+        Format = format;
+        Type = type;
 
         Bind();
-        for (unsigned int face = 0; face < 6; ++face)
-        {
-            size_t dataOffset = face * width * height * stride;
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, Format, width, height, 0, dataFormat, type, data + dataOffset);
-        }
+
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, FilterMin);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, FilterMax);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, WrapS);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, WrapT);
+
+        glTexImage2D(face, 0, format, width, height, 0, format, type, data);
     }
 
-    void TextureCube::SetMipLayer(unsigned int width, unsigned int height, GLenum dataFormat, GLenum type, unsigned int mipLevel, unsigned char **data)
+    void TextureCube::SetMipFace(GLenum face, unsigned int width, unsigned int height, GLenum format, GLenum type, unsigned int mipLevel, unsigned char *data)
     {
-        size_t stride = 1;
-        if (type == GL_SHORT || type == GL_UNSIGNED_SHORT || type == GL_HALF_FLOAT)
-            stride = 2;
-        if (type == GL_FLOAT)
-            stride = 4;
-
         Bind();
-        for (unsigned int face = 0; face < 6; ++face)
-        {
-            size_t dataOffset = face * width * height * stride;
-            glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, mipLevel, 0, 0, width, height, dataFormat, type, data + dataOffset);
-        }
+        glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, mipLevel, 0, 0, width, height, format, type, data);
     }
 
     void TextureCube::Bind(int unit)

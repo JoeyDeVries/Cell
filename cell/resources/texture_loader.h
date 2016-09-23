@@ -9,6 +9,7 @@
 namespace Cell
 {
     class Texture;
+    class TextureCube;
 
     /* NOTE(Joey):
 
@@ -18,9 +19,11 @@ namespace Cell
     class TextureLoader
     {
     public:
-        static Texture Load(std::string path, GLenum Type, GLenum internalFormat);
+        static Texture LoadTexture(std::string path, GLenum Type, GLenum internalFormat);
         // TODO(Joey): read and copy original cubemap order from GL specification
-        static Texture LoadCubemap(std::string top, std::string bottom, std::string left, std::string right, std::string front, std::string back);
+        static TextureCube LoadCubemap(std::string top, std::string bottom, std::string left, std::string right, std::string front, std::string back);
+        // NOTE(Joey): assumes default names for cubemap faces
+        static TextureCube LoadCubemap(std::string folder); 
     };
 }
 #endif

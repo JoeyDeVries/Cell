@@ -152,6 +152,7 @@ int main(int argc, char *argv[])
 
     //Cell::Texture testTexture = Cell::Resources::LoadTexture("test", "textures/checkerboard.png", GL_TEXTURE_2D, GL_RGB);
     Cell::Texture testTexture = Cell::Resources::LoadTexture("test", "textures/scuffed plastic/roughness.png", GL_TEXTURE_2D, GL_RGB);
+    Cell::TextureCube cubemap = Cell::TextureLoader::LoadCubemap("textures/backgrounds/yokohama/");
 
     Log::Display();
     Log::Clear();
