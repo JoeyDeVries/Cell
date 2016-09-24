@@ -72,21 +72,21 @@ namespace math
     // NOTE(Joey): step functions 
     // --------------------------
     template <typename T>
-    inline T step(T e0, T e1, T t)
+    inline T smoothstep(T e0, T e1, T x)
     {
-        return 0.0;
+        T result;
+        result = clamp01((x - e0) / (e1 - e0));
+        result = result * result * (3.0 - 2.0 * result);
+        return result;
     }
 
     template <typename T>
-    inline T smoothstep(T e0, T e1, T t)
+    inline T smootherstep(T e0, T e1, T x)
     {
-        return 0.0;
-    }
-
-    template <typename T>
-    inline T smootherstep(T e0, T e1, T t)
-    {
-        return 0.0;
+        T result;
+        result = clamp01((x - e0) / (e1 - e0));
+        result = (result*result*result) * (result * (result * 6.0 - 15.0) + 10.0);
+        return result;
     }
 
     // NOTE(Joey):

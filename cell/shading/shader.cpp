@@ -1,7 +1,5 @@
 #include "shader.h"
 
-#include "shader_parser.h"
-
 #include <utility/logging/log.h>
 
 #include <gl/glew.h>

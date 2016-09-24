@@ -16,6 +16,7 @@ Feature List (complete)
 * Fully functioning (custom) math library (vectors, matrices, transformations, utility functions):
 	1. Linear algebra: n-dimensional vectors, nxn-dimensional matrices, transformations, utility. 
 	2. Trigonemetry: unit circle utility functions, radian/degree conversions.
+	3. Utility functions: lerp, step, smoothstep, smootherstep, clamp etc.
 
 0. Configure and enable debugging and logging utility.
 1. Shader object w/ custom pre-processor (defines, includes):
@@ -29,9 +30,6 @@ Feature List (complete)
 	
 Feature List (work-in-progress)
 ------
-* Fully functioning (custom) math library (vectors, matrices, transformations, utility functions):	
-	3. Utility functions: lerp, step, smoothstep, smootherstep, clamp etc.
-	4. Convert math to compiler intrinsics (SSE2); SIMD applicable (keep SIMD in CPU registers w/ [__vectorcall](http://www.codersnotes.com/notes/maths-lib-2016/))?
 * Engine utility namespace:
 	1. Random numbers.
 	2. Logging.
