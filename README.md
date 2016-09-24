@@ -52,7 +52,6 @@ Feature List (todo)
 	1. Including CubeMap use and generation (reflection probes, point shadow-maps)
 	2. Post-processing.
 6. Create Render Buffer, draw commands encapsulated in push to render buffer w/ relevant state:
-	1. Define list of render push commands (material, mesh)
 	2. Collect all render commands and seperate by pass.
 	3. Sort render commands per pass; execute (batch where necessary) to minimize state changes.
 7. Configure Deferred rendering pipeline:

@@ -23,11 +23,10 @@ namespace Cell
     {
     private:
         // shader state
+        Shader *m_Shader;
         std::map<std::string, UniformValue>        m_Uniforms;
         std::map<std::string, UniformValueSampler> m_SamplerUniforms; // NOTE(Joey): process samplers differently 
     public:
-        Shader *Shader;
-
         math::vec4 Color = math::vec4(1.0f);
 
         // depth state
@@ -51,6 +50,12 @@ namespace Cell
     private:
       
     public:
+        Material();
+        Material(Shader *shader);
+
+        Shader* GetShader();
+        void    SetShader(Shader *shader);
+
         void SetBool(std::string name,        bool value);
         void SetInt(std::string name,         int value);
         void SetFloat(std::string name,       float value);

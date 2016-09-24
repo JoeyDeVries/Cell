@@ -3,6 +3,26 @@
 namespace Cell
 {
     // ------------------------------------------------------------------------
+    Material::Material()
+    {
+
+    }
+    // ------------------------------------------------------------------------
+    Material::Material(Shader *shader)
+    {
+        m_Shader = shader;
+    }
+    // ------------------------------------------------------------------------
+    Shader* Material::GetShader()
+    {
+        return m_Shader;
+    }
+    // ------------------------------------------------------------------------
+    void Material::SetShader(Shader *shader)
+    {
+        m_Shader = shader;
+    }
+    // ------------------------------------------------------------------------
     void Material::SetBool(std::string name, bool value)
     {
         m_Uniforms[name].Type = SHADER_TYPE_BOOL;
@@ -42,10 +62,10 @@ namespace Cell
             break;
         }
         
-        if (Shader)
+        if (m_Shader)
         {
-            Shader->Use();
-            Shader->SetInt(name, unit);
+            m_Shader->Use();
+            m_Shader->SetInt(name, unit);
         }
     }
     // ------------------------------------------------------------------------

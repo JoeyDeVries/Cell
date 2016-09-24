@@ -40,13 +40,15 @@ namespace Cell
 
         Camera       *m_Camera;
 
-        //std::map<std::string, Material*> m_Materials;
-
         // render state
         std::vector<DirectionalLight*> m_DirectionalLights;
         std::vector<PointLight*>       m_PointLights;
+        Mesh     *m_LightMesh;
+        Material *m_LightMaterial;
+
     public:
         Renderer();
+        ~Renderer();
 
         void Init();
 
@@ -55,15 +57,12 @@ namespace Cell
         Camera* GetCamera();
         void    SetCamera(Camera *camera);
 
-        void PushRender(Mesh *mesh, Material *material, math::mat4 transform);
+        void PushRender(Mesh *mesh, Material *material, math::mat4 transform = math::mat4());
         void PushRender(SceneNode *node);
         void PushRender(Scene *scene);
 
         void PushLight(DirectionalLight *light);
-        void PushLight(PointLight       *light);
-
-        //Material* NewMaterial(std::string name); // NOTE(Joey): will by default material when created
-        //Material *GetMaterial(std::String name);
+        void PushLight(PointLight       *light, bool render = false);        
 
         void Render();
 

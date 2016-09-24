@@ -137,6 +137,7 @@ int main(int argc, char *argv[])
 
     // NOTE(Joey): custom test code
     Cell::Renderer renderer;
+    renderer.Init();
     renderer.SetCamera(&camera);
 
     math::mat3 test;
@@ -165,7 +166,7 @@ int main(int argc, char *argv[])
 
     // NOTE(Joey): set up default scene w/ materials
     Cell::Material defaultMaterial;
-    defaultMaterial.Shader = testShader;
+    defaultMaterial.SetShader(testShader);
     defaultMaterial.SetTexture("testTexture", testTexture, 0);
 
     Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, &defaultMaterial);
@@ -238,7 +239,7 @@ int main(int argc, char *argv[])
         Cell::PointLight light;
         light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);
         light.Color = math::vec3(1.0f, 0.7f, 0.7f);
-        renderer.PushLight(&light);
+        renderer.PushLight(&light, true);
 
         // TODO(Joey): call Cell's renderer
         renderer.Render();
