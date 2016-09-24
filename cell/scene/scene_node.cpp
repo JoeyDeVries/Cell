@@ -8,11 +8,12 @@
 
 namespace Cell
 {
+    // ------------------------------------------------------------------------
     SceneNode::SceneNode()
     {
 
     }
-
+    // ------------------------------------------------------------------------
     SceneNode::~SceneNode()
     {
         //// NOTE(Joey): traverse the linked list and for any node pointer that
@@ -23,34 +24,34 @@ namespace Cell
         //}
         // no longer necessary as we're now storing the children in a vector
     }
-
+    // ------------------------------------------------------------------------
     void SceneNode::AddChild(SceneNode *node)
     {
         node->m_Parent = this;
         m_Children.push_back(node);
     }
-
+    // ------------------------------------------------------------------------
     std::vector<SceneNode*> SceneNode::GetChildren()
     {
         return m_Children;
     }
-
+    // ------------------------------------------------------------------------
     unsigned int SceneNode::GetChildCount()
     {
         return m_Children.size();
     }
-
+    // ------------------------------------------------------------------------
     SceneNode *SceneNode::GetChild(unsigned int index)
     {
         assert(index < m_Children.size());
         return m_Children[index];
     }
-
+    // ------------------------------------------------------------------------
     SceneNode *SceneNode::GetParent()
     {
         return m_Parent;
     }
-
+    // ------------------------------------------------------------------------
     // NOTE(Joey): calculates the transform from its position, scale and 
     // rotation property. As the renderer generates the final transforms only 
     // once while filling the command buffer it is okay to calculate this on 

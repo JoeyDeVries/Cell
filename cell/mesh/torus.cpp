@@ -6,6 +6,7 @@
 
 namespace Cell
 {
+    // ------------------------------------------------------------------------
     // NOTE(Joey): resources:
     // http://www.paulsprojects.net/tutorials/simplebump/simplebump.html
     // http://www.gamedev.net/topic/334335-geometric-shapessolids-generation/?whichpage=1%25EF%25BF%25BD

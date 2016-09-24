@@ -2,6 +2,7 @@
 
 namespace Cell
 {
+    // ------------------------------------------------------------------------
     Plane::Plane(unsigned int xSegments, unsigned int ySegments)
     {
         bool oddRow = false;

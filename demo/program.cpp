@@ -125,6 +125,7 @@ int main(int argc, char *argv[])
     // NOTE(Joey): configure default OpenGL state
     Log::Message("Configuring OpenGL");
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);

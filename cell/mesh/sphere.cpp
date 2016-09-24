@@ -5,6 +5,7 @@
 
 namespace Cell
 {
+    // ------------------------------------------------------------------------
     // NOTE(Joey): parametric equation for a sphere F(u,v, r) = [cos(u)*sin(v)*r, cos(v), sin(u)*sin(v)*r]
     // where u is longitude [0, 2PI] and v is lattitude [0, PI] (note the difference in their range)
     Sphere::Sphere(unsigned int xSegments, unsigned int ySegments)

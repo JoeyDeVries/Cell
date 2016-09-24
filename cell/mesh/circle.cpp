@@ -5,6 +5,7 @@
 
 namespace Cell
 {
+    // ------------------------------------------------------------------------
     Circle::Circle(unsigned int edgeSegments, unsigned int ringSegments)
     {
         for (unsigned int y = 0; y <= ringSegments; ++y)

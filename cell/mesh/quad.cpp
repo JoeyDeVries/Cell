@@ -2,6 +2,7 @@
 
 namespace Cell
 {
+    // ------------------------------------------------------------------------
     Quad::Quad()
     {
         Positions =
@@ -21,7 +22,7 @@ namespace Cell
 
         Finalize();
     }
-
+    // ------------------------------------------------------------------------
     Quad::Quad(float width, float height)
     {
         Positions =

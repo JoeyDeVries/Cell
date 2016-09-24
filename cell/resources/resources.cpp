@@ -10,6 +10,7 @@ namespace Cell
     std::map<unsigned int, TextureCube> Resources::m_TexturesCube = std::map<unsigned int, TextureCube>();
     std::map<unsigned int, Mesh> Resources::m_Meshes              = std::map<unsigned int, Mesh>();
 
+    // ------------------------------------------------------------------------
     // TODO(Joey): think of a proper way to call or default initalize w/ this function.
     // Perhaps a global Cell.h header file, that also hosts a global Cell::Init() function
     // to completely initalize all required Cell modules (like this here)?

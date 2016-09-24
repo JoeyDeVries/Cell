@@ -4,21 +4,25 @@
 
 namespace Cell
 {
+    // ------------------------------------------------------------------------
     Mesh::Mesh()
     {
 
     }
+    // ------------------------------------------------------------------------
     Mesh::Mesh(std::vector<math::vec3> positions, std::vector<unsigned int> indices)
     {
         Positions = positions;
         Indices = indices;
     }
+    // ------------------------------------------------------------------------
     Mesh::Mesh(std::vector<math::vec3> positions, std::vector<math::vec2> uv, std::vector<unsigned int> indices)
     {
         Positions = positions;
         UV = uv;
         Indices = indices;
     }
+    // ------------------------------------------------------------------------
     Mesh::Mesh(std::vector<math::vec3> positions, std::vector<math::vec2> uv, std::vector<math::vec3> normals, std::vector<unsigned int> indices)
     {
         Positions = positions;
@@ -26,6 +30,7 @@ namespace Cell
         Normals = normals;
         Indices = indices;
     }
+    // ------------------------------------------------------------------------
     Mesh::Mesh(std::vector<math::vec3> positions, std::vector<math::vec2> uv, std::vector<math::vec3> normals, std::vector<math::vec3> tangents, std::vector<math::vec3> bitangents, std::vector<unsigned int> indices)
     {
         Positions = positions;
@@ -35,28 +40,28 @@ namespace Cell
         Bitangents = bitangents;
         Indices = indices;
     }
-
+    // ------------------------------------------------------------------------
     void Mesh::SetPositions(std::vector<math::vec3> positions)
     {
         Positions = positions;
     }
-
+    // ------------------------------------------------------------------------
     void Mesh::SetUVs(std::vector<math::vec2> uv)
     {
         UV = uv;
     }
-
+    // ------------------------------------------------------------------------
     void Mesh::SetNormals(std::vector<math::vec3> normals)
     {
         Normals = normals;
     }
-
+    // ------------------------------------------------------------------------
     void Mesh::SetTangents(std::vector<math::vec3> tangents, std::vector<math::vec3> bitangents)
     {
         Tangents = tangents;
         Bitangents = bitangents;
     }
-
+    // ------------------------------------------------------------------------
     void Mesh::Finalize(bool interleaved)
     {
         // NOTE(Joey): initialize object IDs if not configured before
@@ -216,12 +221,12 @@ namespace Cell
         }
         glBindVertexArray(0);
     }
-
+    // ------------------------------------------------------------------------
     void Mesh::calculateNormals(bool smooth)
     {
         // TODO(Joey): manually calculate the normals of each vertex
     }
-
+    // ------------------------------------------------------------------------
     void Mesh::calculateTangents()
     {
         // TODO(Joey): walk overall the vertices and calculate the tangent space vectors manually

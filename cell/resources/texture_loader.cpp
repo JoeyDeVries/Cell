@@ -9,6 +9,7 @@
 
 namespace Cell
 {
+    // ------------------------------------------------------------------------
     Texture TextureLoader::LoadTexture(std::string path, GLenum Type, GLenum internalFormat)
     {
         Texture texture;
@@ -45,7 +46,7 @@ namespace Cell
         }
         return texture;
     }
-
+    // ------------------------------------------------------------------------
     TextureCube TextureLoader::LoadTextureCube(std::string top, std::string bottom, std::string left, std::string right, std::string front, std::string back)
     {
         TextureCube texture;
@@ -82,7 +83,7 @@ namespace Cell
 
         return texture;
     }
-
+    // ------------------------------------------------------------------------
     TextureCube TextureLoader::LoadTextureCube(std::string folder)
     {
         return TextureLoader::LoadTextureCube(folder + "right.jpg",

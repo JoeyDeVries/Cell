@@ -9,6 +9,7 @@
 
 namespace Cell
 {
+    // ------------------------------------------------------------------------
     Background::Background()
     {
         m_Material         = new Material;
@@ -22,19 +23,19 @@ namespace Cell
 
         m_Material->DepthCompare = GL_LEQUAL;
     }
-
+    // ------------------------------------------------------------------------
     Background::~Background()
     {
         delete m_Material;
         delete m_Mesh;
     }
-
+    // ------------------------------------------------------------------------
     void Background::SetCubemap(TextureCube *cubemap)
     {
         m_CubeMap = cubemap;
         m_Material->SetTextureCube("background", m_CubeMap, 0);
     }
-
+    // ------------------------------------------------------------------------
     void Background::Render(Renderer *renderer)
     {
         renderer->PushRender(m_Mesh, m_Material, math::mat4());

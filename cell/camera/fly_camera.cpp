@@ -6,6 +6,7 @@
 
 namespace Cell
 {
+    // ------------------------------------------------------------------------
     FlyCamera::FlyCamera(math::vec3 position, math::vec3 forward, math::vec3 up)
     {
         Position = position; 
@@ -17,18 +18,17 @@ namespace Cell
         m_WorldUp = Up;
         m_TargetPosition = position;
     }
-
+    // ------------------------------------------------------------------------
     void FlyCamera::Update(float dt)
     {
         // NOTE(Joey): slowly interpolate to target position each frame given some damping factor.
         // This gives smooth camera movement that fades out the closer we are to our target.
-        //Position = math::lerp(Position, m_TargetPosition, dt * Damping);
         Position = math::lerp(Position, m_TargetPosition, math::clamp01(dt * Damping));
 
         // NOTE(Joey): calculate the new view matrix
         View = math::lookAt(Position, Position + Forward, Up);
     }
-
+    // ------------------------------------------------------------------------
     void FlyCamera::InputKey(float dt, CAMERA_MOVEMENT direction)
     {
         float speed = MovementSpeed * dt;
@@ -42,7 +42,7 @@ namespace Cell
         else if (direction == CAMERA_RIGHT)
             m_TargetPosition = m_TargetPosition + Right*speed;
     }
-
+    // ------------------------------------------------------------------------
     void FlyCamera::InputMouse(float deltaX, float deltaY)
     {
         float xmovement = deltaX * MouseSensitivty;

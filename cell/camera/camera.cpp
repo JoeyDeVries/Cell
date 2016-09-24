@@ -6,6 +6,7 @@
 
 namespace Cell
 {
+    // ------------------------------------------------------------------------
     void Camera::SetPerspective(float fov, float aspect, float near, float far)
     {
         m_Perspective = true;
@@ -13,13 +14,13 @@ namespace Cell
         m_Fov = fov;
         m_Aspect = aspect;
     }
-
+    // ------------------------------------------------------------------------
     void Camera::SetOrthographic(float left, float right, float top, float bottom, float near, float far)
     {
         m_Perspective = false;
         Projection = math::orthographic(left, right, top, bottom, near, far);
     }
-
+    // ------------------------------------------------------------------------
     float Camera::FrustumHeightAtDistance(float distance)
     {
         if (m_Perspective)
@@ -31,7 +32,7 @@ namespace Cell
             return Frustum.Top.Distance;
         }
     }
-
+    // ------------------------------------------------------------------------
     float Camera::DistanceAtFrustumHeight(float frustumHeight)
     {
         if (m_Perspective)

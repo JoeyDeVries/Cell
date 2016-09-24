@@ -14,11 +14,12 @@
 
 namespace Cell
 {
+    // ------------------------------------------------------------------------
     Renderer::Renderer()
     {
 
     }
-
+    // ------------------------------------------------------------------------
     void Renderer::Init()
     {
         /* NOTE(Joey):
@@ -59,29 +60,29 @@ namespace Cell
         */
         // [...]
     }
-
+    // ------------------------------------------------------------------------
     void Renderer::SetTarget()
     {
 
     }
-
+    // ------------------------------------------------------------------------
     Camera* Renderer::GetCamera()
     {
         return m_Camera;
     }
-
+    // ------------------------------------------------------------------------
     void Renderer::SetCamera(Camera *camera)
     {
         m_Camera = camera;
     }
-
+    // ------------------------------------------------------------------------
     void Renderer::PushRender(Mesh *mesh, Material *material, math::mat4 transform)
     {
         // NOTE(Joey): don't render right away but push to the command buffer
         // for later rendering.
         m_CommandBuffer.Push(mesh, material, transform);
     }
-
+    // ------------------------------------------------------------------------
     void Renderer::PushRender(SceneNode *node)
     {
         // NOTE(Joey): traverse through all the scene nodes and for each node:
@@ -103,24 +104,24 @@ namespace Cell
                 childStack.push(child->GetChild(i));
         }
     }
-
+    // ------------------------------------------------------------------------
     void Renderer::PushRender(Scene *scene)
     {
         // NOTE(Joey): propagate scene to SceneNode push call from its top
         // root node, effectively pushing the entire scene.
         PushRender(scene->GetRootNode());
     }
-
+    // ------------------------------------------------------------------------
     void Renderer::PushLight(DirectionalLight *light)
     {
         m_DirectionalLights.push_back(light);
     }
-
+    // ------------------------------------------------------------------------
     void Renderer::PushLight(PointLight       *light)
     {
         m_PointLights.push_back(light);
     }
-
+    // ------------------------------------------------------------------------
     void Renderer::Render()
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

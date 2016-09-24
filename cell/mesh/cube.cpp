@@ -2,6 +2,7 @@
 
 namespace Cell
 {
+    // ------------------------------------------------------------------------
     Cube::Cube()
     {
         Positions = std::vector<math::vec3> {

@@ -4,6 +4,7 @@
 
 namespace Cell
 {
+    // ------------------------------------------------------------------------
     Shader ShaderLoader::Load(std::string vsPath, std::string fsPath)
     {
         std::ifstream vsFile, fsFile;
@@ -30,7 +31,7 @@ namespace Cell
 
         return shader;
     }
-
+    // ------------------------------------------------------------------------
     std::string ShaderLoader::readShader(std::ifstream &file, std::string directory)
     {
         std::string source, line;
