@@ -10,6 +10,7 @@
 #include "shading_types.h"
 #include "shader.h"
 #include "texture.h"
+#include "texture_cube.h"
 
 namespace Cell
 {
@@ -50,16 +51,17 @@ namespace Cell
     private:
       
     public:
-        void SetBool(std::string name,    bool value);
-        void SetInt(std::string name,     int value);
-        void SetFloat(std::string name,   float value);
-        void SetTexture(std::string name, Texture *value, unsigned int unit = 0);
-        void SetVector(std::string name,  math::vec2 value);
-        void SetVector(std::string name,  math::vec3 value);
-        void SetVector(std::string name,  math::vec4 value);
-        void SetMatrix(std::string name,  math::mat2 value);
-        void SetMatrix(std::string name,  math::mat3 value);
-        void SetMatrix(std::string name,  math::mat4 value);
+        void SetBool(std::string name,        bool value);
+        void SetInt(std::string name,         int value);
+        void SetFloat(std::string name,       float value);
+        void SetTexture(std::string name,     Texture *value, unsigned int unit = 0);
+        void SetTextureCube(std::string name, TextureCube *value, unsigned int unit = 0);
+        void SetVector(std::string name,      math::vec2 value);
+        void SetVector(std::string name,      math::vec3 value);
+        void SetVector(std::string name,      math::vec4 value);
+        void SetMatrix(std::string name,      math::mat2 value);
+        void SetMatrix(std::string name,      math::mat3 value);
+        void SetMatrix(std::string name,      math::mat4 value);
 
         std::map<std::string, UniformValue>*        GetUniforms();
         std::map<std::string, UniformValueSampler>* GetSamplerUniforms();

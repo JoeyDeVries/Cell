@@ -20,8 +20,8 @@ namespace Cell
     }
     void Material::SetTexture(std::string name, Texture *value, unsigned int unit)
     {
-        m_SamplerUniforms[name].Unit = unit;
-        m_SamplerUniforms[name].Value = value;
+        m_SamplerUniforms[name].Unit    = unit;
+        m_SamplerUniforms[name].Texture = value;
 
         switch (value->Type)
         {
@@ -45,6 +45,14 @@ namespace Cell
             Shader->SetInt(name, unit);
         }
     }
+
+    void Material::SetTextureCube(std::string name, TextureCube *value, unsigned int unit)
+    {
+        m_SamplerUniforms[name].Unit        = unit;
+        m_SamplerUniforms[name].Type        = SHADER_TYPE_SAMPLERCUBE;
+        m_SamplerUniforms[name].TextureCube = value;
+    }
+
     void Material::SetVector(std::string name, math::vec2 value)
     {
         m_Uniforms[name].Type = SHADER_TYPE_VEC2;

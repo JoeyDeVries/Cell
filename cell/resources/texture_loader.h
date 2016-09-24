@@ -21,9 +21,9 @@ namespace Cell
     public:
         static Texture LoadTexture(std::string path, GLenum Type, GLenum internalFormat);
         // TODO(Joey): read and copy original cubemap order from GL specification
-        static TextureCube LoadCubemap(std::string top, std::string bottom, std::string left, std::string right, std::string front, std::string back);
+        static TextureCube LoadTextureCube(std::string top, std::string bottom, std::string left, std::string right, std::string front, std::string back);
         // NOTE(Joey): assumes default names for cubemap faces
-        static TextureCube LoadCubemap(std::string folder); 
+        static TextureCube LoadTextureCube(std::string folder);
     };
 }
 #endif

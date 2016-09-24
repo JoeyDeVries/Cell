@@ -128,6 +128,7 @@
     <ClCompile Include="lighting\directional_light.cpp" />
     <ClCompile Include="lighting\point_light.cpp" />
     <ClCompile Include="mesh\circle.cpp" />
+    <ClCompile Include="mesh\cube.cpp" />
     <ClCompile Include="mesh\mesh.cpp" />
     <ClCompile Include="mesh\plane.cpp" />
     <ClCompile Include="mesh\quad.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="lighting\directional_light.h" />
     <ClInclude Include="lighting\point_light.h" />
     <ClInclude Include="mesh\circle.h" />
+    <ClInclude Include="mesh\cube.h" />
     <ClInclude Include="mesh\mesh.h" />
     <ClInclude Include="mesh\plane.h" />
     <ClInclude Include="mesh\quad.h" />

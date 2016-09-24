@@ -6,6 +6,7 @@
 namespace Cell
 {
     class Texture;
+    class TextureCube;
 
     enum SHADER_TYPE
     {
@@ -60,7 +61,8 @@ namespace Cell
         unsigned int Unit;
         union 
         {
-            Texture   *Value;
+            Texture     *Texture;
+            TextureCube *TextureCube;
         };
 
         UniformValueSampler() {}

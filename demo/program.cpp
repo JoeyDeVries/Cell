@@ -15,9 +15,11 @@
 #include <cell/mesh/sphere.h>
 #include <cell/mesh/line_strip.h>
 #include <cell/mesh/torus.h>
+#include <cell/mesh/cube.h>
 #include <utility/logging/log.h>
 #include <cell/camera/fly_camera.h>
 #include <cell/scene/scene.h>
+#include <cell/scene/background.h>
 #include <cell/renderer/renderer.h>
 #include <cell/lighting/point_light.h>
 
@@ -152,7 +154,7 @@ int main(int argc, char *argv[])
 
     //Cell::Texture testTexture = Cell::Resources::LoadTexture("test", "textures/checkerboard.png", GL_TEXTURE_2D, GL_RGB);
     Cell::Texture testTexture = Cell::Resources::LoadTexture("test", "textures/scuffed plastic/roughness.png", GL_TEXTURE_2D, GL_RGB);
-    Cell::TextureCube cubemap = Cell::TextureLoader::LoadCubemap("textures/backgrounds/yokohama/");
+    Cell::TextureCube cubemap = Cell::Resources::LoadTextureCube("yokohama night", "textures/backgrounds/yokohama night/");
 
     Log::Display();
     Log::Clear();
@@ -184,6 +186,9 @@ int main(int argc, char *argv[])
     floor->Rotation        = math::vec4(1.0f, 0.0f, 0.0f, math::Deg2Rad(-90.0f));
     floor->Scale           = math::vec3(10.0f);
     floor->Position        = math::vec3(0.0f, -2.0f, 0.0f);
+
+    Cell::Background background;
+    background.SetCubemap(&cubemap);
 
     // scene management:
     //ScenePbrTest scene(&renderer, &camera);
@@ -226,6 +231,8 @@ int main(int argc, char *argv[])
 
         renderer.PushRender(mainTorus);
         renderer.PushRender(floor);
+
+        background.Render(&renderer);
 
         Cell::PointLight light;
         light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);

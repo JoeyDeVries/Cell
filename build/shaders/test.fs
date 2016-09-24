@@ -20,6 +20,8 @@ void main()
 	
 	float lambert = max(dot(N, L), 0.0);
 	vec3 diffuse = texture(testTexture, TexCoords).rgb * lambert * PointLight0_Col;
+
+	diffuse += vec3(0.025);// ambient
 	
 	FragColor = vec4(diffuse, 1.0);
 	// FragColor = vec4(TexCoords, 0.0f, 1.0f);

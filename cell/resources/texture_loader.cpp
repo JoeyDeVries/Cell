@@ -46,9 +46,12 @@ namespace Cell
         return texture;
     }
 
-    TextureCube TextureLoader::LoadCubemap(std::string top, std::string bottom, std::string left, std::string right, std::string front, std::string back)
+    TextureCube TextureLoader::LoadTextureCube(std::string top, std::string bottom, std::string left, std::string right, std::string front, std::string back)
     {
         TextureCube texture;
+
+        // NOTE(Joey): disable y flip on cubemaps
+        stbi_set_flip_vertically_on_load(false);
 
         std::vector<std::string> faces = { top, bottom, left, right, front, back };
         for (unsigned int i = 0; i < faces.size(); ++i)
@@ -80,14 +83,14 @@ namespace Cell
         return texture;
     }
 
-    TextureCube TextureLoader::LoadCubemap(std::string folder)
+    TextureCube TextureLoader::LoadTextureCube(std::string folder)
     {
-        return TextureLoader::LoadCubemap(folder + "top.jpg",
-                                          folder + "bottom.jpg",
-                                          folder + "left.jpg",
-                                          folder + "right.jpg",
-                                          folder + "front.jpg",
-                                          folder + "back.jpg");
+        return TextureLoader::LoadTextureCube(folder + "right.jpg",
+                                              folder + "left.jpg",
+                                              folder + "top.jpg",
+                                              folder + "bottom.jpg",
+                                              folder + "front.jpg",
+                                              folder + "back.jpg");
     }
 
 }

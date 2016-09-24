@@ -138,6 +138,10 @@ namespace Cell
         {
             Material *material = renderCommands[i].Material;
             Mesh     *mesh     = renderCommands[i].Mesh;
+
+            // NOTE(Joey): set global GL state based on material
+            // TODO(Joey): only change these if different value, and sort by major state changes
+            glDepthFunc(material->DepthCompare);
             
             // TODO(Joey): only use shader and set per-shader specific uniforms
             // (ViewProjection) if state requires change; otherwise ignore.
@@ -173,14 +177,17 @@ namespace Cell
                     material->Shader->SetVector("PointLight" + std::to_string(i) + "_Col", m_PointLights[i]->Color);
                 }
                 else
-                    break; // NOTE(Joey): if PointLight2 doesn't exist we assume that PointLight3 and 4,5,6 should also exist; stop searching
+                    break; // NOTE(Joey): if PointLight2 doesn't exist we assume that PointLight3 and 4,5,6 also don't exist; stop searching
             }
 
             // NOTE(Joey): bind/active uniform sampler/texture objects
             auto *samplers = material->GetSamplerUniforms();
             for (auto it = samplers->begin(); it != samplers->end(); ++it)
             {
-                it->second.Value->Bind(it->second.Unit);
+                if(it->second.Type == SHADER_TYPE_SAMPLERCUBE)
+                    it->second.TextureCube->Bind(it->second.Unit);
+                else
+                    it->second.Texture->Bind(it->second.Unit);
             }
 
             // NOTE(Joey): set uniform state of material

@@ -30,11 +30,12 @@ namespace Cell
     {
     private:
         // NOTE(Joey): we index all resources w/ a hashed string ID
-        static std::map<unsigned int, Shader>  m_Shaders;
-        static std::map<unsigned int, Texture> m_Textures;
+        static std::map<unsigned int, Shader>      m_Shaders;
+        static std::map<unsigned int, Texture>     m_Textures;
+        static std::map<unsigned int, TextureCube> m_TexturesCube;
         // TODO(Joey): we can't store meshes directly as loaded models often contain more than 1 mesh
         // so we have to store them directlry into a scene graph or intermediate structure.
-        static std::map<unsigned int, Mesh>    m_Meshes;
+        static std::map<unsigned int, Mesh>        m_Meshes;
     public:
 
     private:
@@ -43,9 +44,10 @@ namespace Cell
     public:
         static void Init();
 
-        static Shader&  LoadShader(std::string name, std::string vsPath, std::string fsPath);
-        static Texture& LoadTexture(std::string name, std::string path, GLenum type = GL_TEXTURE_2D, GLenum format = GL_RGBA);
-        static Mesh&    LoadMesh(std::string name, std::string path);
+        static Shader&      LoadShader(std::string name, std::string vsPath, std::string fsPath);
+        static Texture&     LoadTexture(std::string name, std::string path, GLenum type = GL_TEXTURE_2D, GLenum format = GL_RGBA);
+        static TextureCube& LoadTextureCube(std::string name, std::string folder);
+        static Mesh&        LoadMesh(std::string name, std::string path);
     };
 }
 
