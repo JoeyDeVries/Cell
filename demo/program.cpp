@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
     int linktest = SuperCalcFunc(1337);
     Log::Message("Testing Cell Linkage: " + std::to_string(linktest), LOG_DEBUG);
 
-    Cell::Shader testShader = Cell::Resources::LoadShader("test", "shaders/test.vs", "shaders/test.fs");
+    Cell::Shader *testShader = Cell::Resources::LoadShader("test", "shaders/test.vs", "shaders/test.fs");
     Cell::Quad quad;
     Cell::LineStrip lineStrip(0.5f, 32);
     Cell::Plane plane(16, 16);
@@ -153,8 +153,8 @@ int main(int argc, char *argv[])
     Cell::Torus torus(2.0f, 0.4f, 32, 32);
 
     //Cell::Texture testTexture = Cell::Resources::LoadTexture("test", "textures/checkerboard.png", GL_TEXTURE_2D, GL_RGB);
-    Cell::Texture testTexture = Cell::Resources::LoadTexture("test", "textures/scuffed plastic/roughness.png", GL_TEXTURE_2D, GL_RGB);
-    Cell::TextureCube cubemap = Cell::Resources::LoadTextureCube("yokohama night", "textures/backgrounds/yokohama night/");
+    Cell::Texture     *testTexture = Cell::Resources::LoadTexture("test", "textures/scuffed plastic/roughness.png", GL_TEXTURE_2D, GL_RGB);
+    Cell::TextureCube *cubemap     = Cell::Resources::LoadTextureCube("yokohama night", "textures/backgrounds/yokohama night/");
 
     Log::Display();
     Log::Clear();
@@ -164,8 +164,8 @@ int main(int argc, char *argv[])
 
     // NOTE(Joey): set up default scene w/ materials
     Cell::Material defaultMaterial;
-    defaultMaterial.Shader = &testShader;
-    defaultMaterial.SetTexture("testTexture", &testTexture, 0);
+    defaultMaterial.Shader = testShader;
+    defaultMaterial.SetTexture("testTexture", testTexture, 0);
 
     Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, &defaultMaterial);
     Cell::SceneNode *secondTorus = Cell::Scene::MakeSceneNode(&torus, &defaultMaterial);
@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
     floor->Position        = math::vec3(0.0f, -2.0f, 0.0f);
 
     Cell::Background background;
-    background.SetCubemap(&cubemap);
+    background.SetCubemap(cubemap);
 
     // scene management:
     //ScenePbrTest scene(&renderer, &camera);

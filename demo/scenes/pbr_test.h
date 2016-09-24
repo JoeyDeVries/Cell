@@ -15,10 +15,10 @@ private:
     Cell::Material m_PBRIrradianceMaterial;
     Cell::Material m_PBRPrefilterMaterial;
     Cell::Material m_PBRBRDFIntegrateMaterial;
-    Cell::Shader   m_PbrShader;
-    Cell::Shader   m_PbrIrradianceShader;
-    Cell::Shader   m_PbrPrefilterShader;
-    Cell::Shader   m_PbrBRDFintegrateShader;
+    Cell::Shader   *m_PbrShader;
+    Cell::Shader   *m_PbrIrradianceShader;
+    Cell::Shader   *m_PbrPrefilterShader;
+    Cell::Shader   *m_PbrBRDFintegrateShader;
 
 public:
     // NOTE(Joey): pass over relevant data per scene: dependancy injection

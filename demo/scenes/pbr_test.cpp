@@ -12,7 +12,7 @@ ScenePbrTest::ScenePbrTest(Cell::Renderer *renderer, Cell::Camera *camera)
      m_Camera = camera;
 
      m_PbrShader = Cell::Resources::LoadShader("pbr", "shaders/pbr.vs", "shaders/pbr.frag");
-     m_PBRMaterial.Shader = &m_PbrShader;
+     m_PBRMaterial.Shader = m_PbrShader;
 }
 
 ScenePbrTest::~ScenePbrTest()

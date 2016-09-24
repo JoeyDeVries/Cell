@@ -4,10 +4,12 @@
 
 namespace Cell
 {
+    // ------------------------------------------------------------------------
     Texture::Texture()
     {
         
     }
+    // ------------------------------------------------------------------------
     Texture::~Texture()
     {
         // TODO(Joey): this doesn't work as texture objects get frequently passed around over the
@@ -15,7 +17,7 @@ namespace Cell
         // over a single container, or do explicit texture cleanup.
         //glDeleteTextures(1, &m_ID);
     }
-
+    // ------------------------------------------------------------------------
     void Texture::Generate(unsigned int width, GLenum format, GLenum type, unsigned char *data)
     {
         glGenTextures(1, &m_ID);
@@ -36,7 +38,7 @@ namespace Cell
                 glGenerateMipmap(Target);
         Unbind();
     }
-
+    // ------------------------------------------------------------------------
     void Texture::Generate(unsigned int width, unsigned int height, GLenum format, GLenum type, unsigned char *data)
     {
         glGenTextures(1, &m_ID);
@@ -58,7 +60,7 @@ namespace Cell
                 glGenerateMipmap(Target);
         Unbind();
     }
-
+    // ------------------------------------------------------------------------
     void Texture::Generate(unsigned int width, unsigned int height, unsigned int depth, GLenum format, GLenum type, unsigned char *data)
     {
         glGenTextures(1, &m_ID);
@@ -81,14 +83,14 @@ namespace Cell
                 glGenerateMipmap(Target);
         Unbind();
     }
-
+    // ------------------------------------------------------------------------
     void Texture::Bind(int unit)
     {
         if(unit >= 0)
             glActiveTexture(GL_TEXTURE0 + unit);
         glBindTexture(Target, m_ID);
     }
-
+    // ------------------------------------------------------------------------
     void Texture::Unbind()
     {
         glBindTexture(Target, 0);

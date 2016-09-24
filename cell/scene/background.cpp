@@ -12,9 +12,9 @@ namespace Cell
     Background::Background()
     {
         m_Material         = new Material;
-        m_Shader           = &Resources::LoadShader("background", "shaders/background.vs", "shaders/background.fs");
+        m_Shader           = Resources::LoadShader("background", "shaders/background.vs", "shaders/background.fs");
         m_Material->Shader = m_Shader;
-        m_CubeMap          = &Resources::LoadTextureCube("yokohama", "textures/backgrounds/yokohama/");
+        m_CubeMap          = Resources::LoadTextureCube("yokohama", "textures/backgrounds/yokohama/");
         m_Mesh             = new Cell::Cube;
 
         // default material configuration
