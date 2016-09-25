@@ -29,7 +29,7 @@ namespace Cell
 
         void SetCubemap(TextureCube *cubemap);
 
-        void Render(Renderer *renderer);
+        void PushRender(Renderer *renderer);
     };
 }
 

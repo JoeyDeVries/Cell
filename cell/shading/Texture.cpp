@@ -18,19 +18,20 @@ namespace Cell
         //glDeleteTextures(1, &m_ID);
     }
     // ------------------------------------------------------------------------
-    void Texture::Generate(unsigned int width, GLenum format, GLenum type, unsigned char *data)
+    void Texture::Generate(unsigned int width, GLenum internalFormat, GLenum format, GLenum type, unsigned char *data)
     {
-        glGenTextures(1, &m_ID);
+        glGenTextures(1, &ID);
 
-        Width = width;
-        Height = 0;
-        Depth = 0;
-        Format = format;
-        Type = type;
+        Width          = width;
+        Height         = 0;
+        Depth          = 0;
+        InternalFormat = internalFormat;
+        Format         = format;
+        Type           = type;
 
         assert(Target == GL_TEXTURE_1D);
         Bind();
-            glTexImage1D(Target, 0, format, width, 0, format, type, data);
+            glTexImage1D(Target, 0, internalFormat, width, 0, format, type, data);
             glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, FilterMin);
             glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, FilterMax);
             glTexParameteri(Target, GL_TEXTURE_WRAP_S, WrapS);
@@ -39,19 +40,20 @@ namespace Cell
         Unbind();
     }
     // ------------------------------------------------------------------------
-    void Texture::Generate(unsigned int width, unsigned int height, GLenum format, GLenum type, unsigned char *data)
+    void Texture::Generate(unsigned int width, unsigned int height, GLenum internalFormat, GLenum format, GLenum type, unsigned char *data)
     {
-        glGenTextures(1, &m_ID);
+        glGenTextures(1, &ID);
 
-        Width = width;
-        Height = height;
-        Depth = 0;
-        Format = format;
-        Type = type;
+        Width          = width;
+        Height         = height;
+        Depth          = 0;
+        InternalFormat = internalFormat;
+        Format         = format;
+        Type           = type;
         
         assert(Target == GL_TEXTURE_2D);
         Bind();
-            glTexImage2D(Target, 0, format, width, height, 0, format, type, data);
+            glTexImage2D(Target, 0, internalFormat, width, height, 0, format, type, data);
             glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, FilterMin);
             glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, FilterMax);
             glTexParameteri(Target, GL_TEXTURE_WRAP_S, WrapS);
@@ -61,19 +63,20 @@ namespace Cell
         Unbind();
     }
     // ------------------------------------------------------------------------
-    void Texture::Generate(unsigned int width, unsigned int height, unsigned int depth, GLenum format, GLenum type, unsigned char *data)
+    void Texture::Generate(unsigned int width, unsigned int height, unsigned int depth, GLenum internalFormat, GLenum format, GLenum type, unsigned char *data)
     {
-        glGenTextures(1, &m_ID);
+        glGenTextures(1, &ID);
 
-        Width = width;
-        Height = height;
-        Depth = depth;
-        Format = format;
-        Type = type;
+        Width          = width;
+        Height         = height;
+        Depth          = depth;
+        InternalFormat = internalFormat;
+        Format         = format;
+        Type           = type;
 
         assert(Target == GL_TEXTURE_3D);
         Bind();
-            glTexImage3D(Target, 0, format, width, height, depth, 0, format, type, data);
+            glTexImage3D(Target, 0, internalFormat, width, height, depth, 0, format, type, data);
             glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, FilterMin);
             glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, FilterMax);
             glTexParameteri(Target, GL_TEXTURE_WRAP_S, WrapS);
@@ -88,7 +91,7 @@ namespace Cell
     {
         if(unit >= 0)
             glActiveTexture(GL_TEXTURE0 + unit);
-        glBindTexture(Target, m_ID);
+        glBindTexture(Target, ID);
     }
     // ------------------------------------------------------------------------
     void Texture::Unbind()

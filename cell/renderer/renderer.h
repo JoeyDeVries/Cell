@@ -24,6 +24,7 @@ namespace Cell
     class Scene;
     class SceneNode;
     class Camera;
+    class RenderTarget;
 
     /* NOTE(Joey):
 
@@ -52,7 +53,7 @@ namespace Cell
 
         void Init();
 
-        void SetTarget(/*FrameBuffer/RenderTexture target*/);
+        void SetTarget(RenderTarget *renderTarget, GLenum target = GL_TEXTURE_2D);
 
         Camera* GetCamera();
         void    SetCamera(Camera *camera);
@@ -64,7 +65,7 @@ namespace Cell
         void PushLight(DirectionalLight *light);
         void PushLight(PointLight       *light, bool render = false);        
 
-        void Render();
+        void RenderPushedCommands();
 
         //void RenderToCubemap(SceneNode *root, Cubemap *cubemap, unsigned int faceWidth, unsigned int faceHeight, math::vec3 position);
     };

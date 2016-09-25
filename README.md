@@ -42,18 +42,17 @@ Feature List (work-in-progress)
 	3. Re-compilation during runtime?	
 2. Material pipeline; configure render state in materials, together with shader, uniform configuration and samplers used.
 	1. Allow for easy access of materials and storage; include set of default materials (default material, glass material etc.)
-
-Feature List (todo)
-------
-3. Define Mesh object and encompassing Model class.
-	2. Load artist defined 3D models w/ Assimp (pre-process to custom binary format?).
-4. Add Camera functionality; add multiple camera variations: FPS, FlightSim, ArcBall.
 5. Flexible Framebuffer configuration utility:
 	1. Including CubeMap use and generation (reflection probes, point shadow-maps)
 	2. Post-processing.
 6. Create Render Buffer, draw commands encapsulated in push to render buffer w/ relevant state:
 	2. Collect all render commands and seperate by pass.
 	3. Sort render commands per pass; execute (batch where necessary) to minimize state changes.
+Feature List (todo)
+------
+3. Define Mesh object and encompassing Model class.
+	2. Load artist defined 3D models w/ Assimp (pre-process to custom binary format?).
+4. Add Camera functionality; add multiple camera variations: FPS, FlightSim, ArcBall.
 7. Configure Deferred rendering pipeline:
 	1. Set up light architecture; types of light, material interaction, volume calculation.
 	2. Configure render buffer w/ geometry pass.

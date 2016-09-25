@@ -1,11 +1,13 @@
 #include "material.h"
 
+#include "../resources/resources.h"
+
 namespace Cell
 {
     // ------------------------------------------------------------------------
     Material::Material()
     {
-
+        m_Shader = Resources::GetShader("standard");
     }
     // ------------------------------------------------------------------------
     Material::Material(Shader *shader)

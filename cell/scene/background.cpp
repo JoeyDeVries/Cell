@@ -36,7 +36,7 @@ namespace Cell
         m_Material->SetTextureCube("background", m_CubeMap, 0);
     }
     // ------------------------------------------------------------------------
-    void Background::Render(Renderer *renderer)
+    void Background::PushRender(Renderer *renderer)
     {
         renderer->PushRender(m_Mesh, m_Material, math::mat4());
     }

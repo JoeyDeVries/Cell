@@ -22,6 +22,7 @@
 #include <cell/scene/background.h>
 #include <cell/renderer/renderer.h>
 #include <cell/lighting/point_light.h>
+#include <cell/renderer/render_target.h>
 
 #include "scenes/pbr_test.h"
 
@@ -140,17 +141,11 @@ int main(int argc, char *argv[])
     renderer.Init();
     renderer.SetCamera(&camera);
 
-    math::mat3 test;
-    math::vec3 test2;
-    // NOTE(Joey): check if linking Cell static library worked properly
-    int linktest = SuperCalcFunc(1337);
-    Log::Message("Testing Cell Linkage: " + std::to_string(linktest), LOG_DEBUG);
-
     Cell::Shader *testShader = Cell::Resources::LoadShader("test", "shaders/test.vs", "shaders/test.fs");
-    Cell::Quad quad;
-    Cell::LineStrip lineStrip(0.5f, 32);
+    //Cell::Quad quad;
+    //Cell::LineStrip lineStrip(0.5f, 32);
     Cell::Plane plane(16, 16);
-    Cell::Circle circle(16,16);
+    //Cell::Circle circle(16,16);
     Cell::Sphere sphere(64, 64);
     Cell::Torus torus(2.0f, 0.4f, 32, 32);
 
@@ -192,6 +187,8 @@ int main(int argc, char *argv[])
     Cell::Background background;
     background.SetCubemap(cubemap);
 
+    Cell::RenderTarget target(512, 512, GL_UNSIGNED_BYTE, 2, true);
+
     // scene management:
     //ScenePbrTest scene(&renderer, &camera);
     //scene.Init();
@@ -225,7 +222,7 @@ int main(int argc, char *argv[])
         // NOTE(Joey): update render logic
         camera.Update(deltaTime);
 
-        // TODO(Joey): fill the renderer's command buffer with interesting polygons
+        // NOTE(Joey): fill the renderer's command buffer with default test scene
         mainTorus->Rotation   = math::vec4(math::vec3(1.0f, 0.0f, 0.0f), glfwGetTime());
         secondTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
         thirdTorus->Rotation  = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
@@ -234,15 +231,15 @@ int main(int argc, char *argv[])
         renderer.PushRender(mainTorus);
         renderer.PushRender(floor);
 
-        background.Render(&renderer);
+        background.PushRender(&renderer);
 
         Cell::PointLight light;
         light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);
         light.Color = math::vec3(1.0f, 0.7f, 0.7f);
         renderer.PushLight(&light, true);
 
-        // TODO(Joey): call Cell's renderer
-        renderer.Render();
+        // NOTE(Joey): request Cell to render all currently pushed commands
+        renderer.RenderPushedCommands();
    
         // NOTE(Joey): display log messages / diagnostics
         Log::Display();

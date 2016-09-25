@@ -33,9 +33,9 @@ namespace Cell
                 format = GL_RGBA;
 
             if(Type == GL_TEXTURE_1D)
-                texture.Generate(width, format, GL_UNSIGNED_BYTE, data);
+                texture.Generate(width, format, format, GL_UNSIGNED_BYTE, data);
             else if (Type == GL_TEXTURE_2D)
-                texture.Generate(width, height, format, GL_UNSIGNED_BYTE, data);
+                texture.Generate(width, height, format, format, GL_UNSIGNED_BYTE, data);
             stbi_image_free(data);
         }
         else

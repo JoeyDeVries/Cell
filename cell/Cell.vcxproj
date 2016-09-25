@@ -138,6 +138,7 @@
     <ClCompile Include="ProjectLinkTest.cpp" />
     <ClCompile Include="renderer\command_buffer.cpp" />
     <ClCompile Include="renderer\renderer.cpp" />
+    <ClCompile Include="renderer\render_target.cpp" />
     <ClCompile Include="resources\mesh_loader.cpp" />
     <ClCompile Include="resources\resources.cpp" />
     <ClCompile Include="resources\shader_loader.cpp" />
@@ -169,6 +170,7 @@
     <ClInclude Include="renderer\command_buffer.h" />
     <ClInclude Include="renderer\renderer.h" />
     <ClInclude Include="renderer\render_command.h" />
+    <ClInclude Include="renderer\render_target.h" />
     <ClInclude Include="resources\mesh_loader.h" />
     <ClInclude Include="resources\resources.h" />
     <ClInclude Include="resources\shader_loader.h" />

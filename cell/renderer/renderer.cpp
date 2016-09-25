@@ -1,5 +1,6 @@
 #include "renderer.h"
 
+#include "render_target.h"
 #include "../mesh/mesh.h"
 #include "../shading/material.h"
 #include "../scene/scene.h"
@@ -73,7 +74,7 @@ namespace Cell
         
     }
     // ------------------------------------------------------------------------
-    void Renderer::SetTarget()
+    void Renderer::SetTarget(RenderTarget *renderTarget, GLenum target)
     {
 
     }
@@ -139,7 +140,7 @@ namespace Cell
         }
     }
     // ------------------------------------------------------------------------
-    void Renderer::Render()
+    void Renderer::RenderPushedCommands()
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
