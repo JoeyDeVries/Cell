@@ -48,6 +48,9 @@ namespace Cell
         Material *m_LightMaterial;
         std::vector<RenderTarget*>  m_RenderTargetsCustom;
         RenderTarget               *m_CurrentRenderTargetCustom = nullptr;
+
+        // (dynamic) cubemap generation
+        unsigned int m_FramebufferCubemap; // NOTE(Joey): cubemap render targets are a very specific case so we can do these without abstractions.
     public:
         Renderer();
         ~Renderer();
@@ -68,8 +71,9 @@ namespace Cell
 
         void RenderPushedCommands();
 
-        //void RenderToCubemap(SceneNode *root, Cubemap *cubemap, unsigned int faceWidth, unsigned int faceHeight, math::vec3 position);
+        void RenderToCubemap(SceneNode *scene, TextureCube *target, unsigned int faceWidth, unsigned int faceHeight, math::vec3 position, unsigned int mipLevel = 0);
     private:
+        void renderCustomCommand(RenderCommand *command, Camera *camera);
         RenderTarget *getCurrentRenderTarget();
     };
 }

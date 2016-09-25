@@ -52,6 +52,9 @@ namespace Cell
         // NOTE(Joey): accept input from windowing library and respond appropriately based on camera type
         virtual void InputKey(float dt, CAMERA_MOVEMENT direction) = 0;
         virtual void InputMouse(float deltaX, float deltaY) = 0;
+
+        // TODO(Joey): move calculate view-basis to here, with as input the forward
+        //void UpdateViewBasis(math::vec3 forward);
         
         void SetPerspective(float fov, float aspect, float near, float far);
         void SetOrthographic(float left, float right, float top, float bottom, float near, float far);

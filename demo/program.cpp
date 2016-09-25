@@ -190,10 +190,15 @@ int main(int argc, char *argv[])
     Cell::RenderTarget target(512, 512, GL_UNSIGNED_BYTE, 2, true);
 
     defaultMaterial.SetTexture("testTexture", target.GetColorTexture(0), 0);
+    //defaultMaterial.SetTexture("testTexture", testTexture, 0);
 
     // scene management:
     //ScenePbrTest scene(&renderer, &camera);
     //scene.Init();
+
+    Cell::TextureCube cubez;
+    cubez.DefaultInitialize(1024, 1024, GL_RGB, GL_FLOAT);
+   
 
     while (!glfwWindowShouldClose(window))
     {
@@ -243,6 +248,9 @@ int main(int argc, char *argv[])
         light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);
         light.Color = math::vec3(1.0f, 0.7f, 0.7f);
         renderer.PushLight(&light, true);
+
+        // NOTE(Joey): also generate dynamic cubemap from scene
+        //renderer.RenderToCubemap(mainTorus, cubemap, 1024, 1024, math::vec3(0.0f), 0);
 
         // NOTE(Joey): request Cell to render all currently pushed commands
         renderer.RenderPushedCommands();
