@@ -48,6 +48,7 @@ Feature List (work-in-progress)
 6. Create Render Buffer, draw commands encapsulated in push to render buffer w/ relevant state:
 	2. Collect all render commands and seperate by pass.
 	3. Sort render commands per pass; execute (batch where necessary) to minimize state changes.
+	
 Feature List (todo)
 ------
 3. Define Mesh object and encompassing Model class.
