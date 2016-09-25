@@ -16,6 +16,7 @@ namespace Cell
     public:
         unsigned int Width;
         unsigned int Height;
+        GLenum       Type;
 
         bool HasDepthAndStencil;
     private:

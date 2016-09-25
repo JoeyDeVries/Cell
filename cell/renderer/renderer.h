@@ -46,7 +46,8 @@ namespace Cell
         std::vector<PointLight*>       m_PointLights;
         Mesh     *m_LightMesh;
         Material *m_LightMaterial;
-
+        std::vector<RenderTarget*>  m_RenderTargetsCustom;
+        RenderTarget               *m_CurrentRenderTargetCustom = nullptr;
     public:
         Renderer();
         ~Renderer();
@@ -68,6 +69,8 @@ namespace Cell
         void RenderPushedCommands();
 
         //void RenderToCubemap(SceneNode *root, Cubemap *cubemap, unsigned int faceWidth, unsigned int faceHeight, math::vec3 position);
+    private:
+        RenderTarget *getCurrentRenderTarget();
     };
 }
 

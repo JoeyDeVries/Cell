@@ -18,13 +18,23 @@ namespace Cell
         Clear();
     }
     // ------------------------------------------------------------------------
-    void CommandBuffer::Push(Mesh *mesh, Material *material, math::mat4 transform)
+    void CommandBuffer::Push(RenderTarget *target, Mesh *mesh, Material *material, math::mat4 transform)
     {
         RenderCommand command = {};
         command.Mesh      = mesh;
         command.Material  = material;
         command.Transform = transform;
-        m_RenderCommands.push_back(command);
+
+        // NOTE(Joey): check if this render target has been pushed before, if
+        // so add to vector, otherwise create new vector with this render
+        // target.
+        if(m_RenderCommands.find(target) != m_RenderCommands.end())
+            m_RenderCommands[target].push_back(command);
+        else
+        {
+            m_RenderCommands[target] = std::vector<RenderCommand>();
+            m_RenderCommands[target].push_back(command);
+        }
     }
     // ------------------------------------------------------------------------
     void CommandBuffer::Clear()
@@ -45,8 +55,8 @@ namespace Cell
         //std::sort(m_RenderCommands.begin(), m_RenderCommands.end(), customRenderSort);
     }
     // ------------------------------------------------------------------------
-    std::vector<RenderCommand> CommandBuffer::GetRenderCommands()
+    std::vector<RenderCommand> CommandBuffer::GetRenderCommands(RenderTarget *target)
     {
-        return m_RenderCommands;
+        return m_RenderCommands[target];
     }
 };

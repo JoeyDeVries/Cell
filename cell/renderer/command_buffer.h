@@ -1,16 +1,18 @@
 #ifndef CELL_RENDERER_COMMAND_BUFFER_H
 #define CELL_RENDERER_COMMAND_BUFFER_H
 
-#include <vector>
+#include "render_command.h"
 
 #include <math/linear_algebra/matrix.h>
 
-#include "render_command.h"
+#include <map>
+#include <vector>
 
 namespace Cell
 {
     class Mesh;
     class Material;
+    class RenderTarget;
 
     /* NOTE(Joey):
 
@@ -25,7 +27,7 @@ namespace Cell
     public:
 
     private:
-        std::vector<RenderCommand> m_RenderCommands;
+        std::map<RenderTarget*, std::vector<RenderCommand>> m_RenderCommands;
 
     public:
         CommandBuffer();
@@ -33,7 +35,7 @@ namespace Cell
         
         // NOTE(Joey): pushes render state relevant to a single render call
         // to the command buffer.
-        void Push(Mesh *mesh, Material *material, math::mat4 transform);
+        void Push(RenderTarget *target, Mesh *mesh, Material *material, math::mat4 transform);
 
         // NOTE(Joey): clears the command buffer; usually done after issuing
         // all the stored render commands.
@@ -45,7 +47,7 @@ namespace Cell
         // NOTE(Joey): returns the list of render commands. For minimizing
         // state changes it is advised to first call Sort() before retrieving
         // and issuing the render commands.
-        std::vector<RenderCommand> GetRenderCommands();
+        std::vector<RenderCommand> GetRenderCommands(RenderTarget *target);
     };
 }
 

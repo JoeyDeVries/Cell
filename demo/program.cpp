@@ -189,6 +189,8 @@ int main(int argc, char *argv[])
 
     Cell::RenderTarget target(512, 512, GL_UNSIGNED_BYTE, 2, true);
 
+    defaultMaterial.SetTexture("testTexture", target.GetColorTexture(0), 0);
+
     // scene management:
     //ScenePbrTest scene(&renderer, &camera);
     //scene.Init();
@@ -232,6 +234,10 @@ int main(int argc, char *argv[])
         renderer.PushRender(floor);
 
         background.PushRender(&renderer);
+
+        renderer.SetTarget(&target);
+        background.PushRender(&renderer);
+        renderer.SetTarget(nullptr);
 
         Cell::PointLight light;
         light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);

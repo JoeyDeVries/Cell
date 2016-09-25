@@ -37,11 +37,12 @@ namespace Cell
         math::vec3 Up       = math::vec3(0.0f, 1.0f,  0.0f);
         math::vec3 Right    = math::vec3(1.0f, 0.0f,  0.0f);
 
+        float FOV;
+        float Aspect;
+        bool  Perspective;
+
         CameraFrustum Frustum;
     private:
-        float m_Fov;
-        float m_Aspect;
-        bool  m_Perspective;
     public:
         Camera() { } // NOTE(Joey): y do I need to make constructor here; See CameraFrustum note.
 

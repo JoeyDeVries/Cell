@@ -7,7 +7,7 @@ namespace Cell
     // ------------------------------------------------------------------------
     Material::Material()
     {
-        m_Shader = Resources::GetShader("standard");
+        //m_Shader = Resources::GetShader("standard");
     }
     // ------------------------------------------------------------------------
     Material::Material(Shader *shader)

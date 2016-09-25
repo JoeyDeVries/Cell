@@ -7,6 +7,10 @@ namespace Cell
     // ------------------------------------------------------------------------
     RenderTarget::RenderTarget(unsigned int width, unsigned int height, GLenum type, unsigned int nrColorAttachments, bool depthAndStencil)
     {
+        Width  = width;
+        Height = height;
+        Type   = type;
+
         glGenFramebuffers(1, &m_ID);
         glBindFramebuffer(GL_FRAMEBUFFER, m_ID);
         // NOTE(Joey): generate all color attachments
@@ -46,7 +50,7 @@ namespace Cell
     // ------------------------------------------------------------------------
     Texture* RenderTarget::GetColorTexture(unsigned int index)
     {
-        if(m_ColorAttachments.size() < index)
+        if(index < m_ColorAttachments.size())
             return &m_ColorAttachments[index];
         else
         {
