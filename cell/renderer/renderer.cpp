@@ -76,14 +76,7 @@ namespace Cell
         // NOTE(Joey): initialize render items
         // TODO(Joey): do we want to abstract this or not? as it is very specific.
         glGenFramebuffers(1, &m_FramebufferCubemap);
-        glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferCubemap);
-        unsigned int rbo; // NOTE(Joey): store it locally, no need to keep the depth (for now)
-        glGenRenderbuffers(1, &rbo);
-        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1024, 1024);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glGenRenderbuffers(1, &m_CubemapDepthRBO);
     }
     // ------------------------------------------------------------------------
     void Renderer::SetTarget(RenderTarget *renderTarget, GLenum target)
@@ -269,29 +262,40 @@ namespace Cell
         commandBuffer.Sort();
         std::vector<RenderCommand> renderCommands = commandBuffer.GetRenderCommands(nullptr);
 
-        // TODO(Joey): define 6 camera directions/lookup vectors
-        float oldAspect = m_Camera->Aspect;
-        float oldFoV = m_Camera->FOV;
-        m_Camera->SetPerspective(math::Deg2Rad(90.0f), 1.0f, 0.1f, 100.0f);
+        // NOTE(Joey): define 6 camera directions/lookup vectors
+        Camera faceCameras[6] = {
+            Camera(position, math::vec3( 1.0f,  0.0f,  0.0f), math::vec3(0.0f, -1.0f,  0.0f)),
+            Camera(position, math::vec3(-1.0f,  0.0f,  0.0f), math::vec3(0.0f, -1.0f,  0.0f)),
+            Camera(position, math::vec3( 0.0f,  1.0f,  0.0f), math::vec3(0.0f,  0.0f,  1.0f)),
+            Camera(position, math::vec3( 0.0f, -1.0f,  0.0f), math::vec3(0.0f,  0.0f,- 1.0f)),
+            Camera(position, math::vec3( 0.0f,  0.0f,  1.0f), math::vec3(0.0f, -1.0f,  0.0f)),
+            Camera(position, math::vec3( 0.0f,  0.0f, -1.0f), math::vec3(0.0f, -1.0f,  0.0f))
+        };
 
-        // TODO(Joey): test if we can use different facewidtsh w/ differently sized depth resolution
-        // otherwise, resize depth buffer as well. (make resize function)
-        //target->Resize(faceWidth, faceHeight);
-        //glViewport(0, 0, faceWidth, faceHeight);
+        // TODO(Joey): only resize/recreate if faceWidth is different than before
+        glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferCubemap);
+        glBindRenderbuffer(GL_RENDERBUFFER, m_CubemapDepthRBO);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, faceWidth, faceHeight);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_CubemapDepthRBO);
+
+        // NOTE(Joey): resize relevant buffers
+        target->Resize(faceWidth, faceHeight);
+        glViewport(0, 0, faceWidth, faceHeight);
         glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferCubemap);
         for (unsigned int i = 0; i < 6; ++i)
         {
-            // TODO(Joey): define RenderTargetCube w/ per-face specific settings (and 1 color attachment)
+            Camera *camera = &faceCameras[i];
+            camera->SetPerspective(math::Deg2Rad(90.0f), (float)faceWidth/(float)faceHeight, 0.1f, 100.0f);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, target->ID, mipLevel);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             for (unsigned int i = 0; i < renderCommands.size(); ++i)
             {
-                renderCustomCommand(&renderCommands[i], m_Camera);
+                //renderCustomCommand(&renderCommands[i], m_Camera);
+                renderCustomCommand(&renderCommands[i], camera);
             }
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        m_Camera->SetPerspective(oldFoV, oldAspect, 0.1f, 100.0f);
+        glViewport(0, 0, 1280, 720);
     }
     // ------------------------------------------------------------------------
     void Renderer::renderCustomCommand(RenderCommand *command, Camera *camera)

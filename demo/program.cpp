@@ -197,7 +197,8 @@ int main(int argc, char *argv[])
     //scene.Init();
 
     Cell::TextureCube cubez;
-    cubez.DefaultInitialize(1024, 1024, GL_RGB, GL_FLOAT);
+    cubez.DefaultInitialize(1024, 1024, GL_RGB, GL_UNSIGNED_BYTE);
+    //background.SetCubemap(&cubez);
    
 
     while (!glfwWindowShouldClose(window))
@@ -242,6 +243,7 @@ int main(int argc, char *argv[])
 
         renderer.SetTarget(&target);
         background.PushRender(&renderer);
+        renderer.PushRender(mainTorus);
         renderer.SetTarget(nullptr);
 
         Cell::PointLight light;
@@ -250,7 +252,7 @@ int main(int argc, char *argv[])
         renderer.PushLight(&light, true);
 
         // NOTE(Joey): also generate dynamic cubemap from scene
-        //renderer.RenderToCubemap(mainTorus, cubemap, 1024, 1024, math::vec3(0.0f), 0);
+        renderer.RenderToCubemap(mainTorus, cubemap, 1024, 1024, math::vec3(0.0f, 8.0f, 0.0f), 0);
 
         // NOTE(Joey): request Cell to render all currently pushed commands
         renderer.RenderPushedCommands();

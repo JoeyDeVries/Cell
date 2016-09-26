@@ -17,11 +17,11 @@ namespace Cell
         // directly change the texture state where relevant from within the setters.
         GLenum Format = GL_RGBA;                 // NOTE(Joey): the format each texel is stored in
         GLenum Type   = GL_UNSIGNED_BYTE;
-        GLenum FilterMin = GL_LINEAR_MIPMAP_LINEAR; // NOTE(Joey): what filter method to use during minification
+        GLenum FilterMin = GL_LINEAR; // NOTE(Joey): what filter method to use during minification
         GLenum FilterMax = GL_LINEAR;               // NOTE(Joey): what filter method to use during magnification
         GLenum WrapS = GL_CLAMP_TO_EDGE;            // NOTE(Joey): wrapping method of the S coordinate
         GLenum WrapT = GL_CLAMP_TO_EDGE;            // NOTE(Joey): wrapping method of the T coordinate
-        bool   Mipmapping = true;
+        bool   Mipmapping = false;
 
         unsigned int FaceWidth  = 0;
         unsigned int FaceHeight = 0;

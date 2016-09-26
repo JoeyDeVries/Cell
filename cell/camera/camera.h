@@ -44,20 +44,15 @@ namespace Cell
         CameraFrustum Frustum;
     private:
     public:
-        Camera() { } // NOTE(Joey): y do I need to make constructor here; See CameraFrustum note.
+        Camera(); // NOTE(Joey): y do I need to make constructor here; See CameraFrustum note.
+        Camera(math::vec3 position, math::vec3 forward, math::vec3 up);
 
-        // NOTE(Joey): per-frame camera calculations (e.g. damping); specific per camera type
-        virtual void Update(float dt) = 0;
-
-        // NOTE(Joey): accept input from windowing library and respond appropriately based on camera type
-        virtual void InputKey(float dt, CAMERA_MOVEMENT direction) = 0;
-        virtual void InputMouse(float deltaX, float deltaY) = 0;
-
-        // TODO(Joey): move calculate view-basis to here, with as input the forward
-        //void UpdateViewBasis(math::vec3 forward);
+        void Update(float dt);
         
         void SetPerspective(float fov, float aspect, float near, float far);
         void SetOrthographic(float left, float right, float top, float bottom, float near, float far);
+
+        void UpdateView();
 
         float FrustumHeightAtDistance(float distance);
         float DistanceAtFrustumHeight(float frustumHeight);

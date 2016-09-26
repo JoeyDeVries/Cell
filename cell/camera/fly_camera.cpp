@@ -7,12 +7,8 @@
 namespace Cell
 {
     // ------------------------------------------------------------------------
-    FlyCamera::FlyCamera(math::vec3 position, math::vec3 forward, math::vec3 up)
+    FlyCamera::FlyCamera(math::vec3 position, math::vec3 forward, math::vec3 up) : Camera(position, forward, up)
     {
-        Position = position; 
-        Forward =  forward;
-        Up      =  up;
-
         Yaw = -90.0f;
 
         m_WorldUp = Up;
@@ -26,7 +22,8 @@ namespace Cell
         Position = math::lerp(Position, m_TargetPosition, math::clamp01(dt * Damping));
 
         // NOTE(Joey): calculate the new view matrix
-        View = math::lookAt(Position, Position + Forward, Up);
+        UpdateView();
+        //View = math::lookAt(Position, Position + Forward, Up);
     }
     // ------------------------------------------------------------------------
     void FlyCamera::InputKey(float dt, CAMERA_MOVEMENT direction)

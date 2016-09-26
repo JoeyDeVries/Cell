@@ -51,6 +51,7 @@ namespace Cell
 
         // (dynamic) cubemap generation
         unsigned int m_FramebufferCubemap; // NOTE(Joey): cubemap render targets are a very specific case so we can do these without abstractions.
+        unsigned int m_CubemapDepthRBO;
     public:
         Renderer();
         ~Renderer();

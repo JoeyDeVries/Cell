@@ -7,6 +7,21 @@
 namespace Cell
 {
     // ------------------------------------------------------------------------
+    Camera::Camera()
+    {
+
+    }
+    // ------------------------------------------------------------------------
+    Camera::Camera(math::vec3 position, math::vec3 forward, math::vec3 up) : Position(position), Forward(forward), Up(up)
+    {
+        UpdateView();
+    }
+    // ------------------------------------------------------------------------
+    void Camera::Update(float dt)
+    {
+
+    }
+    // ------------------------------------------------------------------------
     void Camera::SetPerspective(float fov, float aspect, float near, float far)
     {
         Perspective = true;
@@ -19,6 +34,11 @@ namespace Cell
     {
         Perspective = false;
         Projection = math::orthographic(left, right, top, bottom, near, far);
+    }
+    // ------------------------------------------------------------------------
+    void Camera::UpdateView()
+    {
+        View = math::lookAt(Position, Position + Forward, Up);
     }
     // ------------------------------------------------------------------------
     float Camera::FrustumHeightAtDistance(float distance)
