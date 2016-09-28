@@ -1,11 +1,10 @@
 // ----------------------------------------------------------------------------
 // calculation without bit-operators. This might be required for certain
 // glsl versions or ES/WebGL versions that don't support bit-operators yet.
-uint VanDerCorpus(uint i, uint base = 2)
+// VanDerCorpus with base 2 equals hammersley's second value.
+float VanDerCorpus(uint i, uint base)
 {
-	vec2 result = vec2(0, 0);
-	
-	return result;
+	return 0.0;
 }
 // ----------------------------------------------------------------------------
 // http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
@@ -23,6 +22,11 @@ float RadicalInverse_VdC(uint bits)
 vec2 Hammersley(uint i, uint N)
 {
 	return vec2(float(i)/float(N), RadicalInverse_VdC(i));
+}
+// ----------------------------------------------------------------------------
+vec2 HammersleyNoBitOps(uint i, uint N)
+{
+	return vec2(float(i)/float(N), VanDerCorpus(i, 2));
 }
 // ----------------------------------------------------------------------------
 
