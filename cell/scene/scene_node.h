@@ -33,6 +33,7 @@ namespace Cell
     public:
         // NOTE(Joey): each node contains relevant render state
         Mesh        *Mesh;
+        // TODO(Joey): name Mesh and Material differently than their types.
         Material    *Material;
         
         math::vec3 Position = math::vec3(0.0f);

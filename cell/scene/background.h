@@ -1,8 +1,10 @@
 #ifndef CELL_SCENE_BACKGROUND_H
 #define CELL_SCENE_BACKGROUND_H
 
+#include "scene_node.h"
 
-namespace Cell
+
+namespace Cell 
 {
     class TextureCube;
     class Material;
@@ -15,21 +17,18 @@ namespace Cell
       
 
     */
-    class Background 
+    class Background : public SceneNode
     {
     private:
         TextureCube *m_CubeMap;
-        Material    *m_Material;
         Shader      *m_Shader;
-        Cube        *m_Mesh;        
 
     public:
         Background();
         ~Background();
 
         void SetCubemap(TextureCube *cubemap);
-
-        void PushRender(Renderer *renderer);
+        void SetMaterial(Cell::Material *material);
     };
 }
 

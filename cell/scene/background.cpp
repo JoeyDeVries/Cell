@@ -12,32 +12,33 @@ namespace Cell
     // ------------------------------------------------------------------------
     Background::Background()
     {
-        m_Material         = new Material;
-        m_Shader           = Resources::LoadShader("background", "shaders/background.vs", "shaders/background.fs");
-        m_Material->SetShader(m_Shader);
-        m_CubeMap          = Resources::LoadTextureCube("yokohama", "textures/backgrounds/yokohama/");
-        m_Mesh             = new Cell::Cube;
+        m_Shader  = Resources::LoadShader("background", "shaders/background.vs", "shaders/background.fs");
+        m_CubeMap = Resources::LoadTextureCube("yokohama", "textures/backgrounds/yokohama/");
+        Material  = new Cell::Material;
+        Mesh      = new Cell::Cube;
 
         // default material configuration
-        m_Material->SetTextureCube("background", m_CubeMap, 0);
+        Material->SetShader(m_Shader);
+        Material->SetTextureCube("background", m_CubeMap, 0);
 
-        m_Material->DepthCompare = GL_LEQUAL;
+        Material->DepthCompare = GL_LEQUAL;
     }
     // ------------------------------------------------------------------------
     Background::~Background()
     {
-        delete m_Material;
-        delete m_Mesh;
+        delete Material;
+        delete Mesh;
     }
     // ------------------------------------------------------------------------
     void Background::SetCubemap(TextureCube *cubemap)
     {
         m_CubeMap = cubemap;
-        m_Material->SetTextureCube("background", m_CubeMap, 0);
+        Material->SetTextureCube("background", m_CubeMap, 0);
     }
     // ------------------------------------------------------------------------
-    void Background::PushRender(Renderer *renderer)
+    void Background::SetMaterial(Cell::Material *material)
     {
-        renderer->PushRender(m_Mesh, m_Material, math::mat4());
+        Material = material;
+        Material->SetTextureCube("background", m_CubeMap, 0);
     }
 };

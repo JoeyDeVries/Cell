@@ -239,10 +239,11 @@ int main(int argc, char *argv[])
         renderer.PushRender(mainTorus);
         renderer.PushRender(floor);
 
-        background.PushRender(&renderer);
+        renderer.PushRender(&background);
 
         renderer.SetTarget(&target);
-        background.PushRender(&renderer);
+        renderer.PushRender(&background);
+        //background.PushRender(&renderer);
         renderer.PushRender(mainTorus);
         renderer.SetTarget(nullptr);
 
@@ -250,6 +251,11 @@ int main(int argc, char *argv[])
         light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);
         light.Color = math::vec3(1.0f, 0.7f, 0.7f);
         renderer.PushLight(&light, true);
+
+        Cell::PointLight light2;
+        light2.Position = math::vec3(sin(glfwGetTime() * 0.3f) * 5.5, 0.0f, cos(glfwGetTime() * 0.1f) * 10.0f);
+        light2.Color = math::vec3(0.5f, 0.5f, 1.0f);
+        renderer.PushLight(&light2, true);
 
         // NOTE(Joey): also generate dynamic cubemap from scene
         renderer.RenderToCubemap(mainTorus, cubemap, 1024, 1024, math::vec3(0.0f, 8.0f, 0.0f), 0);
