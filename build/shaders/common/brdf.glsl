@@ -11,7 +11,7 @@ float DistributionGGX(vec3 N, vec3 H, float roughness)
 	float denom = (NdotH2 * (a2 - 1.0) + 1.0);
 	denom = PI * denom * denom;
 	
-	return nominator / denom;
+	return nom / denom;
 }
 
 // ----------------------------------------------------------------------------
@@ -58,17 +58,17 @@ float GeometryGGXIBL(vec3 N, vec3 L, vec3 V, float roughness)
 	return ggx1 * ggx2;
 }
 // ----------------------------------------------------------------------------
-float FresnelSchlick(float cosTheta, vec3 F0)
+vec3 FresnelSchlick(float cosTheta, vec3 F0)
 {
 	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 // ----------------------------------------------------------------------------
-float FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 {
 	return F0 + (1.0 - F0 * roughness) * pow(1.0 - cosTheta, 5.0);
 }
 // ----------------------------------------------------------------------------
-float FresnelSphericalGaussian(float cosTheta, vec3 F0)
+vec3 FresnelSphericalGaussian(float cosTheta, vec3 F0)
 {
 	return F0 + (1.0 - F0) * pow(2.0, (-5.55473 * cosTheta - 6.98316 * cosTheta));
 }
