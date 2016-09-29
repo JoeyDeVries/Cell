@@ -28,7 +28,6 @@ namespace Cell
         ~Background();
 
         void SetCubemap(TextureCube *cubemap);
-        void SetMaterial(Cell::Material *material);
     };
 }
 

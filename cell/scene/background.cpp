@@ -35,10 +35,4 @@ namespace Cell
         m_CubeMap = cubemap;
         Material->SetTextureCube("background", m_CubeMap, 0);
     }
-    // ------------------------------------------------------------------------
-    void Background::SetMaterial(Cell::Material *material)
-    {
-        Material = material;
-        Material->SetTextureCube("background", m_CubeMap, 0);
-    }
 };

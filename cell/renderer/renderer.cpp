@@ -282,6 +282,7 @@ namespace Cell
         target->Resize(faceWidth, faceHeight);
         glViewport(0, 0, faceWidth, faceHeight);
         glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferCubemap);
+
         for (unsigned int i = 0; i < 6; ++i)
         {
             Camera *camera = &faceCameras[i];
@@ -294,6 +295,7 @@ namespace Cell
                 renderCustomCommand(&renderCommands[i], camera);
             }
         }
+        // NOTE(Joey): reset state
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, 1280, 720);
     }

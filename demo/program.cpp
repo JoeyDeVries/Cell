@@ -148,10 +148,11 @@ int main(int argc, char *argv[])
     //Cell::Circle circle(16,16);
     Cell::Sphere sphere(64, 64);
     Cell::Torus torus(2.0f, 0.4f, 32, 32);
+    Cell::Cube cube;
 
     //Cell::Texture testTexture = Cell::Resources::LoadTexture("test", "textures/checkerboard.png", GL_TEXTURE_2D, GL_RGB);
     Cell::Texture     *testTexture = Cell::Resources::LoadTexture("test", "textures/scuffed plastic/roughness.png", GL_TEXTURE_2D, GL_RGB);
-    Cell::TextureCube *cubemap     = Cell::Resources::LoadTextureCube("yokohama night", "textures/backgrounds/yokohama night/");
+    Cell::TextureCube *cubemap     = Cell::Resources::LoadTextureCube("yokohama night", "textures/backgrounds/yokohama/");
 
     Log::Display();
     Log::Clear();
@@ -200,6 +201,31 @@ int main(int argc, char *argv[])
     cubez.DefaultInitialize(1024, 1024, GL_RGB, GL_UNSIGNED_BYTE);
     //background.SetCubemap(&cubez);
    
+
+    // NOTE(Joey): pbr pre-compute
+    Cell::Shader *irradianceCapture = Cell::Resources::LoadShader("irradiance", "shaders/cube_sample.vs", "shaders/irradiance_capture.fs");
+    Cell::Shader *prefilterCapture = Cell::Resources::LoadShader("prefilter", "shaders/cube_sample.vs", "shaders/prefilter_capture.fs");
+    Cell::Material matIrradianceCapture;
+    Cell::Material matPrefilterCapture;
+    matIrradianceCapture.SetShader(irradianceCapture);
+    matPrefilterCapture.SetShader(prefilterCapture);
+    matIrradianceCapture.DepthCompare = GL_LEQUAL;
+    matPrefilterCapture.DepthCompare = GL_LEQUAL;
+    Cell::SceneNode *environmentCube = Cell::Scene::MakeSceneNode(&cube, &matIrradianceCapture);
+    // - irradiance
+    Cell::TextureCube irradianceMap;
+    irradianceMap.DefaultInitialize(1024, 1024, GL_RGB, GL_FLOAT);
+    matIrradianceCapture.SetTextureCube("environment", cubemap, 0);
+    renderer.RenderToCubemap(environmentCube, &irradianceMap, 1024, 1024, math::vec3(0.0f), 0);
+    // - prefilter 
+    Cell::TextureCube prefilterMap;
+    prefilterMap.DefaultInitialize(1024, 1024, GL_RGB, GL_FLOAT);
+    matPrefilterCapture.SetTextureCube("environment", cubemap, 0);
+    environmentCube->Material = &matPrefilterCapture;
+    renderer.RenderToCubemap(environmentCube, &prefilterMap, 1024, 1024, math::vec3(0.0f), 0);
+
+
+    //background.SetCubemap(&irradianceMap);
 
     while (!glfwWindowShouldClose(window))
     {
