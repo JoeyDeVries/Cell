@@ -239,7 +239,7 @@ namespace Cell
 
     }
     // ------------------------------------------------------------------------
-    void Renderer::RenderToCubemap(SceneNode *scene, TextureCube *target, unsigned int faceWidth, unsigned int faceHeight, math::vec3 position, unsigned int mipLevel)
+    void Renderer::RenderToCubemap(SceneNode *scene, TextureCube *target, math::vec3 position, unsigned int mipLevel)
     {
         // NOTE(Joey): create a command buffer specifically for this operation (as to not conflict with 
         // main command buffer)
@@ -272,26 +272,28 @@ namespace Cell
             Camera(position, math::vec3( 0.0f,  0.0f, -1.0f), math::vec3(0.0f, -1.0f,  0.0f))
         };
 
+        // NOTE(Joey): resize target dimensions based on mip level we're rendering.
+        float width = (float)target->FaceWidth * pow(0.5, mipLevel);
+        float height = (float)target->FaceHeight * pow(0.5, mipLevel);
+
         // TODO(Joey): only resize/recreate if faceWidth is different than before
         glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferCubemap);
         glBindRenderbuffer(GL_RENDERBUFFER, m_CubemapDepthRBO);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, faceWidth, faceHeight);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_CubemapDepthRBO);
 
         // NOTE(Joey): resize relevant buffers
-        target->Resize(faceWidth, faceHeight);
-        glViewport(0, 0, faceWidth, faceHeight);
+        glViewport(0, 0, width, height);
         glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferCubemap);
 
         for (unsigned int i = 0; i < 6; ++i)
         {
             Camera *camera = &faceCameras[i];
-            camera->SetPerspective(math::Deg2Rad(90.0f), (float)faceWidth/(float)faceHeight, 0.1f, 100.0f);
+            camera->SetPerspective(math::Deg2Rad(90.0f), width/height, 0.1f, 100.0f);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, target->ID, mipLevel);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             for (unsigned int i = 0; i < renderCommands.size(); ++i)
             {
-                //renderCustomCommand(&renderCommands[i], m_Camera);
                 renderCustomCommand(&renderCommands[i], camera);
             }
         }

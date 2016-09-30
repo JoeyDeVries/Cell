@@ -13,7 +13,7 @@ namespace Cell
 
     }
     // ------------------------------------------------------------------------
-    void TextureCube::DefaultInitialize(unsigned int width, unsigned int height, GLenum format, GLenum type)
+    void TextureCube::DefaultInitialize(unsigned int width, unsigned int height, GLenum format, GLenum type, bool mipmap)
     {
         glGenTextures(1, &ID);
 
@@ -21,6 +21,7 @@ namespace Cell
         FaceHeight = height;
         Format = format;
         Type = type;
+        Mipmapping = mipmap;
 
         Bind();
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, FilterMin);
@@ -28,8 +29,12 @@ namespace Cell
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, WrapS);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, WrapT);
 
-        for(unsigned int i = 0; i < 6; ++i)
+        for (unsigned int i = 0; i < 6; ++i)
+        {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, type, NULL);
+        }
+        if (mipmap)
+            glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
     }
     // ------------------------------------------------------------------------
     void TextureCube::GenerateFace(GLenum face, unsigned int width, unsigned int height, GLenum format, GLenum type, unsigned char *data)

@@ -214,18 +214,32 @@ int main(int argc, char *argv[])
     Cell::SceneNode *environmentCube = Cell::Scene::MakeSceneNode(&cube, &matIrradianceCapture);
     // - irradiance
     Cell::TextureCube irradianceMap;
-    irradianceMap.DefaultInitialize(1024, 1024, GL_RGB, GL_FLOAT);
+    irradianceMap.DefaultInitialize(32, 32, GL_RGB, GL_FLOAT);
     matIrradianceCapture.SetTextureCube("environment", cubemap, 0);
-    renderer.RenderToCubemap(environmentCube, &irradianceMap, 1024, 1024, math::vec3(0.0f), 0);
+    renderer.RenderToCubemap(environmentCube, &irradianceMap, math::vec3(0.0f), 0);
     // - prefilter 
     Cell::TextureCube prefilterMap;
-    prefilterMap.DefaultInitialize(1024, 1024, GL_RGB, GL_FLOAT);
+    prefilterMap.DefaultInitialize(128, 128, GL_RGB, GL_FLOAT, true);
     matPrefilterCapture.SetTextureCube("environment", cubemap, 0);
     environmentCube->Material = &matPrefilterCapture;
-    renderer.RenderToCubemap(environmentCube, &prefilterMap, 1024, 1024, math::vec3(0.0f), 0);
+    // TODO(Joey): this should be done in a cleaner fashion w/ cubemap generation; ideally we don't touch the GL internals here
+    prefilterMap.Bind();
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    prefilterMap.Unbind();
+    // calculate prefilter for multiple roughness levels
+    unsigned int maxMipLevels = 7;
+    for (unsigned int i = 0; i < maxMipLevels; ++i) 
+    {
+        matPrefilterCapture.SetFloat("roughness", (float)i / (float)(maxMipLevels - 1));
+        renderer.RenderToCubemap(environmentCube, &prefilterMap, math::vec3(0.0f), i);
+
+    }
+
+    float lodLevel = 2.0f;
+    background.SetCubemap(&prefilterMap);
+    background.Material->SetFloat("lodLevel", lodLevel);
 
 
-    //background.SetCubemap(&irradianceMap);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -247,6 +261,18 @@ int main(int argc, char *argv[])
             camera.InputKey(deltaTime, Cell::CAMERA_LEFT);
         if (keysPressed[GLFW_KEY_D] || keysPressed[GLFW_KEY_RIGHT])
             camera.InputKey(deltaTime, Cell::CAMERA_RIGHT);
+        if (keysPressed[GLFW_KEY_T])
+        {
+            lodLevel += 1.0 * deltaTime;
+            background.Material->SetFloat("lodLevel", lodLevel); 
+            Log::Message(std::to_string(lodLevel));
+        }
+        else if (keysPressed[GLFW_KEY_G])
+        {
+            lodLevel -= 1.0 * deltaTime;
+            background.Material->SetFloat("lodLevel", lodLevel);
+            Log::Message(std::to_string(lodLevel));
+        }
 
         if (keysPressed[GLFW_KEY_Z]) {
             wireframe = !wireframe;
@@ -284,7 +310,7 @@ int main(int argc, char *argv[])
         renderer.PushLight(&light2, true);
 
         // NOTE(Joey): also generate dynamic cubemap from scene
-        renderer.RenderToCubemap(mainTorus, cubemap, 1024, 1024, math::vec3(0.0f, 8.0f, 0.0f), 0);
+        //renderer.RenderToCubemap(mainTorus, cubemap, math::vec3(0.0f, 8.0f, 0.0f), 0);
 
         // NOTE(Joey): request Cell to render all currently pushed commands
         renderer.RenderPushedCommands();

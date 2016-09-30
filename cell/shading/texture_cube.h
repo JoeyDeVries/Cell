@@ -31,7 +31,7 @@ namespace Cell
         ~TextureCube();
 
         // NOTE(Joey): default initialize all cubemap faces w/ default values
-        void DefaultInitialize(unsigned int width, unsigned int height, GLenum format, GLenum type);
+        void DefaultInitialize(unsigned int width, unsigned int height, GLenum format, GLenum type, bool mipmap = false);
 
         // NOTE(Joey): cubemap texture generation per face
         void GenerateFace(GLenum face, unsigned int width, unsigned int height, GLenum format, GLenum type, unsigned char *data);

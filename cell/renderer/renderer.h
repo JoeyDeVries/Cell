@@ -72,7 +72,7 @@ namespace Cell
 
         void RenderPushedCommands();
 
-        void RenderToCubemap(SceneNode *scene, TextureCube *target, unsigned int faceWidth, unsigned int faceHeight, math::vec3 position, unsigned int mipLevel = 0);
+        void RenderToCubemap(SceneNode *scene, TextureCube *target, math::vec3 position, unsigned int mipLevel = 0);
     private:
         void renderCustomCommand(RenderCommand *command, Camera *camera);
         RenderTarget *getCurrentRenderTarget();

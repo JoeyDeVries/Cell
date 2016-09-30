@@ -2,9 +2,27 @@
 // calculation without bit-operators. This might be required for certain
 // glsl versions or ES/WebGL versions that don't support bit-operators yet.
 // VanDerCorpus with base 2 equals hammersley's second value.
-float VanDerCorpus(uint i, uint base)
+float VanDerCorpus(uint n, uint base)
 {
-	return 0.0;
+    float invBase = 1.0 / float(base);
+    float denom   = 1.0;
+    float result  = 0.0;
+
+    // NOTE(Joey): do this for all 32 bits; doesn't work with
+    // while loop. This produces a lot of wasted cycles but
+    // difficult to do otherwise in ES 2.0.
+    for(int i = 0; i < 32; ++i)
+    {
+        if(n > 0)
+        {
+            denom   = mod(float(n), 2.0);
+            result += denom * invBase;
+            invBase = invBase / 2.0;
+            n       = int(float(n) / 2.0);
+        }
+    }
+
+    return result;
 }
 // ----------------------------------------------------------------------------
 // http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
@@ -29,21 +47,19 @@ vec2 HammersleyNoBitOps(uint i, uint N)
 	return vec2(float(i)/float(N), VanDerCorpus(i, 2));
 }
 // ----------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------
-vec3 SampleHemisphereUniform(float u, float v)
+vec3 SampleHemisphereUniform(vec2 Xi)
 {
-	float phi = v * 2.0 * PI;
-	float cosTheta = sqrt(1.0 - u);
+	float phi = Xi.y * 2.0 * PI;
+	float cosTheta = sqrt(1.0 - Xi.x);
 	float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 	
 	return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
 }
 // ----------------------------------------------------------------------------
-vec3 SampleHemisphereCos(float u, float v)
+vec3 SampleHemisphereCos(vec2 Xi)
 {
-	float phi = v * 2.0 * PI;
-	float cosTheta = 1.0 - u;
+	float phi = Xi.y * 2.0 * PI;
+	float cosTheta = 1.0 - Xi.x;
 	float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 	
 	return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
