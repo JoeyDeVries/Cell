@@ -34,13 +34,7 @@ void main(void) {
         // NOTE(Joey): also try without NdotL!
         if(NdotL > 0.0)
         {
-            // NOTE(Joey): store linearly, see discussion at irradiance.fs.glsl (and images at
-            // data folder of modelPreviewer).
             // NOTE(Joey): note that HDR environment map is loaded linearly, so no need for linearizing first.
-            // NOTE(Joey): write down that with high-contrast HDR images (like grace-new.hdr) you need A LOT
-            // more samples for a proper integration (otherwise result resembles a disco light party); so for
-            // pre-computing this at start-up be sure to use more neutral HDR maps (like eagle_hill).
-//            prefilteredColor += pow(textureCube(_CubeSampler, L).rgb, vec3(2.2)) * NdotL;
             prefilteredColor += texture(environment, L).rgb * NdotL;
             totalWeight      += NdotL;
         }

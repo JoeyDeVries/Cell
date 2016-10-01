@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
     renderer.SetCamera(&camera);
 
     Cell::Shader *testShader = Cell::Resources::LoadShader("test", "shaders/test.vs", "shaders/test.fs");
-    //Cell::Quad quad;
+    Cell::Quad quad;
     //Cell::LineStrip lineStrip(0.5f, 32);
     Cell::Plane plane(16, 16);
     //Cell::Circle circle(16,16);
@@ -205,10 +205,13 @@ int main(int argc, char *argv[])
     // NOTE(Joey): pbr pre-compute
     Cell::Shader *irradianceCapture = Cell::Resources::LoadShader("irradiance", "shaders/cube_sample.vs", "shaders/irradiance_capture.fs");
     Cell::Shader *prefilterCapture = Cell::Resources::LoadShader("prefilter", "shaders/cube_sample.vs", "shaders/prefilter_capture.fs");
+    Cell::Shader *integrateBrdf = Cell::Resources::LoadShader("integrate_brdf", "shaders/screen_quad.vs", "shaders/integrate_brdf.fs");
     Cell::Material matIrradianceCapture;
     Cell::Material matPrefilterCapture;
+    Cell::Material matIntegrateBrdf;
     matIrradianceCapture.SetShader(irradianceCapture);
     matPrefilterCapture.SetShader(prefilterCapture);
+    matIntegrateBrdf.SetShader(integrateBrdf);
     matIrradianceCapture.DepthCompare = GL_LEQUAL;
     matPrefilterCapture.DepthCompare = GL_LEQUAL;
     Cell::SceneNode *environmentCube = Cell::Scene::MakeSceneNode(&cube, &matIrradianceCapture);
@@ -234,11 +237,19 @@ int main(int argc, char *argv[])
         renderer.RenderToCubemap(environmentCube, &prefilterMap, math::vec3(0.0f), i);
 
     }
+    // - brdf integration
+    // NOTE(Joey): the result is not exactly 100% similar to Unreal's BRDF 2D LUT: http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
+    // Try and see what we update to get the exact same results; different roughness approximations?
+    Cell::RenderTarget brdfTarget(512, 512, GL_HALF_FLOAT, 1, true);
+    // TODO(Joey): render this with a specific blit function of the renderer (that takes as input a src and destination target + material to use; destination can be nullPtr which is default framebuffer)
+    renderer.SetTarget(&brdfTarget);
+    renderer.PushRender(&quad, &matIntegrateBrdf);
+    renderer.SetTarget(nullptr);
+    renderer.RenderPushedCommands();
 
     float lodLevel = 2.0f;
     background.SetCubemap(&prefilterMap);
     background.Material->SetFloat("lodLevel", lodLevel);
-
 
 
     while (!glfwWindowShouldClose(window))
@@ -298,6 +309,7 @@ int main(int argc, char *argv[])
         //background.PushRender(&renderer);
         renderer.PushRender(mainTorus);
         renderer.SetTarget(nullptr);
+
 
         Cell::PointLight light;
         light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);

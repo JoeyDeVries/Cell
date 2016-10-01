@@ -16,13 +16,11 @@ float DistributionGGX(vec3 N, vec3 H, float roughness)
 
 // ----------------------------------------------------------------------------
 // TODO(Joey): get proper names of the options/functions
-float GeometryGGXSchlick(vec3 N, vec3 V, float roughness)
+float GeometryGGXSchlick(float NdotV, float roughness)
 {
 	float r = (roughness + 1.0);
 	float k = (r*r) / 8.0;
-	
-	float NdotV = max(dot(N, V), 0.0);
-	
+
 	float nom    = NdotV;
 	float denom = NdotV * (1.0 - k) + k ;
 	
@@ -30,30 +28,29 @@ float GeometryGGXSchlick(vec3 N, vec3 V, float roughness)
 }
 // ----------------------------------------------------------------------------
 // NOTE(Joey): for IBL we use a different k (see unreal course notes)
-float GeometryGGXSchlickIBL(vec3 N, vec3 V, float roughness)
+float GeometryGGXSchlickIBL(float NdotV, float roughness)
 {
-	float k = roughness / 2.0;
-	
-	float NdotV = max(dot(N, V), 0.0);
-	
+	float a = roughness*roughness;
+	float k = a / 2.0;
+		
 	float nom    = NdotV;
 	float denom = NdotV * (1.0 - k) + k ;
 	
 	return nom / denom;
 }
 // ----------------------------------------------------------------------------
-float GeometryGGX(vec3 N, vec3 L, vec3 V, float roughness)
+float GeometryGGX(float NdotV, float NdotL, float roughness)
 {
-	float ggx1 = GeometryGGXSchlick(N, L, roughness);
-	float ggx2 = GeometryGGXSchlick(N, V, roughness);
+	float ggx2 = GeometryGGXSchlick(NdotV, roughness);
+	float ggx1 = GeometryGGXSchlick(NdotL, roughness);
 	
 	return ggx1 * ggx2;
 }
 // ----------------------------------------------------------------------------
-float GeometryGGXIBL(vec3 N, vec3 L, vec3 V, float roughness)
+float GeometryGGXIBL(float NdotV, float NdotL, float roughness)
 {
-	float ggx1 = GeometryGGXSchlickIBL(N, L, roughness);
-	float ggx2 = GeometryGGXSchlickIBL(N, V, roughness);
+	float ggx1 = GeometryGGXSchlickIBL(NdotV, roughness);
+	float ggx2 = GeometryGGXSchlickIBL(NdotL, roughness);
 	
 	return ggx1 * ggx2;
 }
