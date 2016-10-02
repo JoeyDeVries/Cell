@@ -44,6 +44,9 @@ namespace Cell
             stbi_image_free(data);
             return texture;
         }
+        texture.Width = width;
+        texture.Height = height;
+
         return texture;
     }
     // ------------------------------------------------------------------------

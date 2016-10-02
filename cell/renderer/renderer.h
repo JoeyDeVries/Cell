@@ -5,6 +5,7 @@
 
 #include "../lighting/point_light.h"
 #include "../lighting/directional_light.h"
+#include "../mesh/quad.h"
 #include "command_buffer.h"
 
 namespace Cell
@@ -48,10 +49,15 @@ namespace Cell
         Material *m_LightMaterial;
         std::vector<RenderTarget*>  m_RenderTargetsCustom;
         RenderTarget               *m_CurrentRenderTargetCustom = nullptr;
+        Quad m_NDCPlane; 
 
         // (dynamic) cubemap generation
         unsigned int m_FramebufferCubemap; // NOTE(Joey): cubemap render targets are a very specific case so we can do these without abstractions.
         unsigned int m_CubemapDepthRBO;
+
+        // set of default materials 
+        // NOTE(Joey): do we want to abstract this from the renderer?
+        std::map<unsigned int, Material*> m_DefaultMaterials;
     public:
         Renderer();
         ~Renderer();
@@ -63,6 +69,10 @@ namespace Cell
         Camera* GetCamera();
         void    SetCamera(Camera *camera);
 
+        // NOTE(Joey): idea, create either a deferred default material (based on default set of materials available (like glass)), or a custom material (with custom you have to supply your own shader)
+        Material CreateMaterial(std::string base = "default"); // NOTE(Joey): these don't have the custom flag set (default material has default state and uses checkerboard texture as albedo (and black metallic, half roughness, purple normal, white ao)
+        Material CreateCustomMaterial(Shader *shader);         // NOTE(Joey): these have the custom flag set (will be rendered in forward pass)
+
         void PushRender(Mesh *mesh, Material *material, math::mat4 transform = math::mat4());
         void PushRender(SceneNode *node);
         void PushRender(Scene *scene);
@@ -72,6 +82,7 @@ namespace Cell
 
         void RenderPushedCommands();
 
+        void Blit(RenderTarget *src, RenderTarget *dst, Material *material, std::string textureUniformName = "TexSrc");
         void RenderToCubemap(SceneNode *scene, TextureCube *target, math::vec3 position, unsigned int mipLevel = 0);
     private:
         void renderCustomCommand(RenderCommand *command, Camera *camera);

@@ -25,6 +25,31 @@ namespace Cell
         m_Shader = shader;
     }
     // ------------------------------------------------------------------------
+    Material Material::Copy()
+    {
+        Material copy(m_Shader);
+
+        copy.Color = Color;
+        
+        copy.DepthTest = DepthTest;
+        copy.DepthWrite = DepthWrite;
+        copy.DepthCompare = DepthCompare;
+
+        copy.Cull = Cull;
+        copy.CullFace = CullFace;
+        copy.CullWindingOrder = CullWindingOrder;
+
+        copy.Blend = Blend;
+        copy.BlendSrc = BlendSrc;
+        copy.BlendDst = BlendDst;
+        copy.BlendEquation = BlendEquation;
+
+        copy.m_Uniforms = m_Uniforms;
+        copy.m_SamplerUniforms = m_SamplerUniforms;
+        
+        return copy;
+    }
+    // ------------------------------------------------------------------------
     void Material::SetBool(std::string name, bool value)
     {
         m_Uniforms[name].Type = SHADER_TYPE_BOOL;

@@ -11,6 +11,7 @@
 #include "../resources/resources.h"
 
 #include <utility/logging/log.h>
+#include <utility/string_id.h>
 
 #include <stack>
 
@@ -26,6 +27,11 @@ namespace Cell
     {
         delete m_LightMesh;
         delete m_LightMaterial;
+
+        for (auto it = m_DefaultMaterials.begin(); it != m_DefaultMaterials.end(); ++it)
+        {
+            delete it->second;
+        }
     }
     // ------------------------------------------------------------------------
     void Renderer::Init()
@@ -72,6 +78,18 @@ namespace Cell
         Shader *shader = Resources::LoadShader("light", "shaders/light.vs", "shaders/light.fs");
         m_LightMesh = new Sphere(8, 8);
         m_LightMaterial = new Material(shader);
+        Shader *defaultShader = Resources::LoadShader("default", "shaders/pbr.vs", "shaders/pbr.fs");
+        // NOTE(Joey): and materials
+        Material *defaultMat = new Material(defaultShader);
+     /*   defaultMat->Blend = true;
+        defaultMat->BlendSrc = GL_SRC_ALPHA;
+        defaultMat->BlendDst = GL_ONE_MINUS_SRC_ALPHA;*/
+        defaultMat->SetTexture("TexAlbedo",    Resources::LoadTexture("default", "textures/checkerboard.png"), 3);
+        defaultMat->SetTexture("TexNormal",    Resources::LoadTexture("default", "textures/norm.png"),         4);
+        defaultMat->SetTexture("TexMetallic",  Resources::LoadTexture("default", "textures/black.png"),        5);
+        defaultMat->SetTexture("TexRoughness", Resources::LoadTexture("default", "textures/checkerboard.png"), 6);
+        defaultMat->SetTexture("TexAO",        Resources::LoadTexture("default", "textures/white.png"),        7);
+        m_DefaultMaterials[SID("default")] = defaultMat;
 
         // NOTE(Joey): initialize render items
         // TODO(Joey): do we want to abstract this or not? as it is very specific.
@@ -99,6 +117,29 @@ namespace Cell
     void Renderer::SetCamera(Camera *camera)
     {
         m_Camera = camera;
+    }
+    // ------------------------------------------------------------------------
+    Material Renderer::CreateMaterial(std::string base)
+    {
+        // NOTE(Joey): first check if the given base material exists, otherwise
+        // log error.
+        auto found = m_DefaultMaterials.find(SID(base));
+        if (found != m_DefaultMaterials.end())
+        {
+            return m_DefaultMaterials[SID(base)]->Copy();
+        }
+        else
+        {
+            Log::Message("Material of template: " + base + " requested, but template did not exist.", LOG_ERROR);
+            return Material();
+        }
+    }
+    // ------------------------------------------------------------------------
+    Material Renderer::CreateCustomMaterial(Shader *shader)
+    {
+        Material mat(shader);
+        // mat.custom = true;
+        return mat;
     }
     // ------------------------------------------------------------------------
     void Renderer::PushRender(Mesh *mesh, Material *material, math::mat4 transform)
@@ -239,6 +280,44 @@ namespace Cell
 
     }
     // ------------------------------------------------------------------------
+    void Renderer::Blit(RenderTarget *src, RenderTarget *dst, Material *material, std::string textureUniformName)
+    {
+        // NOTE(Joey): if a destination target is given, bind to its framebuffer
+        if (dst)
+        {
+            glViewport(0, 0, dst->Width, dst->Height);
+            glBindFramebuffer(GL_FRAMEBUFFER, dst->m_ID);
+            if (dst->HasDepthAndStencil)
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+            else
+                glClear(GL_COLOR_BUFFER_BIT);
+        }
+        // NOTE(Joey): else we bind to the default framebuffer
+        else
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        }
+        // NOTE(Joey): if a source render target is given, use its color buffer
+        // as input to the material shader.
+        if (src)
+        {
+            material->SetTexture(textureUniformName, src->GetColorTexture(0));
+        }
+        // NOTE(Joey): render screen-space material to quad which will be 
+        // stored/displayer inside dst's buffers.
+        RenderCommand command;
+        command.Material = material;
+        command.Mesh = &m_NDCPlane;
+        renderCustomCommand(&command, nullptr);
+
+        // NOTE(Joey): revert back to default framebuffer
+        // NOTE(Joey): is this necessary? do we want this?
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // TODO(Joey): manage/store render size in renderer!
+        glViewport(0, 0, 1280, 720); 
+    }
+    // ------------------------------------------------------------------------
     void Renderer::RenderToCubemap(SceneNode *scene, TextureCube *target, math::vec3 position, unsigned int mipLevel)
     {
         // NOTE(Joey): create a command buffer specifically for this operation (as to not conflict with 
@@ -323,9 +402,13 @@ namespace Cell
         // regardless of shader configuration (see them as a default set of
         // shader uniform variables always there).
         material->GetShader()->Use();
-        material->GetShader()->SetMatrix("projection", camera->Projection);
-        material->GetShader()->SetMatrix("view", camera->View);
-        material->GetShader()->SetMatrix("model", command->Transform);
+        if (camera)
+        {
+            material->GetShader()->SetMatrix("projection", camera->Projection);
+            material->GetShader()->SetMatrix("view", camera->View);
+            material->GetShader()->SetMatrix("model", command->Transform);
+            material->GetShader()->SetVector("CamPos", camera->Position);
+        }
         // NOTE(Joey): lighting setup: also move to uniform buffer object 
         // in future
         for (unsigned int i = 0; i < m_DirectionalLights.size() && i < 4; ++i) // NOTE(Joey): no more than 4 directional lights

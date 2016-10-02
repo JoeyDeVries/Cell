@@ -141,8 +141,7 @@ int main(int argc, char *argv[])
     renderer.Init();
     renderer.SetCamera(&camera);
 
-    Cell::Shader *testShader = Cell::Resources::LoadShader("test", "shaders/test.vs", "shaders/test.fs");
-    Cell::Shader *pbrShader = Cell::Resources::LoadShader("pbr", "shaders/pbr.vs", "shaders/pbr.fs");
+    // NOTE(Joey): shapes
     Cell::Quad quad;
     //Cell::LineStrip lineStrip(0.5f, 32);
     Cell::Plane plane(16, 16);
@@ -151,12 +150,15 @@ int main(int argc, char *argv[])
     Cell::Torus torus(2.0f, 0.4f, 32, 32);
     Cell::Cube cube;
 
-    //Cell::Texture *testTexture = Cell::Resources::LoadTexture("test", "textures/checkerboard.png", GL_TEXTURE_2D, GL_RGB);
-    Cell::Texture *albedo    = Cell::Resources::LoadTexture("plastic albedo", "textures/pbr/plastic/albedo.png"); // NOTE(Joey): test if SRGB texture support works properly with current texture implementation
-    Cell::Texture *normal    = Cell::Resources::LoadTexture("plastic normal", "textures/pbr/plastic/normal.png");
-    Cell::Texture *metallic  = Cell::Resources::LoadTexture("plastic metallic", "textures/pbr/plastic/metallic.png");
-    Cell::Texture *roughness = Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/plastic/roughness.png");
-    Cell::Texture *ao        = Cell::Resources::LoadTexture("plastic ao", "textures/pbr/plastic/ao.png");
+    // NOTE(Joey): material setup
+    Cell::Material matPbr = renderer.CreateMaterial();
+    Cell::Material matPbrPink = renderer.CreateMaterial();
+    matPbrPink.SetTexture("TexAlbedo",    Cell::Resources::LoadTexture("plastic albedo",    "textures/pbr/plastic/albedo.png"),    3);
+    matPbrPink.SetTexture("TexNormal",    Cell::Resources::LoadTexture("plastic normal",    "textures/pbr/plastic/normal.png"),    4);
+    matPbrPink.SetTexture("TexMetallic",  Cell::Resources::LoadTexture("plastic metallic",  "textures/pbr/plastic/metallic.png"),  5);
+    matPbrPink.SetTexture("TexRoughness", Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/plastic/roughness.png"), 6);
+    matPbrPink.SetTexture("TexAO",        Cell::Resources::LoadTexture("plastic ao",        "textures/pbr/plastic/ao.png"),        7);
+
     Cell::TextureCube *cubemap = Cell::Resources::LoadTextureCube("yokohama night", "textures/backgrounds/yokohama/");
 
     Log::Display();
@@ -165,21 +167,11 @@ int main(int argc, char *argv[])
     // NOTE(Joey): configure camera
     camera.SetPerspective(math::Deg2Rad(60.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
 
-    // NOTE(Joey): set up default scene w/ materials
-    Cell::Material defaultMaterial;
-    //defaultMaterial.SetShader(testShader);
-    defaultMaterial.SetShader(pbrShader);
-    //defaultMaterial.SetTexture("testTexture", testTexture, 0);
-    defaultMaterial.SetTexture("TexAlbedo", albedo,3);
-    defaultMaterial.SetTexture("TexNormal", normal, 4);
-    defaultMaterial.SetTexture("TexMetallic", metallic, 5);
-    defaultMaterial.SetTexture("TexRoughness", roughness, 6);
-    defaultMaterial.SetTexture("TexAO", ao, 7);
-     
-    Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, &defaultMaterial);
-    Cell::SceneNode *secondTorus = Cell::Scene::MakeSceneNode(&torus, &defaultMaterial);
-    Cell::SceneNode *thirdTorus  = Cell::Scene::MakeSceneNode(&torus, &defaultMaterial);
-    Cell::SceneNode *sphereNode  = Cell::Scene::MakeSceneNode(&sphere, &defaultMaterial);
+    // NOTE(Joey): scene setup
+    Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, &matPbr);
+    Cell::SceneNode *secondTorus = Cell::Scene::MakeSceneNode(&torus, &matPbr);
+    Cell::SceneNode *thirdTorus  = Cell::Scene::MakeSceneNode(&torus, &matPbr);
+    Cell::SceneNode *sphereNode  = Cell::Scene::MakeSceneNode(&sphere, &matPbr);
 
     mainTorus->AddChild(secondTorus);
     secondTorus->AddChild(thirdTorus);
@@ -191,41 +183,31 @@ int main(int argc, char *argv[])
     thirdTorus->Scale   = math::vec3(0.65f);
     sphereNode->Scale   = math::vec3(1.35f);
 
-    Cell::SceneNode *floor = Cell::Scene::MakeSceneNode(&plane, &defaultMaterial);
+    Cell::SceneNode *floor = Cell::Scene::MakeSceneNode(&plane, &matPbr);
     floor->Rotation        = math::vec4(1.0f, 0.0f, 0.0f, math::Deg2Rad(-90.0f));
     floor->Scale           = math::vec3(10.0f);
     floor->Position        = math::vec3(0.0f, -2.0f, 0.0f);
 
-    Cell::SceneNode *pbrBall = Cell::Scene::MakeSceneNode(&sphere, &defaultMaterial);
+    Cell::SceneNode *pbrBall = Cell::Scene::MakeSceneNode(&sphere, &matPbrPink);
     pbrBall->Position = math::vec3(5.0f, 5.0f, 4.0f);
 
     Cell::Background background;
     background.SetCubemap(cubemap);
 
+    // NOTE(Joey): more complicated render stuff to test framework
     Cell::RenderTarget target(512, 512, GL_UNSIGNED_BYTE, 2, true);
-
-    //defaultMaterial.SetTexture("testTexture", target.GetColorTexture(0), 0);
-    //defaultMaterial.SetTexture("testTexture", testTexture, 0);
-
-    // scene management:
-    //ScenePbrTest scene(&renderer, &camera);
-    //scene.Init();
-
-    Cell::TextureCube cubez;
-    cubez.DefaultInitialize(1024, 1024, GL_RGB, GL_UNSIGNED_BYTE);
-    //background.SetCubemap(&cubez);
    
 
     // NOTE(Joey): pbr pre-compute
+    // TODO(Joey): think of a way we can have a default pre-computed shader set that works at start, without
+    // having to require the developer to pre-compute one first; or use build paths and only use IBL if a 
+    // cubemap is supplied.
     Cell::Shader *irradianceCapture = Cell::Resources::LoadShader("irradiance", "shaders/cube_sample.vs", "shaders/irradiance_capture.fs");
     Cell::Shader *prefilterCapture = Cell::Resources::LoadShader("prefilter", "shaders/cube_sample.vs", "shaders/prefilter_capture.fs");
     Cell::Shader *integrateBrdf = Cell::Resources::LoadShader("integrate_brdf", "shaders/screen_quad.vs", "shaders/integrate_brdf.fs");
-    Cell::Material matIrradianceCapture;
-    Cell::Material matPrefilterCapture;
-    Cell::Material matIntegrateBrdf;
-    matIrradianceCapture.SetShader(irradianceCapture);
-    matPrefilterCapture.SetShader(prefilterCapture);
-    matIntegrateBrdf.SetShader(integrateBrdf);
+    Cell::Material matIrradianceCapture = renderer.CreateCustomMaterial(irradianceCapture);
+    Cell::Material matPrefilterCapture = renderer.CreateCustomMaterial(prefilterCapture);
+    Cell::Material matIntegrateBrdf = renderer.CreateCustomMaterial(integrateBrdf);
     matIrradianceCapture.DepthCompare = GL_LEQUAL;
     matPrefilterCapture.DepthCompare = GL_LEQUAL;
     Cell::SceneNode *environmentCube = Cell::Scene::MakeSceneNode(&cube, &matIrradianceCapture);
@@ -252,20 +234,15 @@ int main(int argc, char *argv[])
 
     }
     // - brdf integration
-    // NOTE(Joey): the result is not exactly 100% similar to Unreal's BRDF 2D LUT: http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
-    // Try and see what we update to get the exact same results; different roughness approximations?
     Cell::RenderTarget brdfTarget(512, 512, GL_HALF_FLOAT, 1, true);
     // TODO(Joey): render this with a specific blit function of the renderer (that takes as input a src and destination target + material to use; destination can be nullPtr which is default framebuffer)
-    renderer.SetTarget(&brdfTarget);
-    renderer.PushRender(&quad, &matIntegrateBrdf);
-    renderer.SetTarget(nullptr);
-    renderer.RenderPushedCommands();
+    renderer.Blit(nullptr, &brdfTarget, &matIntegrateBrdf);
 
     // NOTE(Joey): use pre-computed PBR environment data
     // - pbr shader
-    defaultMaterial.SetTextureCube("EnvIrradiance", &irradianceMap, 0);
-    defaultMaterial.SetTextureCube("EnvPrefilter", &prefilterMap, 1);
-    defaultMaterial.SetTexture("BRDFLUT", brdfTarget.GetColorTexture(0), 2);
+    matPbr.SetTextureCube("EnvIrradiance", &irradianceMap, 0);
+    matPbr.SetTextureCube("EnvPrefilter", &prefilterMap, 1);
+    matPbr.SetTexture("BRDFLUT", brdfTarget.GetColorTexture(0), 2);
     // - background
     float lodLevel = 2.0f;
     background.SetCubemap(&prefilterMap);
@@ -312,9 +289,6 @@ int main(int argc, char *argv[])
 
         // NOTE(Joey): update render logic
         camera.Update(deltaTime);
-
-        // NOTE(Joey): update materials
-        defaultMaterial.SetVector("CamPos", camera.Position);
 
         // NOTE(Joey): fill the renderer's command buffer with default test scene
         mainTorus->Rotation   = math::vec4(math::vec3(1.0f, 0.0f, 0.0f), glfwGetTime());

@@ -28,12 +28,6 @@ namespace Cell
     public:
         RenderTarget(unsigned int width, unsigned int height, GLenum type = GL_UNSIGNED_BYTE, unsigned int nrColorAttachments = 1, bool depthAndStencil = true);
 
-
-        // NOTE(Joey): we don't expose bind functionality as this is handled 
-        // internally at the renderer SetRenderTarget due to the delayed
-        // render approach.
-        // void Bind();
-
         Texture *GetDepthStencilTexture();
         Texture *GetColorTexture(unsigned int index);
 

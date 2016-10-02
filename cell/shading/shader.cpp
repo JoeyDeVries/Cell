@@ -114,8 +114,8 @@ namespace Cell
         int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniform1i(loc, value);
-        else
-            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
+       /* else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);*/
     }
     // ------------------------------------------------------------------------
     void Shader::SetBool(std::string location, bool value)
@@ -123,8 +123,8 @@ namespace Cell
         int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniform1i(loc, (int)value);
-        else
-            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
+      /*  else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);*/
     }
     // ------------------------------------------------------------------------
     void Shader::SetFloat(std::string location, float value)
@@ -132,8 +132,8 @@ namespace Cell
         int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniform1f(loc, value);
-        else
-            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
+       /* else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);*/
     }
     // ------------------------------------------------------------------------
     void Shader::SetVector(std::string location, math::vec2 value)
@@ -141,8 +141,8 @@ namespace Cell
         int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniform2fv(loc, 1, &value[0]);
-        else
-            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
+       /* else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);*/
     }
     // ------------------------------------------------------------------------
     void Shader::SetVector(std::string location, math::vec3 value)
@@ -150,8 +150,8 @@ namespace Cell
         int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniform3fv(loc, 1, &value[0]);
-        else
-            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
+      /*  else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);*/
     }
     // ------------------------------------------------------------------------
     void Shader::SetVector(std::string location, math::vec4 value)
@@ -159,8 +159,8 @@ namespace Cell
         int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniform4fv(loc, 1, &value[0]);
-        else
-            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
+       /* else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);*/
     }
     // ------------------------------------------------------------------------
     void Shader::SetMatrix(std::string location, math::mat2 value)
@@ -168,8 +168,8 @@ namespace Cell
         int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniformMatrix2fv(loc, 1, GL_FALSE, &value[0][0]);
-        else
-            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
+      /*  else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);*/
     }
     // ------------------------------------------------------------------------
     void Shader::SetMatrix(std::string location, math::mat3 value)
@@ -177,8 +177,8 @@ namespace Cell
         int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniformMatrix3fv(loc, 1, GL_FALSE, &value[0][0]);
-        else
-            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
+       /* else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);*/
     }
     // ------------------------------------------------------------------------
     void Shader::SetMatrix(std::string location, math::mat4 value)
@@ -186,8 +186,8 @@ namespace Cell
         int loc = getUniformLocation(location);
         if (loc >= 0)
             glUniformMatrix4fv(loc, 1, GL_FALSE, &value[0][0]);
-        else
-            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);
+       /* else
+            Log::Message("Shader uniform at location: " + location + " not found in shader.", LOG_WARNING);*/
     }
     // ------------------------------------------------------------------------
     int Shader::getUniformLocation(std::string name)

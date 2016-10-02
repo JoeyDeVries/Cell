@@ -26,7 +26,7 @@
 
 #define SID(string) custom_simple_hash(string)
 
-unsigned int custom_simple_hash(std::string &str)
+inline unsigned int custom_simple_hash(std::string &str)
 {
     unsigned int hash = 0;
 
@@ -40,7 +40,7 @@ unsigned int custom_simple_hash(std::string &str)
     return hash;
 }
 // NOTE(Joey): supports c string literals
-unsigned int custom_simple_hash(const char * cStr)
+inline unsigned int custom_simple_hash(const char * cStr)
 {
     std::string str(cStr);
     return custom_simple_hash(str);

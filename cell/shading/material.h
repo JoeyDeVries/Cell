@@ -16,6 +16,8 @@ namespace Cell
 {
     // TODO(Joey): keep track of a 'dirty' flag for each material, and only update the shader in
     // the shader routines whenever the 'dirty' flag is set; otherwise ignore and keep current setting.
+    // TODO(Joey): should be able to copy materials.
+    // TODO(Joey): should not be able to change the shader of the material; this is set during creation via the renderer.
     /* NOTE(Joey):
 
       asd
@@ -57,6 +59,8 @@ namespace Cell
 
         Shader* GetShader();
         void    SetShader(Shader *shader);
+
+        Material Copy();
 
         void SetBool(std::string name,        bool value);
         void SetInt(std::string name,         int value);
