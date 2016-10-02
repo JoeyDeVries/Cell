@@ -84,11 +84,11 @@ namespace Cell
      /*   defaultMat->Blend = true;
         defaultMat->BlendSrc = GL_SRC_ALPHA;
         defaultMat->BlendDst = GL_ONE_MINUS_SRC_ALPHA;*/
-        defaultMat->SetTexture("TexAlbedo",    Resources::LoadTexture("default", "textures/checkerboard.png"), 3);
-        defaultMat->SetTexture("TexNormal",    Resources::LoadTexture("default", "textures/norm.png"),         4);
-        defaultMat->SetTexture("TexMetallic",  Resources::LoadTexture("default", "textures/black.png"),        5);
-        defaultMat->SetTexture("TexRoughness", Resources::LoadTexture("default", "textures/checkerboard.png"), 6);
-        defaultMat->SetTexture("TexAO",        Resources::LoadTexture("default", "textures/white.png"),        7);
+        defaultMat->SetTexture("TexAlbedo",    Resources::LoadTexture("default albedo",    "textures/checkerboard.png"), 3);
+        defaultMat->SetTexture("TexNormal",    Resources::LoadTexture("default normal",    "textures/norm.png"),         4);
+        defaultMat->SetTexture("TexMetallic",  Resources::LoadTexture("default metallic",  "textures/black.png"),        5);
+        defaultMat->SetTexture("TexRoughness", Resources::LoadTexture("default roughness", "textures/checkerboard.png"), 6);
+        defaultMat->SetTexture("TexAO",        Resources::LoadTexture("default ao",        "textures/white.png"),        7);
         m_DefaultMaterials[SID("default")] = defaultMat;
 
         // NOTE(Joey): initialize render items

@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
     renderer.SetCamera(&camera);
 
     // NOTE(Joey): shapes
-    Cell::Quad quad;
+    //Cell::Quad quad;
     //Cell::LineStrip lineStrip(0.5f, 32);
     Cell::Plane plane(16, 16);
     //Cell::Circle circle(16,16);
@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
     renderer.RenderToCubemap(environmentCube, &irradianceMap, math::vec3(0.0f), 0);
     // - prefilter 
     Cell::TextureCube prefilterMap;
-    prefilterMap.DefaultInitialize(512, 512, GL_RGB, GL_FLOAT, true);
+    prefilterMap.DefaultInitialize(128, 128, GL_RGB, GL_FLOAT, true);
     matPrefilterCapture.SetTextureCube("environment", cubemap, 0);
     environmentCube->Material = &matPrefilterCapture;
     // TODO(Joey): this should be done in a cleaner fashion w/ cubemap generation; ideally we don't touch the GL internals here
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
     matPbr.SetTexture("BRDFLUT", brdfTarget.GetColorTexture(0), 2);
     // - background
     float lodLevel = 2.0f;
-    background.SetCubemap(&prefilterMap);
+    background.SetCubemap(cubemap);
     background.Material->SetFloat("lodLevel", lodLevel);
 
 
@@ -321,7 +321,7 @@ int main(int argc, char *argv[])
         renderer.PushLight(&light2, true);
 
         // NOTE(Joey): also generate dynamic cubemap from scene
-        //renderer.RenderToCubemap(mainTorus, cubemap, math::vec3(0.0f, 8.0f, 0.0f), 0);
+        renderer.RenderToCubemap(mainTorus, cubemap, math::vec3(0.0f, 8.0f, 0.0f), 0);
 
         // NOTE(Joey): request Cell to render all currently pushed commands
         renderer.RenderPushedCommands();
