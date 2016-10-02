@@ -25,8 +25,14 @@ Feature List (complete)
 	5. Easy to use state configuration per shader.
 3. Define Mesh object and encompassing Model class.
 	1. Define set of basic shape mesh generation; plane, cube, disk, sphere, cylinder, torus (donut)
+5. Flexible Framebuffer configuration utility:
+	1. Including CubeMap use and generation (reflection probes, point shadow-maps)
 6. Create Render Buffer, draw commands encapsulated in push to render buffer w/ relevant state:
 	1. Define list of render push commands (material, mesh)
+8. Functioning PBR render pipeline.
+	1. Calculate diffuse integral and store into cubemap.
+	2. Prefilter environment map w/ integral and store into cubemap as diffuse integral.
+	3. Pre-calculate active BRDF in 2D LUT (approach by Unreal for split sum approximation).
 	
 Feature List (work-in-progress)
 ------
@@ -34,7 +40,6 @@ Feature List (work-in-progress)
 	1. Random numbers.
 	2. Logging.
 	3. High-precision performance analysis and measurement.
-	4. TrueType fonts to font character sheet (Use STB_TrueType).
 * Flexible OpenGL initialization.
 	
 1. Shader object w/ custom pre-processor (defines, includes):
@@ -43,7 +48,6 @@ Feature List (work-in-progress)
 2. Material pipeline; configure render state in materials, together with shader, uniform configuration and samplers used.
 	1. Allow for easy access of materials and storage; include set of default materials (default material, glass material etc.)
 5. Flexible Framebuffer configuration utility:
-	1. Including CubeMap use and generation (reflection probes, point shadow-maps)
 	2. Post-processing.
 6. Create Render Buffer, draw commands encapsulated in push to render buffer w/ relevant state:
 	2. Collect all render commands and seperate by pass.
@@ -65,10 +69,9 @@ Feature List (todo)
 	8. Environment reflection support.
 	9. Per-object motion blur.
 	10. Number of lights optimization.
-8. Fully functioning PBR render pipeline.
-	1. Calculate diffuse integral and store into cubemap at any given location in the scene.
-	2. Prefilter environment map w/ integral and store into cubemap at same location as diffuse integral.
-	3. Pre-calculate active BRDF in 2D LUT (approach by Unreal for split sum approximation).
+8. Functioning PBR render pipeline.
+	1. Reflection probes: pre-calculate environment lighting from cubemap and scene at any world location.
+	2. Interpolate between world-space reflection probes.
 9. Optimization:
 	1. Per-object Frustum culling.
 	2. Spatial partitioning.

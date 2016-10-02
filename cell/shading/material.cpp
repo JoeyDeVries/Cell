@@ -76,6 +76,12 @@ namespace Cell
         m_SamplerUniforms[name].Unit        = unit;
         m_SamplerUniforms[name].Type        = SHADER_TYPE_SAMPLERCUBE;
         m_SamplerUniforms[name].TextureCube = value;
+
+        if (m_Shader)
+        {
+            m_Shader->Use();
+            m_Shader->SetInt(name, unit);
+        }
     }
     // ------------------------------------------------------------------------
     void Material::SetVector(std::string name, math::vec2 value)

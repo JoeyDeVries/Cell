@@ -27,7 +27,7 @@ namespace Cell
         unsigned int fs = glCreateShader(GL_FRAGMENT_SHADER);
         m_ID = glCreateProgram();
         int status;
-        char log[512];
+        char log[1024];
 
         const char *vsSourceC = vsCode.c_str();
         const char *fsSourceC = fsCode.c_str();
@@ -39,13 +39,13 @@ namespace Cell
         glGetShaderiv(vs, GL_COMPILE_STATUS, &status);
         if (!status)
         {
-            glGetShaderInfoLog(vs, 512, NULL, log);
+            glGetShaderInfoLog(vs, 1024, NULL, log);
             Log::Message("Vertex shader compilation error at: TODO: GET SHADER NAME HERE!\n" + std::string(log), LOG_ERROR);
         }
         glGetShaderiv(fs, GL_COMPILE_STATUS, &status);
         if (!status)
         {
-            glGetShaderInfoLog(fs, 512, NULL, log);
+            glGetShaderInfoLog(fs, 1024, NULL, log);
             Log::Message("Fragment shader compilation error at: TODO: GET SHADER NAME HERE!\n" + std::string(log), LOG_ERROR);
         }
 
@@ -56,7 +56,7 @@ namespace Cell
         glGetProgramiv(m_ID, GL_LINK_STATUS, &status);
         if (!status)
         {
-            glGetProgramInfoLog(m_ID, 512, NULL, log);
+            glGetProgramInfoLog(m_ID, 1024, NULL, log);
             Log::Message("Shader program linking error: \n" + std::string(log), LOG_ERROR);
         }
 

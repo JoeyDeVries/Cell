@@ -65,12 +65,12 @@ vec3 SampleHemisphereCos(vec2 Xi)
 	return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
 }
 // ----------------------------------------------------------------------------
-vec3 ImportanceSampleGGX(vec2 hammersley, vec3 N, float roughness)
+vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness)
 {
 	float a = roughness*roughness;
 	
-	float phi = 2.0 * PI * hammersley.x;
-	float cosTheta = sqrt((1.0 - hammersley.y) / (1.0 + (a*a - 1.0) * hammersley.y));
+	float phi = 2.0 * PI * Xi.x;
+	float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a*a - 1.0) * Xi.y));
 	float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
 	
 	// NOTE(Joey): from spherical coordinates to cartesian coordinates - halfway vector
@@ -85,5 +85,5 @@ vec3 ImportanceSampleGGX(vec2 hammersley, vec3 N, float roughness)
 	vec3 bitangent = cross(N, tangent);
 	
 	vec3 sampleVec = tangent * H.x + bitangent * H.y + N * H.z;
-	return sampleVec;
+	return normalize(sampleVec);
 }

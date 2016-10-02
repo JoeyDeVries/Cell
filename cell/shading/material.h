@@ -14,6 +14,8 @@
 
 namespace Cell
 {
+    // TODO(Joey): keep track of a 'dirty' flag for each material, and only update the shader in
+    // the shader routines whenever the 'dirty' flag is set; otherwise ignore and keep current setting.
     /* NOTE(Joey):
 
       asd

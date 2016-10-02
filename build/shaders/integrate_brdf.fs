@@ -16,7 +16,7 @@ vec2 IntegrateBRDF(float roughness, float NdotV)
     float A = 0.0;
     float B = 0.0;
 
-    const int SAMPLE_COUNT = 4096;
+    const int SAMPLE_COUNT = 1024;
 
     vec3 N = vec3(0.0, 0.0, 1.0);
 
