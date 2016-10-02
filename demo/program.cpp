@@ -201,30 +201,38 @@ int main(int argc, char *argv[])
     // NOTE(Joey): pbr pre-compute
     // TODO(Joey): think of a way we can have a default pre-computed shader set that works at start, without
     // having to require the developer to pre-compute one first; or use build paths and only use IBL if a 
-    // cubemap is supplied.
+    // cubemap is supplied.   
+    Cell::Shader *hdrToCubemap = Cell::Resources::LoadShader("hdr to cubemap", "shaders/cube_sample.vs", "shaders/spherical_to_cube.fs");
     Cell::Shader *irradianceCapture = Cell::Resources::LoadShader("irradiance", "shaders/cube_sample.vs", "shaders/irradiance_capture.fs");
     Cell::Shader *prefilterCapture = Cell::Resources::LoadShader("prefilter", "shaders/cube_sample.vs", "shaders/prefilter_capture.fs");
     Cell::Shader *integrateBrdf = Cell::Resources::LoadShader("integrate_brdf", "shaders/screen_quad.vs", "shaders/integrate_brdf.fs");
+    Cell::Material matHDRToCube = renderer.CreateCustomMaterial(hdrToCubemap);
     Cell::Material matIrradianceCapture = renderer.CreateCustomMaterial(irradianceCapture);
     Cell::Material matPrefilterCapture = renderer.CreateCustomMaterial(prefilterCapture);
     Cell::Material matIntegrateBrdf = renderer.CreateCustomMaterial(integrateBrdf);
+    matHDRToCube.DepthCompare = GL_LEQUAL;
     matIrradianceCapture.DepthCompare = GL_LEQUAL;
     matPrefilterCapture.DepthCompare = GL_LEQUAL;
-    Cell::SceneNode *environmentCube = Cell::Scene::MakeSceneNode(&cube, &matIrradianceCapture);
+    
+    // - convert HDR radiance image to HDR environment cubemap
+    Cell::SceneNode *environmentCube = Cell::Scene::MakeSceneNode(&cube, &matHDRToCube);
+    Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/factory_catwalk.hdr");
+    matHDRToCube.SetTexture("environment", hdrMap, 0);
+    Cell::TextureCube hdrEnvMap;
+    hdrEnvMap.DefaultInitialize(512, 512, GL_RGB, GL_FLOAT);
+    renderer.RenderToCubemap(environmentCube, &hdrEnvMap);
     // - irradiance
     Cell::TextureCube irradianceMap;
     irradianceMap.DefaultInitialize(32, 32, GL_RGB, GL_FLOAT);
-    matIrradianceCapture.SetTextureCube("environment", cubemap, 0);
+    matIrradianceCapture.SetTextureCube("environment", &hdrEnvMap, 0);
+    environmentCube->Material = &matIrradianceCapture;
     renderer.RenderToCubemap(environmentCube, &irradianceMap, math::vec3(0.0f), 0);
     // - prefilter 
     Cell::TextureCube prefilterMap;
+    prefilterMap.FilterMin = GL_LINEAR_MIPMAP_LINEAR;
     prefilterMap.DefaultInitialize(128, 128, GL_RGB, GL_FLOAT, true);
-    matPrefilterCapture.SetTextureCube("environment", cubemap, 0);
+    matPrefilterCapture.SetTextureCube("environment", &hdrEnvMap, 0);
     environmentCube->Material = &matPrefilterCapture;
-    // TODO(Joey): this should be done in a cleaner fashion w/ cubemap generation; ideally we don't touch the GL internals here
-    prefilterMap.Bind();
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    prefilterMap.Unbind();
     // calculate prefilter for multiple roughness levels
     unsigned int maxMipLevels = 5;
     for (unsigned int i = 0; i < maxMipLevels; ++i) 
@@ -245,7 +253,9 @@ int main(int argc, char *argv[])
     matPbr.SetTexture("BRDFLUT", brdfTarget.GetColorTexture(0), 2);
     // - background
     float lodLevel = 2.0f;
+    //background.SetCubemap(&prefilterMap);
     background.SetCubemap(cubemap);
+    //background.SetCubemap(&hdrEnvMap);
     background.Material->SetFloat("lodLevel", lodLevel);
 
 
@@ -269,6 +279,10 @@ int main(int argc, char *argv[])
             camera.InputKey(deltaTime, Cell::CAMERA_LEFT);
         if (keysPressed[GLFW_KEY_D] || keysPressed[GLFW_KEY_RIGHT])
             camera.InputKey(deltaTime, Cell::CAMERA_RIGHT);
+        if(keysPressed[GLFW_KEY_E])
+            camera.InputKey(deltaTime, Cell::CAMERA_UP);
+        if(keysPressed[GLFW_KEY_Q])
+            camera.InputKey(deltaTime, Cell::CAMERA_DOWN);
         if (keysPressed[GLFW_KEY_T])
         {
             lodLevel += 1.0 * deltaTime;

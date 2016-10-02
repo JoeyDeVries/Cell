@@ -18,7 +18,7 @@ namespace Cell
         //glDeleteTextures(1, &m_ID);
     }
     // ------------------------------------------------------------------------
-    void Texture::Generate(unsigned int width, GLenum internalFormat, GLenum format, GLenum type, unsigned char *data)
+    void Texture::Generate(unsigned int width, GLenum internalFormat, GLenum format, GLenum type, void *data)
     {
         glGenTextures(1, &ID);
 
@@ -40,7 +40,7 @@ namespace Cell
         Unbind();
     }
     // ------------------------------------------------------------------------
-    void Texture::Generate(unsigned int width, unsigned int height, GLenum internalFormat, GLenum format, GLenum type, unsigned char *data)
+    void Texture::Generate(unsigned int width, unsigned int height, GLenum internalFormat, GLenum format, GLenum type, void *data)
     {
         glGenTextures(1, &ID);
 
@@ -63,7 +63,7 @@ namespace Cell
         Unbind();
     }
     // ------------------------------------------------------------------------
-    void Texture::Generate(unsigned int width, unsigned int height, unsigned int depth, GLenum internalFormat, GLenum format, GLenum type, unsigned char *data)
+    void Texture::Generate(unsigned int width, unsigned int height, unsigned int depth, GLenum internalFormat, GLenum format, GLenum type, void *data)
     {
         glGenTextures(1, &ID);
 

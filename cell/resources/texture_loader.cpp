@@ -10,10 +10,10 @@
 namespace Cell
 {
     // ------------------------------------------------------------------------
-    Texture TextureLoader::LoadTexture(std::string path, GLenum Type, GLenum internalFormat)
+    Texture TextureLoader::LoadTexture(std::string path, GLenum target, GLenum internalFormat)
     {
         Texture texture;
-        texture.Type = Type;
+        texture.Target = target;
         texture.Format = internalFormat;
 
         // NOTE(Joey): flip textures on their y coordinate while loading
@@ -32,9 +32,9 @@ namespace Cell
             else if (nrComponents == 4)
                 format = GL_RGBA;
 
-            if(Type == GL_TEXTURE_1D)
+            if(target == GL_TEXTURE_1D)
                 texture.Generate(width, format, format, GL_UNSIGNED_BYTE, data);
-            else if (Type == GL_TEXTURE_2D)
+            else if (target == GL_TEXTURE_2D)
                 texture.Generate(width, height, format, format, GL_UNSIGNED_BYTE, data);
             stbi_image_free(data);
         }
@@ -46,6 +46,39 @@ namespace Cell
         }
         texture.Width = width;
         texture.Height = height;
+
+        return texture;
+    }
+    // ------------------------------------------------------------------------
+    Texture TextureLoader::LoadHDRTexture(std::string path)
+    {
+        Texture texture;
+        texture.Target = GL_TEXTURE_2D;
+
+        stbi_set_flip_vertically_on_load(false);
+
+        if (stbi_is_hdr(path.c_str()))
+        {
+            int width, height, nrComponents;
+            float *data = stbi_loadf(path.c_str(), &width, &height, &nrComponents, 0);
+            if (data)
+            {
+                GLenum format;
+                if (nrComponents == 3)
+                    format = GL_RGB;
+                else if (nrComponents == 4)
+                    format = GL_RGBA;
+
+                texture.Generate(width, height, format, format, GL_FLOAT, data);
+                stbi_image_free(data);
+            }
+            texture.Width = width;
+            texture.Height = height;
+        }
+        else
+        {
+            Log::Message("Trying to load a HDR texture with invalid path or texture is not HDR: " + path + ".", LOG_WARNING);
+        }
 
         return texture;
     }

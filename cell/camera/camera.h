@@ -14,6 +14,8 @@ namespace Cell
         CAMERA_BACK,
         CAMERA_LEFT,
         CAMERA_RIGHT,
+        CAMERA_UP,
+        CAMERA_DOWN,
     };
 
     /* NOTE(Joey):

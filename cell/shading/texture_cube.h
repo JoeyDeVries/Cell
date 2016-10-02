@@ -15,12 +15,12 @@ namespace Cell
         unsigned int ID;
         // TODO(Joey): these should be private and only accessed w/ getters/setters s.t. we can 
         // directly change the texture state where relevant from within the setters.
-        GLenum Format = GL_RGBA;                 // NOTE(Joey): the format each texel is stored in
+        GLenum Format = GL_RGBA;            // NOTE(Joey): the format each texel is stored in
         GLenum Type   = GL_UNSIGNED_BYTE;
-        GLenum FilterMin = GL_LINEAR; // NOTE(Joey): what filter method to use during minification
-        GLenum FilterMax = GL_LINEAR;               // NOTE(Joey): what filter method to use during magnification
-        GLenum WrapS = GL_CLAMP_TO_EDGE;            // NOTE(Joey): wrapping method of the S coordinate
-        GLenum WrapT = GL_CLAMP_TO_EDGE;            // NOTE(Joey): wrapping method of the T coordinate
+        GLenum FilterMin = GL_LINEAR;       // NOTE(Joey): what filter method to use during minification
+        GLenum FilterMax = GL_LINEAR;       // NOTE(Joey): what filter method to use during magnification
+        GLenum WrapS = GL_CLAMP_TO_EDGE;    // NOTE(Joey): wrapping method of the S coordinate
+        GLenum WrapT = GL_CLAMP_TO_EDGE;    // NOTE(Joey): wrapping method of the T coordinate
         bool   Mipmapping = false;
 
         unsigned int FaceWidth  = 0;

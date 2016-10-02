@@ -83,7 +83,7 @@ namespace Cell
         void RenderPushedCommands();
 
         void Blit(RenderTarget *src, RenderTarget *dst, Material *material, std::string textureUniformName = "TexSrc");
-        void RenderToCubemap(SceneNode *scene, TextureCube *target, math::vec3 position, unsigned int mipLevel = 0);
+        void RenderToCubemap(SceneNode *scene, TextureCube *target, math::vec3 position = math::vec3(0.0f), unsigned int mipLevel = 0);
     private:
         void renderCustomCommand(RenderCommand *command, Camera *camera);
         RenderTarget *getCurrentRenderTarget();

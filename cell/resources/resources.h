@@ -48,7 +48,8 @@ namespace Cell
         static Shader*      LoadShader(std::string name, std::string vsPath, std::string fsPath);
         static Shader*      GetShader(std::string name);
         // NOTE(Joey): texture resources
-        static Texture*     LoadTexture(std::string name, std::string path, GLenum type = GL_TEXTURE_2D, GLenum format = GL_RGBA);
+        static Texture*     LoadTexture(std::string name, std::string path, GLenum target = GL_TEXTURE_2D, GLenum format = GL_RGBA);
+        static Texture*     LoadHDR(std::string name, std::string path);
         static TextureCube* LoadTextureCube(std::string name, std::string folder);
         static Texture*     GetTexture(std::string name);
         static TextureCube* GetTextureCube(std::string name);

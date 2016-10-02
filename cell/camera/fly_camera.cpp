@@ -38,6 +38,10 @@ namespace Cell
             m_TargetPosition = m_TargetPosition - Right*speed;
         else if (direction == CAMERA_RIGHT)
             m_TargetPosition = m_TargetPosition + Right*speed;
+        else if (direction == CAMERA_UP)
+            m_TargetPosition = m_TargetPosition + m_WorldUp*speed;
+        else if (direction == CAMERA_DOWN)
+            m_TargetPosition = m_TargetPosition - m_WorldUp*speed;
     }
     // ------------------------------------------------------------------------
     void FlyCamera::InputMouse(float deltaX, float deltaY)

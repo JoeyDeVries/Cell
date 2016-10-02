@@ -19,7 +19,8 @@ namespace Cell
     class TextureLoader
     {
     public:
-        static Texture LoadTexture(std::string path, GLenum Type, GLenum internalFormat);
+        static Texture LoadTexture(std::string path, GLenum target, GLenum internalFormat);
+        static Texture LoadHDRTexture(std::string path);
         // TODO(Joey): read and copy original cubemap order from GL specification
         static TextureCube LoadTextureCube(std::string top, std::string bottom, std::string left, std::string right, std::string front, std::string back);
         // NOTE(Joey): assumes default names for cubemap faces

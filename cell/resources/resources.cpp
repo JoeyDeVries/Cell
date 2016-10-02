@@ -55,7 +55,7 @@ namespace Cell
         }
     }
     // ------------------------------------------------------------------------
-    Texture* Resources::LoadTexture(std::string name, std::string path, GLenum type, GLenum format)
+    Texture* Resources::LoadTexture(std::string name, std::string path, GLenum target, GLenum format)
     {
         unsigned int id = SID(name);
 
@@ -63,7 +63,20 @@ namespace Cell
         if (Resources::m_Textures.find(id) != Resources::m_Textures.end())
             return &Resources::m_Textures[id];
 
-        Texture texture = TextureLoader::LoadTexture(path, type, format);
+        Texture texture = TextureLoader::LoadTexture(path, target, format);
+        Resources::m_Textures[id] = texture;
+        return &Resources::m_Textures[id];
+    }
+    // ------------------------------------------------------------------------
+    Texture* Resources::LoadHDR(std::string name, std::string path)
+    {
+        unsigned int id = SID(name);
+
+        // NOTE(Joey): if texture already exists, return that handle
+        if (Resources::m_Textures.find(id) != Resources::m_Textures.end())
+            return &Resources::m_Textures[id];
+
+        Texture texture = TextureLoader::LoadHDRTexture(path);
         Resources::m_Textures[id] = texture;
         return &Resources::m_Textures[id];
     }
