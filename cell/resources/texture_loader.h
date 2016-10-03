@@ -1,7 +1,7 @@
 #ifndef CELL_RESOURCES_TEXTURE_LOADER
 #define CELL_RESOURCES_TEXTURE_LOADER
 
-#include <GL/glew.h>
+#include "../glad/glad.h"
 
 #include <string>
 

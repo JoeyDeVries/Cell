@@ -125,6 +125,7 @@
     <ClCompile Include="camera\camera.cpp" />
     <ClCompile Include="camera\fly_camera.cpp" />
     <ClCompile Include="camera\camera_frustum.cpp" />
+    <ClCompile Include="glad\glad.c" />
     <ClCompile Include="lighting\directional_light.cpp" />
     <ClCompile Include="lighting\point_light.cpp" />
     <ClCompile Include="mesh\circle.cpp" />
@@ -156,6 +157,8 @@
     <ClInclude Include="camera\camera.h" />
     <ClInclude Include="camera\fly_camera.h" />
     <ClInclude Include="camera\camera_frustum.h" />
+    <ClInclude Include="glad\glad.h" />
+    <ClInclude Include="glad\khrplatform.h" />
     <ClInclude Include="lighting\directional_light.h" />
     <ClInclude Include="lighting\point_light.h" />
     <ClInclude Include="mesh\circle.h" />

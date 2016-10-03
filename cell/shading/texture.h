@@ -1,7 +1,7 @@
 #ifndef CELL_SHADING_TEXTURE_H
 #define CELL_SHADING_TEXTURE_H
 
-#include <GL/glew.h>
+#include "../glad/glad.h"
 
 namespace Cell
 {

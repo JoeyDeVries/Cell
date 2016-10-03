@@ -1,16 +1,17 @@
 #ifndef CELL_SHADING_MATERIAL_H
 #define CELL_SHADING_MATERIAL_H
 
-#include <GL/glew.h>
-
-#include <map>
-
-#include <math/math.h>
-
 #include "shading_types.h"
 #include "shader.h"
 #include "texture.h"
 #include "texture_cube.h"
+
+#include <math/math.h>
+
+#include "../glad/glad.h"
+
+#include <map>
+
 
 namespace Cell
 {

@@ -10,6 +10,9 @@
 
 #include "../resources/resources.h"
 
+#include <math/linear_algebra/vector.h>
+#include <math/linear_algebra/matrix.h>
+
 #include <utility/logging/log.h>
 #include <utility/string_id.h>
 
@@ -27,6 +30,7 @@ namespace Cell
     {
         delete m_LightMesh;
         delete m_LightMaterial;
+        delete m_NDCPlane;
 
         for (auto it = m_DefaultMaterials.begin(); it != m_DefaultMaterials.end(); ++it)
         {
@@ -34,7 +38,7 @@ namespace Cell
         }
     }
     // ------------------------------------------------------------------------
-    void Renderer::Init()
+    void Renderer::Init(GLADloadproc loadProcFunc)
     {
         /* NOTE(Joey):
 
@@ -51,10 +55,20 @@ namespace Cell
           each and every one of these functions. 
 
           For this reason we use a library called ... (glad?)
+          http://glad.dav1d.de/ <- their webservice for generating header file
 
         */
-        // [...] 
-        
+        if (!gladLoadGLLoader(loadProcFunc))
+        {
+            Log::Message("Failed to initialize OpenGL context.", LOG_ERROR);
+            return;
+        }
+        else
+        {
+            Log::Message("OpenGL functions succesfully loaded.", LOG_INIT);
+            Log::Message("Version - Major: " + std::to_string(GLVersion.major) + " Minor: " + std::to_string(GLVersion.minor), LOG_INIT);
+            Log::Message("Driver: " + std::string((char*)glGetString(GL_VENDOR)) + " Renderer: " + std::string((char*)glGetString(GL_RENDERER)), LOG_INIT);
+        }
 
         /* NOTE(Joey): 
 
@@ -69,7 +83,8 @@ namespace Cell
           Note that debug output will only be initialized if the 
           windowing library initialized an OpenGL context with the
           debug output bit flag set; otherwise this functionality
-          is simply ignored.
+          is simply ignored. Note that it did not on a 3.3 context,
+          it's interesting to figure out why!
 
         */
         // [...]
@@ -93,8 +108,20 @@ namespace Cell
 
         // NOTE(Joey): initialize render items
         // TODO(Joey): do we want to abstract this or not? as it is very specific.
+        m_NDCPlane = new Quad;
         glGenFramebuffers(1, &m_FramebufferCubemap);
         glGenRenderbuffers(1, &m_CubemapDepthRBO);
+    }
+    // ------------------------------------------------------------------------
+    void Renderer::SetRenderSize(unsigned int width, unsigned int height)
+    {
+        m_RenderSize.x = width;
+        m_RenderSize.y = height;
+    }
+    // ------------------------------------------------------------------------
+    math::vec2 Renderer::GetRenderSize()
+    {
+        return m_RenderSize;
     }
     // ------------------------------------------------------------------------
     void Renderer::SetTarget(RenderTarget *renderTarget, GLenum target)
@@ -248,10 +275,9 @@ namespace Cell
             }
             else
             {
-                glViewport(0, 0, 1280, 720);
+                glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
-                // TODO(Joey): store default resolution and revert:
-                m_Camera->SetPerspective(m_Camera->FOV, 1280.0f / 720.0f, 0.1, 100.0f);
+                m_Camera->SetPerspective(m_Camera->FOV, m_RenderSize.x / m_RenderSize.y, 0.1, 100.0f);
                 // NOTE(Joey): don't clear the default color buffer.
                 //glClear(GL_COLOR_BUFFER_BIT);
             }
@@ -308,14 +334,13 @@ namespace Cell
         // stored/displayer inside dst's buffers.
         RenderCommand command;
         command.Material = material;
-        command.Mesh = &m_NDCPlane;
+        command.Mesh = m_NDCPlane;
         renderCustomCommand(&command, nullptr);
 
         // NOTE(Joey): revert back to default framebuffer
         // NOTE(Joey): is this necessary? do we want this?
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        // TODO(Joey): manage/store render size in renderer!
-        glViewport(0, 0, 1280, 720); 
+        glViewport(0, 0, m_RenderSize.x, m_RenderSize.y); 
     }
     // ------------------------------------------------------------------------
     void Renderer::RenderToCubemap(SceneNode *scene, TextureCube *target, math::vec3 position, unsigned int mipLevel)
@@ -378,7 +403,7 @@ namespace Cell
         }
         // NOTE(Joey): reset state
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, 1280, 720);
+        glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
     }
     // ------------------------------------------------------------------------
     void Renderer::renderCustomCommand(RenderCommand *command, Camera *camera)
@@ -460,7 +485,7 @@ namespace Cell
                 material->GetShader()->SetFloat(it->first, it->second.Float);
                 break;
             case SHADER_TYPE_VEC2:
-                material->GetShader()->SetVector(it->first, it->second.Vec2);
+                //material->GetShader()->SetVector(it->first, it->second.Vec2);
                 break;
             case SHADER_TYPE_VEC3:
                 material->GetShader()->SetVector(it->first, it->second.Vec3);

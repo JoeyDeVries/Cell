@@ -2,7 +2,7 @@
 
 #include <utility/logging/log.h>
 
-#include <gl/glew.h>
+#include "../glad/glad.h"
 
 #include <fstream>
 #include <string>

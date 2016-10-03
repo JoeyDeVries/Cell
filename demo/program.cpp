@@ -1,9 +1,5 @@
 #include <iostream>
 
-#define GLEW_STATIC
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
 #include <math/math.h>
 #include <cell/ProjectLinkTest.h>
 #include <cell/resources/resources.h>
@@ -25,6 +21,9 @@
 #include <cell/renderer/render_target.h>
 
 #include "scenes/pbr_test.h"
+
+#include <GLFW/glfw3.h>
+
 
 void APIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, void *userParam);
 
@@ -67,7 +66,7 @@ int main(int argc, char *argv[])
     */
     Log::Message("Initializing GLFW");
         glfwInit();
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
@@ -89,6 +88,8 @@ int main(int argc, char *argv[])
         glfwSetKeyCallback(window, keyFunc);
         glfwSetCursorPosCallback(window, mousePosFunc);
 
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
     Log::Message("GLFW initialized");
 
     // TODO(Joey): initialize Cell here
@@ -96,15 +97,21 @@ int main(int argc, char *argv[])
 
     // NOTE(Joey): load OpenGL function pointers
     Log::Message("Initializing GLEW");
-        glewExperimental = true;
-        if (glewInit() != GLEW_OK)
-        {
-            // TODO(Joey): logging/diagnostics
-            return -1;
-        }
-       glGetError();
+       // glewExperimental = true;
+       // if (glewInit() != GLEW_OK)
+       // {
+       //     // TODO(Joey): logging/diagnostics
+       //     return -1;
+       // }
+       //glGetError();
 
     Log::Message("GLEW initialized");
+
+    // NOTE(Joey): custom test code
+    Cell::Renderer renderer;
+    renderer.Init((GLADloadproc)glfwGetProcAddress);
+    renderer.SetRenderSize(width, height);
+    renderer.SetCamera(&camera);
 
     // TODO(Joey): move to Cell initialization; will by initialized by default if windowing library
     // requests a Debug context; otherwise we simply ignore debug output.
@@ -113,11 +120,11 @@ int main(int argc, char *argv[])
     glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
     if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
     {
-        // NOTE(Joey): we succesfully requested a debug context, now initialize
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(glDebugOutput, nullptr);
-        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, true);
+            // NOTE(Joey): we succesfully requested a debug context, now initialize
+            glEnable(GL_DEBUG_OUTPUT);
+            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+            glDebugMessageCallback((GLDEBUGPROC)glDebugOutput, nullptr);
+            glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, true);
     }
 
     Log::Message("Debug output initialized.");
@@ -128,18 +135,15 @@ int main(int argc, char *argv[])
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
+
         glViewport(0, 0, width, height);
 
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
     Log::Message("OpenGL configured");
 
+    Log::Display();
+    Log::Clear();
 
-    // NOTE(Joey): custom test code
-    Cell::Renderer renderer;
-    renderer.Init();
-    renderer.SetCamera(&camera);
 
     // NOTE(Joey): shapes
     //Cell::Quad quad;
@@ -159,13 +163,9 @@ int main(int argc, char *argv[])
     matPbrPink.SetTexture("TexRoughness", Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/plastic/roughness.png"), 6);
     matPbrPink.SetTexture("TexAO",        Cell::Resources::LoadTexture("plastic ao",        "textures/pbr/plastic/ao.png"),        7);
 
-    Cell::TextureCube *cubemap = Cell::Resources::LoadTextureCube("yokohama night", "textures/backgrounds/yokohama/");
-
-    Log::Display();
-    Log::Clear();
-
+ 
     // NOTE(Joey): configure camera
-    camera.SetPerspective(math::Deg2Rad(60.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
+    camera.SetPerspective(math::Deg2Rad(60.0f), renderer.GetRenderSize().x / renderer.GetRenderSize().y ,0.1f, 100.0f);
 
     // NOTE(Joey): scene setup
     Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, &matPbr);
@@ -192,7 +192,8 @@ int main(int argc, char *argv[])
     pbrBall->Position = math::vec3(5.0f, 5.0f, 4.0f);
 
     Cell::Background background;
-    background.SetCubemap(cubemap);
+    Cell::TextureCube cubemap;
+    cubemap.DefaultInitialize(1024, 1024, GL_RGB, GL_UNSIGNED_BYTE);
 
     // NOTE(Joey): more complicated render stuff to test framework
     Cell::RenderTarget target(512, 512, GL_UNSIGNED_BYTE, 2, true);
@@ -243,7 +244,6 @@ int main(int argc, char *argv[])
     }
     // - brdf integration
     Cell::RenderTarget brdfTarget(512, 512, GL_HALF_FLOAT, 1, true);
-    // TODO(Joey): render this with a specific blit function of the renderer (that takes as input a src and destination target + material to use; destination can be nullPtr which is default framebuffer)
     renderer.Blit(nullptr, &brdfTarget, &matIntegrateBrdf);
 
     // NOTE(Joey): use pre-computed PBR environment data
@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
     // - background
     float lodLevel = 2.0f;
     //background.SetCubemap(&prefilterMap);
-    background.SetCubemap(cubemap);
+    background.SetCubemap(&cubemap);
     //background.SetCubemap(&hdrEnvMap);
     background.Material->SetFloat("lodLevel", lodLevel);
 
@@ -335,7 +335,7 @@ int main(int argc, char *argv[])
         renderer.PushLight(&light2, true);
 
         // NOTE(Joey): also generate dynamic cubemap from scene
-        renderer.RenderToCubemap(mainTorus, cubemap, math::vec3(0.0f, 8.0f, 0.0f), 0);
+        renderer.RenderToCubemap(mainTorus, &cubemap, math::vec3(0.0f, 8.0f, 0.0f), 0);
 
         // NOTE(Joey): request Cell to render all currently pushed commands
         renderer.RenderPushedCommands();

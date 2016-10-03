@@ -8,6 +8,8 @@
 #include "../mesh/quad.h"
 #include "command_buffer.h"
 
+#include "../glad/glad.h"
+
 namespace Cell
 {
     /* NOTE(Joey):
@@ -43,13 +45,15 @@ namespace Cell
         Camera       *m_Camera;
 
         // render state
+        math::vec2 m_RenderSize;
+
         std::vector<DirectionalLight*> m_DirectionalLights;
         std::vector<PointLight*>       m_PointLights;
         Mesh     *m_LightMesh;
         Material *m_LightMaterial;
         std::vector<RenderTarget*>  m_RenderTargetsCustom;
         RenderTarget               *m_CurrentRenderTargetCustom = nullptr;
-        Quad m_NDCPlane; 
+        Quad                       *m_NDCPlane; 
 
         // (dynamic) cubemap generation
         unsigned int m_FramebufferCubemap; // NOTE(Joey): cubemap render targets are a very specific case so we can do these without abstractions.
@@ -62,7 +66,10 @@ namespace Cell
         Renderer();
         ~Renderer();
 
-        void Init();
+        void Init(GLADloadproc loadProcFunc);
+
+        void SetRenderSize(unsigned int width, unsigned int height);
+        math::vec2 GetRenderSize();
 
         void SetTarget(RenderTarget *renderTarget, GLenum target = GL_TEXTURE_2D);
 

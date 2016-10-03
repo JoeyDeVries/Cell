@@ -18,7 +18,7 @@ float VanDerCorpus(uint n, uint base)
             denom   = mod(float(n), 2.0);
             result += denom * invBase;
             invBase = invBase / 2.0;
-            n       = int(float(n) / 2.0);
+            n       = uint(float(n) / 2.0);
         }
     }
 
