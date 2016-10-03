@@ -73,7 +73,6 @@ int main(int argc, char *argv[])
         glfwWindowHint(GLFW_RESIZABLE, true);
     
         GLFWwindow *window = glfwCreateWindow(1280, 720, "Cell", nullptr, nullptr);           
-        //std::cout << *ptrToTest << std::endl;
         if (window == nullptr)
         {
             // TODO(Joey): logging/diagnostics
@@ -92,26 +91,13 @@ int main(int argc, char *argv[])
         glfwGetFramebufferSize(window, &width, &height);
     Log::Message("GLFW initialized");
 
-    // TODO(Joey): initialize Cell here
-    //Cell::Init();
+    Log::Message("Initializing render system");
+        Cell::Renderer renderer;
+        renderer.Init((GLADloadproc)glfwGetProcAddress);
+        renderer.SetRenderSize(width, height);
+        renderer.SetCamera(&camera);
+    Log::Message("Render system initialized");
 
-    // NOTE(Joey): load OpenGL function pointers
-    Log::Message("Initializing GLEW");
-       // glewExperimental = true;
-       // if (glewInit() != GLEW_OK)
-       // {
-       //     // TODO(Joey): logging/diagnostics
-       //     return -1;
-       // }
-       //glGetError();
-
-    Log::Message("GLEW initialized");
-
-    // NOTE(Joey): custom test code
-    Cell::Renderer renderer;
-    renderer.Init((GLADloadproc)glfwGetProcAddress);
-    renderer.SetRenderSize(width, height);
-    renderer.SetCamera(&camera);
 
     // TODO(Joey): move to Cell initialization; will by initialized by default if windowing library
     // requests a Debug context; otherwise we simply ignore debug output.
