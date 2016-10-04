@@ -15,12 +15,12 @@ namespace Cell
 
     }
     // ------------------------------------------------------------------------
-    Shader::Shader(std::string vsCode, std::string fsCode)
+    Shader::Shader(std::string vsCode, std::string fsCode, std::vector<std::string> defines)
     {      
-        Load(vsCode, fsCode);
+        Load(vsCode, fsCode, defines);
     }
     // ------------------------------------------------------------------------
-    void Shader::Load(std::string vsCode, std::string fsCode)
+    void Shader::Load(std::string vsCode, std::string fsCode, std::vector<std::string> defines)
     {
         // NOTE(Joey): compile both shaders and link them
         unsigned int vs = glCreateShader(GL_VERTEX_SHADER);
@@ -29,10 +29,68 @@ namespace Cell
         int status;
         char log[1024];
 
-        const char *vsSourceC = vsCode.c_str();
-        const char *fsSourceC = fsCode.c_str();
-        glShaderSource(vs, 1, &vsSourceC, NULL);
-        glShaderSource(fs, 1, &fsSourceC, NULL);
+        
+        // NOTE(Joey): if a list of define statements is specified, add these 
+        // to the start of the shader source, s.t. we can selectively compile
+        // different shaders based on the defines we set.
+        if (defines.size() > 0)
+        {
+            std::vector<std::string> vsMergedCode;
+            std::vector<std::string> fsMergedCode;
+            // NOTE(Joey): first determine if the user supplied a #version 
+            // directive at the top of the shader code, in which case we 
+            // extract it and add it 'before' the list of define code.
+            // The GLSL version specifier is only valid as the first line of
+            // the GLSL code; otherwise the GLSL version defaults to 1.1.
+            std::string firstLine = vsCode.substr(0, vsCode.find("\n"));
+            if (firstLine.find("#version") != std::string::npos)
+            {
+                // NOTE(Joey): strip shader code of first line and add to list
+                // of shader code strings
+                vsCode = vsCode.substr(vsCode.find("\n") + 1, vsCode.length() - 1);
+                vsMergedCode.push_back(firstLine + "\n");
+            }
+            firstLine = fsCode.substr(0, fsCode.find("\n"));
+            if (firstLine.find("#version") != std::string::npos)
+            {
+                // NOTE(Joey): strip shader code of first line and add to list
+                // of shader code strings
+                fsCode = fsCode.substr(fsCode.find("\n") + 1, fsCode.length() - 1);
+                fsMergedCode.push_back(firstLine + "\n");
+            }
+            // NOTE(Joey): then add define statements to the shader string list
+            for (unsigned int i = 0; i < defines.size(); ++i)
+            {
+                std::string define = "#define " + defines[i] + "\n";
+                vsMergedCode.push_back(define);
+                fsMergedCode.push_back(define);
+            }
+            // then addremaining shader code to merged result and pass result
+            // to glShaderSource
+            vsMergedCode.push_back(vsCode);
+            fsMergedCode.push_back(fsCode);
+            // NOTE(Joey): note that we manually build an array of C style 
+            // strings as glShaderSource doesn't expect it in any other format.
+            // Note that all strings are null-terminated so we can pass NULL
+            // as glShaderSource's final argument.
+            const char **vsStringsC = new const char*[vsMergedCode.size()];
+            const char **fsStringsC = new const char*[fsMergedCode.size()];
+            for (unsigned int i = 0; i < vsMergedCode.size(); ++i)
+                vsStringsC[i] = vsMergedCode[i].c_str();
+            for (unsigned int i = 0; i < fsMergedCode.size(); ++i)
+                fsStringsC[i] = fsMergedCode[i].c_str();
+            glShaderSource(vs, vsMergedCode.size(), vsStringsC, NULL);
+            glShaderSource(fs, fsMergedCode.size(), fsStringsC, NULL);
+            delete[] vsStringsC;
+            delete[] fsStringsC;
+        }
+        else
+        {
+            const char *vsSourceC = vsCode.c_str();
+            const char *fsSourceC = fsCode.c_str();
+            glShaderSource(vs, 1, &vsSourceC, NULL);
+            glShaderSource(fs, 1, &fsSourceC, NULL);
+        }
         glCompileShader(vs);
         glCompileShader(fs);
 

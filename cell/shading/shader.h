@@ -29,9 +29,9 @@ namespace Cell
 
     public:
         Shader();
-        Shader(std::string vsCode, std::string fsCode);
+        Shader(std::string vsCode, std::string fsCode, std::vector<std::string> defines = std::vector<std::string>());
 
-        void Load(std::string vsCode, std::string fsCode);
+        void Load(std::string vsCode, std::string fsCode, std::vector<std::string> defines = std::vector<std::string>());
 
         void Use();
 

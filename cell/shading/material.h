@@ -15,6 +15,13 @@
 
 namespace Cell
 {
+    enum MaterialType
+    {
+        MATERIAL_DEFAULT,
+        MATERIAL_CUSTOM,
+        MATERIAL_POST_PROCESS,
+    };
+
     // TODO(Joey): keep track of a 'dirty' flag for each material, and only update the shader in
     // the shader routines whenever the 'dirty' flag is set; otherwise ignore and keep current setting.
     // TODO(Joey): should be able to copy materials.
@@ -32,7 +39,8 @@ namespace Cell
         std::map<std::string, UniformValue>        m_Uniforms;
         std::map<std::string, UniformValueSampler> m_SamplerUniforms; // NOTE(Joey): process samplers differently 
     public:
-        math::vec4 Color = math::vec4(1.0f);
+        MaterialType Type = MATERIAL_DEFAULT;
+        math::vec4 Color  = math::vec4(1.0f);
 
         // depth state
         bool   DepthTest    = true;

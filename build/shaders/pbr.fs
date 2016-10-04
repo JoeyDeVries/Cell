@@ -98,6 +98,18 @@ void main()
 	
 	// NOTE(Joey): gamma correct
 	color = pow(color, vec3(1.0/2.2)); 
+    
+    #ifdef COLOR_SQUARE
+        color = color * color;
+    #endif
+    
+    #ifdef COLOR_RED
+        color = color * vec3(1.0, 0.0, 0.0);
+    #endif
+    
+    #ifdef TEST
+        color += vec3(0.0, 1.0, 0.0);
+    #endif
 	
 	FragColor = vec4(color, 1.0);
 }

@@ -18,6 +18,9 @@
 
 #include <stack>
 
+
+void APIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, void *userParam);
+
 namespace Cell
 {
     // ------------------------------------------------------------------------
@@ -87,13 +90,29 @@ namespace Cell
           it's interesting to figure out why!
 
         */
-        // [...]
+        Log::Message("Initializing debug Output.");
+        int flags;
+        glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+        if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+        {
+            // NOTE(Joey): we succesfully requested a debug context, now initialize
+            glEnable(GL_DEBUG_OUTPUT);
+            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+            glDebugMessageCallback((GLDEBUGPROC)glDebugOutput, nullptr); // NOTE(Joey): defined at bottom of renderer.cpp
+            glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, true);
+        }
+        else
+        {
+            Log::Message("Debug output not supported.", LOG_INIT);
+        }
+        Log::Message("Debug output initialized.");
+
 
         // TODO(Joey): load default set of shaders (do this in Init function!; here or in resources)
         Shader *shader = Resources::LoadShader("light", "shaders/light.vs", "shaders/light.fs");
         m_LightMesh = new Sphere(8, 8);
         m_LightMaterial = new Material(shader);
-        Shader *defaultShader = Resources::LoadShader("default", "shaders/pbr.vs", "shaders/pbr.fs");
+        Shader *defaultShader = Resources::LoadShader("default", "shaders/pbr.vs", "shaders/pbr.fs", { "COLOR_SQUARE", "COLOR_RED" });
         // NOTE(Joey): and materials
         Material *defaultMat = new Material(defaultShader);
      /*   defaultMat->Blend = true;
@@ -530,4 +549,54 @@ namespace Cell
         //else
             //return nullptr;
     }
+}
+
+
+// NOTE(Joey): process OpenGL's debug output
+void APIENTRY glDebugOutput(GLenum source,
+    GLenum type,
+    GLuint id,
+    GLenum severity,
+    GLsizei length,
+    const GLchar *message,
+    void *userParam)
+{
+    // ignore non-significant error/warning codes
+    if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+
+    std::string logMessage = "Debug output: (" + std::to_string(id) + "): " + message + "\n";
+
+    switch (source)
+    {
+    case GL_DEBUG_SOURCE_API:             logMessage += "Source: API"; break;
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   logMessage += "Source: Window System"; break;
+    case GL_DEBUG_SOURCE_SHADER_COMPILER: logMessage += "Source: Shader Compiler"; break;
+    case GL_DEBUG_SOURCE_THIRD_PARTY:     logMessage += "Source: Third Party"; break;
+    case GL_DEBUG_SOURCE_APPLICATION:     logMessage += "Source: Application"; break;
+    case GL_DEBUG_SOURCE_OTHER:           logMessage += "Source: Other"; break;
+    } logMessage += "\n";
+
+    switch (type)
+    {
+    case GL_DEBUG_TYPE_ERROR:               logMessage += "Type: Error"; break;
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: logMessage += "Type: Deprecated Behaviour"; break;
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  logMessage += "Type: Undefined Behaviour"; break;
+    case GL_DEBUG_TYPE_PORTABILITY:         logMessage += "Type: Portability"; break;
+    case GL_DEBUG_TYPE_PERFORMANCE:         logMessage += "Type: Performance"; break;
+    case GL_DEBUG_TYPE_MARKER:              logMessage += "Type: Marker"; break;
+    case GL_DEBUG_TYPE_PUSH_GROUP:          logMessage += "Type: Push Group"; break;
+    case GL_DEBUG_TYPE_POP_GROUP:           logMessage += "Type: Pop Group"; break;
+    case GL_DEBUG_TYPE_OTHER:               logMessage += "Type: Other"; break;
+    } logMessage += "\n";
+
+    switch (severity)
+    {
+    case GL_DEBUG_SEVERITY_HIGH:         logMessage += "Severity: high"; break;
+    case GL_DEBUG_SEVERITY_MEDIUM:       logMessage += "Severity: medium"; break;
+    case GL_DEBUG_SEVERITY_LOW:          logMessage += "Severity: low"; break;
+    case GL_DEBUG_SEVERITY_NOTIFICATION: logMessage += "Severity: notification"; break;
+    } logMessage += "\n";
+    logMessage += "\n";
+
+    Log::Message(logMessage, type == GL_DEBUG_TYPE_ERROR ? LOG_ERROR : LOG_WARNING);
 }

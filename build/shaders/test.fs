@@ -1,4 +1,5 @@
 #version 330 core
+#define numLights
 out vec4 FragColor;
 in vec3 color;
 in vec2 TexCoords;
@@ -6,6 +7,8 @@ in vec3 WorldPos;
 in vec3 Normal;
 
 #include test_include.glsl
+
+
 
 uniform float testUniform;
 uniform sampler2D testTexture;

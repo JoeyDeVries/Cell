@@ -26,7 +26,7 @@ namespace Cell
     }
 
     // ------------------------------------------------------------------------
-    Shader* Resources::LoadShader(std::string name, std::string vsPath, std::string fsPath)
+    Shader* Resources::LoadShader(std::string name, std::string vsPath, std::string fsPath, std::vector<std::string> defines)
     {
         unsigned int id = SID(name);
 
@@ -34,7 +34,7 @@ namespace Cell
         if(Resources::m_Shaders.find(id) != Resources::m_Shaders.end())
             return &Resources::m_Shaders[id];
 
-        Shader shader = ShaderLoader::Load(vsPath, fsPath);
+        Shader shader = ShaderLoader::Load(vsPath, fsPath, defines);
         Resources::m_Shaders[id] = shader;
         return &Resources::m_Shaders[id];
     }

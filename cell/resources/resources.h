@@ -45,7 +45,7 @@ namespace Cell
         static void Init();
 
         // NOTE(Joey): shader resources
-        static Shader*      LoadShader(std::string name, std::string vsPath, std::string fsPath);
+        static Shader*      LoadShader(std::string name, std::string vsPath, std::string fsPath, std::vector<std::string> defines = std::vector<std::string>());
         static Shader*      GetShader(std::string name);
         // NOTE(Joey): texture resources
         static Texture*     LoadTexture(std::string name, std::string path, GLenum target = GL_TEXTURE_2D, GLenum format = GL_RGBA);

@@ -25,7 +25,7 @@
 #include <GLFW/glfw3.h>
 
 
-void APIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, void *userParam);
+
 
 void framebufferSizeFunc(GLFWwindow *window, int width, int height);
 void keyFunc(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -98,32 +98,12 @@ int main(int argc, char *argv[])
         renderer.SetCamera(&camera);
     Log::Message("Render system initialized");
 
-
-    // TODO(Joey): move to Cell initialization; will by initialized by default if windowing library
-    // requests a Debug context; otherwise we simply ignore debug output.
-    Log::Message("Initializing debug Output.");
-    int flags;
-    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
-    {
-            // NOTE(Joey): we succesfully requested a debug context, now initialize
-            glEnable(GL_DEBUG_OUTPUT);
-            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-            glDebugMessageCallback((GLDEBUGPROC)glDebugOutput, nullptr);
-            glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, true);
-    }
-
-    Log::Message("Debug output initialized.");
-
-
     // NOTE(Joey): configure default OpenGL state
     Log::Message("Configuring OpenGL");
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
-
         glViewport(0, 0, width, height);
-
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
     Log::Message("OpenGL configured");
 
@@ -256,7 +236,9 @@ int main(int argc, char *argv[])
 
         // TODO(Joey): do we need to pass input to Cell?
         // TODO(Joey): replace by input manager that maps any window input to a 
-        // custom defined format.
+        // custom defined format; don't think we want this, we'd probably still
+        // want to control the camera somewhat from outside the renderer; same
+        // with changing material parameters.
         if (keysPressed[GLFW_KEY_W] || keysPressed[GLFW_KEY_UP])
             camera.InputKey(deltaTime, Cell::CAMERA_FORWARD);
         if (keysPressed[GLFW_KEY_S] || keysPressed[GLFW_KEY_DOWN])
@@ -304,11 +286,8 @@ int main(int argc, char *argv[])
 
         renderer.SetTarget(&target);
         renderer.PushRender(&background);
-        //background.PushRender(&renderer);
         renderer.PushRender(mainTorus);
         renderer.SetTarget(nullptr);
-
-        //renderer.PushRender(&quad, &matIntegrateBrdf);
 
         Cell::PointLight light;
         light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);
@@ -375,55 +354,4 @@ void mousePosFunc(GLFWwindow *window, double xpos, double ypos)
     lastY = ypos;
 
     camera.InputMouse(xoffset, yoffset);
-}
-
-
-// NOTE(Joey): process OpenGL's debug output
-// TODO(Joey): this should be included in Cell
-void APIENTRY glDebugOutput(GLenum source,
-    GLenum type,
-    GLuint id,
-    GLenum severity,
-    GLsizei length,
-    const GLchar *message,
-    void *userParam)
-{
-    // ignore non-significant error/warning codes
-    if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
-
-    std::string logMessage = "Debug output: (" + std::to_string(id) + "): " + message + "\n";
-
-    switch (source)
-    {
-    case GL_DEBUG_SOURCE_API:             logMessage += "Source: API"; break;
-    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   logMessage += "Source: Window System"; break;
-    case GL_DEBUG_SOURCE_SHADER_COMPILER: logMessage += "Source: Shader Compiler"; break;
-    case GL_DEBUG_SOURCE_THIRD_PARTY:     logMessage += "Source: Third Party"; break;
-    case GL_DEBUG_SOURCE_APPLICATION:     logMessage += "Source: Application"; break;
-    case GL_DEBUG_SOURCE_OTHER:           logMessage += "Source: Other"; break;
-    } logMessage += "\n";
-
-    switch (type)
-    {
-    case GL_DEBUG_TYPE_ERROR:               logMessage += "Type: Error"; break;
-    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: logMessage += "Type: Deprecated Behaviour"; break;
-    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  logMessage += "Type: Undefined Behaviour"; break;
-    case GL_DEBUG_TYPE_PORTABILITY:         logMessage += "Type: Portability"; break;
-    case GL_DEBUG_TYPE_PERFORMANCE:         logMessage += "Type: Performance"; break;
-    case GL_DEBUG_TYPE_MARKER:              logMessage += "Type: Marker"; break;
-    case GL_DEBUG_TYPE_PUSH_GROUP:          logMessage += "Type: Push Group"; break;
-    case GL_DEBUG_TYPE_POP_GROUP:           logMessage += "Type: Pop Group"; break;
-    case GL_DEBUG_TYPE_OTHER:               logMessage += "Type: Other"; break;
-    } logMessage += "\n";
-
-    switch (severity)
-    {
-    case GL_DEBUG_SEVERITY_HIGH:         logMessage += "Severity: high"; break;
-    case GL_DEBUG_SEVERITY_MEDIUM:       logMessage += "Severity: medium"; break;
-    case GL_DEBUG_SEVERITY_LOW:          logMessage += "Severity: low"; break;
-    case GL_DEBUG_SEVERITY_NOTIFICATION: logMessage += "Severity: notification"; break;
-    } logMessage += "\n";
-    logMessage += "\n";
-
-    Log::Message(logMessage, type == GL_DEBUG_TYPE_ERROR ? LOG_ERROR : LOG_WARNING);
 }

@@ -21,8 +21,9 @@ Feature List (complete)
 0. Configure and enable debugging and logging utility.
 1. Shader object w/ custom pre-processor (defines, includes):
 	1. Include other shader files.
-	4. Parse active vertex attributes and uniform variables, retrieve location and store in shader object.
-	5. Easy to use state configuration per shader.
+	2. Parse active vertex attributes and uniform variables, retrieve location and store in shader object.
+	3. Easy to use state configuration per shader.
+    4. Support multiple build paths.
 3. Define Mesh object and encompassing Model class.
 	1. Define set of basic shape mesh generation; plane, cube, disk, sphere, cylinder, torus (donut)
 5. Flexible Framebuffer configuration utility:
@@ -42,9 +43,6 @@ Feature List (work-in-progress)
 	3. High-precision performance analysis and measurement.
 * Flexible OpenGL initialization.
 	
-1. Shader object w/ custom pre-processor (defines, includes):
-	2. Support multiple build paths.
-	3. Re-compilation during runtime?	
 2. Material pipeline; configure render state in materials, together with shader, uniform configuration and samplers used.
 	1. Allow for easy access of materials and storage; include set of default materials (default material, glass material etc.)
 5. Flexible Framebuffer configuration utility:

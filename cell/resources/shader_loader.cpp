@@ -5,7 +5,7 @@
 namespace Cell
 {
     // ------------------------------------------------------------------------
-    Shader ShaderLoader::Load(std::string vsPath, std::string fsPath)
+    Shader ShaderLoader::Load(std::string vsPath, std::string fsPath, std::vector<std::string> defines)
     {
         std::ifstream vsFile, fsFile;
         vsFile.open(vsPath);
@@ -24,7 +24,7 @@ namespace Cell
         std::string fsSource = readShader(fsFile, directory);
 
         // NOTE(Joey): now build the shader with the source code
-        Shader shader(vsSource, fsSource);
+        Shader shader(vsSource, fsSource, defines);
 
         vsFile.close();
         fsFile.close();
