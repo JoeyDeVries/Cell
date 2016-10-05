@@ -17,12 +17,12 @@ void main(void) {
     vec3 R = N;
     vec3 V = N;
 
-    const int SAMPLE_COUNT = 4096;
+    const uint SAMPLE_COUNT = 4096u;
     vec3 prefilteredColor = vec3(0.0);
     float totalWeight = 0.0;
 
     // NOTE(Joey): for debugging, make scope visible to end part
-    for(int i = 0; i < SAMPLE_COUNT; ++i)
+    for(uint i = 0u; i < SAMPLE_COUNT; ++i)
     {
         // NOTE(Joey): generates a sample vector that's biased towards the
         // preferred alignment direction (importance sampling).

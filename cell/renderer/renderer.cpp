@@ -112,7 +112,7 @@ namespace Cell
         Shader *shader = Resources::LoadShader("light", "shaders/light.vs", "shaders/light.fs");
         m_LightMesh = new Sphere(8, 8);
         m_LightMaterial = new Material(shader);
-        Shader *defaultShader = Resources::LoadShader("default", "shaders/pbr.vs", "shaders/pbr.fs", { "COLOR_SQUARE", "COLOR_RED" });
+        Shader *defaultShader = Resources::LoadShader("default", "shaders/pbr.vs", "shaders/pbr.fs");
         // NOTE(Joey): and materials
         Material *defaultMat = new Material(defaultShader);
      /*   defaultMat->Blend = true;

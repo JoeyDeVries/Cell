@@ -18,11 +18,11 @@ namespace Cell
     {
         // NOTE(Joey): initialize default assets/resources that should 
         // always be available, regardless of configuration.
-        Shader defaultShader = ShaderLoader::Load("shaders/default.vs", "shaders/default.fs");
+        //Shader defaultShader = ShaderLoader::Load("default", "shaders/default.vs", "shaders/default.fs");
         Texture placeholderTexture;
 
-        m_Shaders[SID("default")] = defaultShader;
-        m_Textures[SID("default")] = placeholderTexture;
+        //m_Shaders[SID("default")] = defaultShader;
+        //m_Textures[SID("default")] = placeholderTexture;
     }
 
     // ------------------------------------------------------------------------
@@ -34,7 +34,7 @@ namespace Cell
         if(Resources::m_Shaders.find(id) != Resources::m_Shaders.end())
             return &Resources::m_Shaders[id];
 
-        Shader shader = ShaderLoader::Load(vsPath, fsPath, defines);
+        Shader shader = ShaderLoader::Load(name, vsPath, fsPath, defines);
         Resources::m_Shaders[id] = shader;
         return &Resources::m_Shaders[id];
     }

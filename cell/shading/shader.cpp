@@ -15,12 +15,12 @@ namespace Cell
 
     }
     // ------------------------------------------------------------------------
-    Shader::Shader(std::string vsCode, std::string fsCode, std::vector<std::string> defines)
+    Shader::Shader(std::string name, std::string vsCode, std::string fsCode, std::vector<std::string> defines)
     {      
-        Load(vsCode, fsCode, defines);
+        Load(name, vsCode, fsCode, defines);
     }
     // ------------------------------------------------------------------------
-    void Shader::Load(std::string vsCode, std::string fsCode, std::vector<std::string> defines)
+    void Shader::Load(std::string name, std::string vsCode, std::string fsCode, std::vector<std::string> defines)
     {
         // NOTE(Joey): compile both shaders and link them
         unsigned int vs = glCreateShader(GL_VERTEX_SHADER);
@@ -98,13 +98,13 @@ namespace Cell
         if (!status)
         {
             glGetShaderInfoLog(vs, 1024, NULL, log);
-            Log::Message("Vertex shader compilation error at: TODO: GET SHADER NAME HERE!\n" + std::string(log), LOG_ERROR);
+            Log::Message("Vertex shader compilation error at: " + name + "!\n" + std::string(log), LOG_ERROR);
         }
         glGetShaderiv(fs, GL_COMPILE_STATUS, &status);
         if (!status)
         {
             glGetShaderInfoLog(fs, 1024, NULL, log);
-            Log::Message("Fragment shader compilation error at: TODO: GET SHADER NAME HERE!\n" + std::string(log), LOG_ERROR);
+            Log::Message("Fragment shader compilation error at: " + name + "!\n" + std::string(log), LOG_ERROR);
         }
 
         glAttachShader(m_ID, vs);

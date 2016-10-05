@@ -5,10 +5,9 @@ in vec2 TexCoords;
 in vec3 WorldPos;
 in vec3 Normal;
 
-#include test_include.glsl
 #include common/constants.glsl
 #include common/brdf.glsl
-#include common/sampling.glsl
+// #include common/sampling.glsl
 
 uniform samplerCube EnvIrradiance;
 uniform samplerCube EnvPrefilter;

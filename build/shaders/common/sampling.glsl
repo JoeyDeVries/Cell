@@ -11,9 +11,9 @@ float VanDerCorpus(uint n, uint base)
     // NOTE(Joey): do this for all 32 bits; doesn't work with
     // while loop. This produces a lot of wasted cycles but
     // difficult to do otherwise in ES 2.0.
-    for(int i = 0; i < 32; ++i)
+    for(uint i = 0u; i < 32u; ++i)
     {
-        if(n > 0)
+        if(n > 0u)
         {
             denom   = mod(float(n), 2.0);
             result += denom * invBase;
@@ -44,7 +44,7 @@ vec2 Hammersley(uint i, uint N)
 // ----------------------------------------------------------------------------
 vec2 HammersleyNoBitOps(uint i, uint N)
 {
-	return vec2(float(i)/float(N), VanDerCorpus(i, 2));
+	return vec2(float(i)/float(N), VanDerCorpus(i, 2u));
 }
 // ----------------------------------------------------------------------------
 vec3 SampleHemisphereUniform(vec2 Xi)

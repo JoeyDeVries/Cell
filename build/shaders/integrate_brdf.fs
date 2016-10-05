@@ -16,11 +16,11 @@ vec2 IntegrateBRDF(float roughness, float NdotV)
     float A = 0.0;
     float B = 0.0;
 
-    const int SAMPLE_COUNT = 1024;
+    const uint SAMPLE_COUNT = 1024u;
 
     vec3 N = vec3(0.0, 0.0, 1.0);
 
-    for(int i = 0; i < SAMPLE_COUNT; ++i)
+    for(uint i = 0u; i < SAMPLE_COUNT; ++i)
     {
         // NOTE(Joey): generates a sample vector that's biased towards the
         // preferred alignment direction (importance sampling).
