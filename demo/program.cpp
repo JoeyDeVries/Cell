@@ -22,6 +22,8 @@
 
 #include "scenes/pbr_test.h"
 
+#include <utility/timing/diagnostics.h>
+
 #include <GLFW/glfw3.h>
 
 
@@ -169,6 +171,7 @@ int main(int argc, char *argv[])
     // TODO(Joey): think of a way we can have a default pre-computed shader set that works at start, without
     // having to require the developer to pre-compute one first; or use build paths and only use IBL if a 
     // cubemap is supplied.   
+    float lodLevel = 2.0f;
     Cell::Shader *hdrToCubemap = Cell::Resources::LoadShader("hdr to cubemap", "shaders/cube_sample.vs", "shaders/spherical_to_cube.fs");
     Cell::Shader *irradianceCapture = Cell::Resources::LoadShader("irradiance", "shaders/cube_sample.vs", "shaders/irradiance_capture.fs");
     Cell::Shader *prefilterCapture = Cell::Resources::LoadShader("prefilter", "shaders/cube_sample.vs", "shaders/prefilter_capture.fs");
@@ -180,7 +183,7 @@ int main(int argc, char *argv[])
     matHDRToCube.DepthCompare = GL_LEQUAL;
     matIrradianceCapture.DepthCompare = GL_LEQUAL;
     matPrefilterCapture.DepthCompare = GL_LEQUAL;
-    
+
     // - convert HDR radiance image to HDR environment cubemap
     Cell::SceneNode *environmentCube = Cell::Scene::MakeSceneNode(&cube, &matHDRToCube);
     Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/factory_catwalk.hdr");
@@ -202,7 +205,7 @@ int main(int argc, char *argv[])
     environmentCube->Material = &matPrefilterCapture;
     // calculate prefilter for multiple roughness levels
     unsigned int maxMipLevels = 5;
-    for (unsigned int i = 0; i < maxMipLevels; ++i) 
+    for (unsigned int i = 0; i < maxMipLevels; ++i)
     {
         matPrefilterCapture.SetFloat("roughness", (float)i / (float)(maxMipLevels - 1));
         renderer.RenderToCubemap(environmentCube, &prefilterMap, math::vec3(0.0f), i);
@@ -218,7 +221,6 @@ int main(int argc, char *argv[])
     matPbr.SetTextureCube("EnvPrefilter", &prefilterMap, 1);
     matPbr.SetTexture("BRDFLUT", brdfTarget.GetColorTexture(0), 2);
     // - background
-    float lodLevel = 2.0f;
     //background.SetCubemap(&prefilterMap);
     background.SetCubemap(&cubemap);
     //background.SetCubemap(&hdrEnvMap);
@@ -234,76 +236,87 @@ int main(int argc, char *argv[])
         deltaTime     = currentFrameTime - lastFrameTime;
         lastFrameTime = currentFrameTime;
 
-        // TODO(Joey): do we need to pass input to Cell?
-        // TODO(Joey): replace by input manager that maps any window input to a 
-        // custom defined format; don't think we want this, we'd probably still
-        // want to control the camera somewhat from outside the renderer; same
-        // with changing material parameters.
-        if (keysPressed[GLFW_KEY_W] || keysPressed[GLFW_KEY_UP])
-            camera.InputKey(deltaTime, Cell::CAMERA_FORWARD);
-        if (keysPressed[GLFW_KEY_S] || keysPressed[GLFW_KEY_DOWN])
-            camera.InputKey(deltaTime, Cell::CAMERA_BACK);
-        if (keysPressed[GLFW_KEY_A] || keysPressed[GLFW_KEY_LEFT])
-            camera.InputKey(deltaTime, Cell::CAMERA_LEFT);
-        if (keysPressed[GLFW_KEY_D] || keysPressed[GLFW_KEY_RIGHT])
-            camera.InputKey(deltaTime, Cell::CAMERA_RIGHT);
-        if(keysPressed[GLFW_KEY_E])
-            camera.InputKey(deltaTime, Cell::CAMERA_UP);
-        if(keysPressed[GLFW_KEY_Q])
-            camera.InputKey(deltaTime, Cell::CAMERA_DOWN);
-        if (keysPressed[GLFW_KEY_T])
         {
-            lodLevel += 1.0 * deltaTime;
-            background.Material->SetFloat("lodLevel", lodLevel); 
-            Log::Message(std::to_string(lodLevel));
+            //CLOCK(UPDATE);
+            // TODO(Joey): do we need to pass input to Cell?
+            // TODO(Joey): replace by input manager that maps any window input to a 
+            // custom defined format; don't think we want this, we'd probably still
+            // want to control the camera somewhat from outside the renderer; same
+            // with changing material parameters.
+            if (keysPressed[GLFW_KEY_W] || keysPressed[GLFW_KEY_UP])
+                camera.InputKey(deltaTime, Cell::CAMERA_FORWARD);
+            if (keysPressed[GLFW_KEY_S] || keysPressed[GLFW_KEY_DOWN])
+                camera.InputKey(deltaTime, Cell::CAMERA_BACK);
+            if (keysPressed[GLFW_KEY_A] || keysPressed[GLFW_KEY_LEFT])
+                camera.InputKey(deltaTime, Cell::CAMERA_LEFT);
+            if (keysPressed[GLFW_KEY_D] || keysPressed[GLFW_KEY_RIGHT])
+                camera.InputKey(deltaTime, Cell::CAMERA_RIGHT);
+            if (keysPressed[GLFW_KEY_E])
+                camera.InputKey(deltaTime, Cell::CAMERA_UP);
+            if (keysPressed[GLFW_KEY_Q])
+                camera.InputKey(deltaTime, Cell::CAMERA_DOWN);
+            if (keysPressed[GLFW_KEY_T])
+            {
+                lodLevel += 1.0 * deltaTime;
+                background.Material->SetFloat("lodLevel", lodLevel);
+                Log::Message(std::to_string(lodLevel));
+            }
+            else if (keysPressed[GLFW_KEY_G])
+            {
+                lodLevel -= 1.0 * deltaTime;
+                background.Material->SetFloat("lodLevel", lodLevel);
+                Log::Message(std::to_string(lodLevel));
+            }
+
+            if (keysPressed[GLFW_KEY_Z]) {
+                wireframe = !wireframe;
+                glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+            }
+
+            // NOTE(Joey): update render logic
+            camera.Update(deltaTime);
+
+            // NOTE(Joey): fill the renderer's command buffer with default test scene
+            mainTorus->Rotation = math::vec4(math::vec3(1.0f, 0.0f, 0.0f), glfwGetTime());
+            secondTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
+            thirdTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
+            sphereNode->Rotation = math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime());
         }
-        else if (keysPressed[GLFW_KEY_G])
+
         {
-            lodLevel -= 1.0 * deltaTime;
-            background.Material->SetFloat("lodLevel", lodLevel);
-            Log::Message(std::to_string(lodLevel));
+            //CLOCK(PUSH);
+            renderer.PushRender(mainTorus);
+            //renderer.PushRender(floor);
+            renderer.PushRender(pbrBall);
+
+            renderer.PushRender(&background);
+
+            renderer.SetTarget(&target);
+            renderer.PushRender(&background);
+            renderer.PushRender(mainTorus);
+            renderer.SetTarget(nullptr);
+
+            Cell::PointLight light;
+            light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);
+            light.Color = math::vec3(1.0f, 0.7f, 0.7f);
+            renderer.PushLight(&light, true);
+
+            Cell::PointLight light2;
+            light2.Position = math::vec3(sin(glfwGetTime() * 0.3f) * 5.5, 0.0f, cos(glfwGetTime() * 0.1f) * 10.0f);
+            light2.Color = math::vec3(0.5f, 0.5f, 1.0f);
+            renderer.PushLight(&light2, true);
+        }
+        {
+            //CLOCK(CUBEMAP);
+            // NOTE(Joey): also generate dynamic cubemap from scene
+            renderer.RenderToCubemap(mainTorus, &cubemap, math::vec3(0.0f, 8.0f, 0.0f), 0);
         }
 
-        if (keysPressed[GLFW_KEY_Z]) {
-            wireframe = !wireframe;
-            glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+        {
+            CLOCK(RENDER);
+            // NOTE(Joey): request Cell to render all currently pushed commands
+            renderer.RenderPushedCommands();
         }
-
-        // NOTE(Joey): update render logic
-        camera.Update(deltaTime);
-
-        // NOTE(Joey): fill the renderer's command buffer with default test scene
-        mainTorus->Rotation   = math::vec4(math::vec3(1.0f, 0.0f, 0.0f), glfwGetTime());
-        secondTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
-        thirdTorus->Rotation  = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
-        sphereNode->Rotation  = math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime());
-
-        renderer.PushRender(mainTorus);
-        //renderer.PushRender(floor);
-        renderer.PushRender(pbrBall);
-
-        renderer.PushRender(&background);
-
-        renderer.SetTarget(&target);
-        renderer.PushRender(&background);
-        renderer.PushRender(mainTorus);
-        renderer.SetTarget(nullptr);
-
-        Cell::PointLight light;
-        light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);
-        light.Color = math::vec3(1.0f, 0.7f, 0.7f);
-        renderer.PushLight(&light, true);
-
-        Cell::PointLight light2;
-        light2.Position = math::vec3(sin(glfwGetTime() * 0.3f) * 5.5, 0.0f, cos(glfwGetTime() * 0.1f) * 10.0f);
-        light2.Color = math::vec3(0.5f, 0.5f, 1.0f);
-        renderer.PushLight(&light2, true);
-
-        // NOTE(Joey): also generate dynamic cubemap from scene
-        renderer.RenderToCubemap(mainTorus, &cubemap, math::vec3(0.0f, 8.0f, 0.0f), 0);
-
-        // NOTE(Joey): request Cell to render all currently pushed commands
-        renderer.RenderPushedCommands();
    
         // NOTE(Joey): display log messages / diagnostics
         Log::Display();

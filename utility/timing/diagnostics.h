@@ -38,9 +38,10 @@ namespace diagnostics
     */
     class clock
     {
+    private:
         std::string m_Name;
         u64         m_StartClock;
-
+    public:
         clock(std::string name)
         {
             m_Name = name;
@@ -51,9 +52,14 @@ namespace diagnostics
         {
             u64 endClock = (u64)__rdtsc();
             u64 delta = endClock - m_StartClock;
-            // TODO(Joey): globally retrieve CPU estimate of cycles/p/second and calculate time in s and ms
-            std::cout << m_Name << " :  " << delta << " cycles " << std::endl;
-            // TODO(Joey): directly print and/or store in global performance table for later analysis
+            // NOTE(Joey): clock is mostly used for internal time diagnosis, so for ease of use I simply 
+            // directly set my CPU's clock speed (requesting this requires OS specific calls). If you want
+            // to diagnose your own syste, simply replace the value below with your own CPU's clock speed
+            // or use something like windows' QueryPerformanceFrequency to retrieve the clock speed.
+            const u32 clockSpeed = 3400000000;
+            float clockTime = (float)delta / (float)clockSpeed * 1000.0f;
+            std::cout << m_Name << ":  " << delta << " cycles | " << clockTime << " ms" << std::endl;
+            // TODO(Joey): store in global performance table for later analysis
         }
     };
 }
