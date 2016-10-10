@@ -54,8 +54,8 @@ namespace Cell
     {
         Texture texture;
         texture.Target = GL_TEXTURE_2D;
-		// TODO(Joey): this breaks the spherical to cube! Figure out why!
-		//texture.Mipmapping = false; 
+		texture.FilterMin = GL_LINEAR;
+		texture.Mipmapping = false; 
 
         stbi_set_flip_vertically_on_load(true);
 
