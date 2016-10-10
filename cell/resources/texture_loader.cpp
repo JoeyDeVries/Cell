@@ -54,8 +54,10 @@ namespace Cell
     {
         Texture texture;
         texture.Target = GL_TEXTURE_2D;
+		// TODO(Joey): this breaks the spherical to cube! Figure out why!
+		//texture.Mipmapping = false; 
 
-        stbi_set_flip_vertically_on_load(false);
+        stbi_set_flip_vertically_on_load(true);
 
         if (stbi_is_hdr(path.c_str()))
         {
@@ -63,6 +65,17 @@ namespace Cell
             float *data = stbi_loadf(path.c_str(), &width, &height, &nrComponents, 0);
             if (data)
             {
+				// NOTE(Joey): check if HDRI is properly loaded; thus if a float value 
+				// exceeds 1.0.
+				float max = 0.0;
+				int counter = 0;
+				for (float *p = data; counter < width * height; counter++, p++)
+				{
+					if (*p > max)
+						max = *p;
+				}
+				Log::Message("STBI MAX VALUE: " + std::to_string(max), LOG_DEBUG);
+
                 GLenum format;
                 if (nrComponents == 3)
                     format = GL_RGB;

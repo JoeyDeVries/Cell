@@ -26,6 +26,7 @@ uniform vec3 PointLight1_Pos;
 uniform vec3 PointLight1_Col;
 
 uniform vec3 CamPos;
+uniform float Exposure;
 
 vec3 getNormal(vec3 worldNormal, vec3 tangentNormal)
 {
@@ -94,6 +95,9 @@ void main()
 	// NOTE(Joey): as the IBL lighting of both diffuse and specular counts as
     // (GI) ambient lighting, we multiply both with the AO component.
     color *= ao;
+	
+	// NOTE(Joey): HDR tonemapping
+	color = vec3(1.0) - exp(-color * Exposure);
 	
 	// NOTE(Joey): gamma correct
 	color = pow(color, vec3(1.0/2.2)); 

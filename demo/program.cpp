@@ -171,7 +171,6 @@ int main(int argc, char *argv[])
     // TODO(Joey): think of a way we can have a default pre-computed shader set that works at start, without
     // having to require the developer to pre-compute one first; or use build paths and only use IBL if a 
     // cubemap is supplied.   
-    float lodLevel = 2.0f;
     Cell::Shader *hdrToCubemap = Cell::Resources::LoadShader("hdr to cubemap", "shaders/cube_sample.vs", "shaders/spherical_to_cube.fs");
     Cell::Shader *irradianceCapture = Cell::Resources::LoadShader("irradiance", "shaders/cube_sample.vs", "shaders/irradiance_capture.fs");
     Cell::Shader *prefilterCapture = Cell::Resources::LoadShader("prefilter", "shaders/cube_sample.vs", "shaders/prefilter_capture.fs");
@@ -186,7 +185,8 @@ int main(int argc, char *argv[])
 
     // - convert HDR radiance image to HDR environment cubemap
     Cell::SceneNode *environmentCube = Cell::Scene::MakeSceneNode(&cube, &matHDRToCube);
-    Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/factory_catwalk.hdr");
+	//Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/factory_catwalk.hdr"); 
+	Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/Seascape02_downscaled.hdr"); 
     matHDRToCube.SetTexture("environment", hdrMap, 0);
     Cell::TextureCube hdrEnvMap;
     hdrEnvMap.DefaultInitialize(512, 512, GL_RGB, GL_FLOAT);
@@ -222,9 +222,14 @@ int main(int argc, char *argv[])
     matPbr.SetTexture("BRDFLUT", brdfTarget.GetColorTexture(0), 2);
     // - background
     //background.SetCubemap(&prefilterMap);
-    background.SetCubemap(&cubemap);
-    //background.SetCubemap(&hdrEnvMap);
-    background.Material->SetFloat("lodLevel", lodLevel);
+    //background.SetCubemap(&cubemap);
+    background.SetCubemap(&hdrEnvMap);
+	float lodLevel = 0.0f; // was 2.0
+	//background.Material->SetFloat("lodLevel", lodLevel);
+	background.Material->SetFloat("lodLevel", lodLevel);
+	float exposure = 1.0;
+	background.Material->SetFloat("Exposure", exposure);
+	matPbr.SetFloat("Exposure", exposure);
 
 
     while (!glfwWindowShouldClose(window))
@@ -258,16 +263,29 @@ int main(int argc, char *argv[])
             if (keysPressed[GLFW_KEY_T])
             {
                 lodLevel += 1.0 * deltaTime;
-                background.Material->SetFloat("lodLevel", lodLevel);
-                Log::Message(std::to_string(lodLevel));
+				background.Material->SetFloat("lodLevel", lodLevel);
+                Log::Message("LOD:" + std::to_string(lodLevel));
             }
-            else if (keysPressed[GLFW_KEY_G])
+            if (keysPressed[GLFW_KEY_G])
             {
                 lodLevel -= 1.0 * deltaTime;
-                background.Material->SetFloat("lodLevel", lodLevel);
-                Log::Message(std::to_string(lodLevel));
+				background.Material->SetFloat("lodLevel", lodLevel);
+                Log::Message("LOD:" + std::to_string(lodLevel));
             }
-
+			if (keysPressed[GLFW_KEY_Y])
+			{
+				exposure += 1.0 * deltaTime;
+				background.Material->SetFloat("Exposure", exposure);
+				matPbr.SetFloat("Exposure", exposure);
+				Log::Message("EXPOSURE:" + std::to_string(exposure));
+			}
+			if (keysPressed[GLFW_KEY_H])
+			{
+				exposure -= 1.0 * deltaTime;
+				background.Material->SetFloat("Exposure", exposure);
+				matPbr.SetFloat("Exposure", exposure);
+				Log::Message("EXPOSURE:" + std::to_string(exposure));
+			}
             if (keysPressed[GLFW_KEY_Z]) {
                 wireframe = !wireframe;
                 glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
@@ -309,11 +327,11 @@ int main(int argc, char *argv[])
         {
             //CLOCK(CUBEMAP);
             // NOTE(Joey): also generate dynamic cubemap from scene
-            renderer.RenderToCubemap(mainTorus, &cubemap, math::vec3(0.0f, 8.0f, 0.0f), 0);
+            //renderer.RenderToCubemap(mainTorus, &cubemap, math::vec3(0.0f, 8.0f, 0.0f), 0);
         }
 
         {
-            CLOCK(RENDER);
+            //CLOCK(RENDER);
             // NOTE(Joey): request Cell to render all currently pushed commands
             renderer.RenderPushedCommands();
         }

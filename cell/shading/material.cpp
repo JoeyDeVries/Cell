@@ -73,7 +73,7 @@ namespace Cell
         m_SamplerUniforms[name].Unit    = unit;
         m_SamplerUniforms[name].Texture = value;
 
-        switch (value->Type)
+        switch (value->Target)
         {
         case GL_TEXTURE_1D:
             m_SamplerUniforms[name].Type      = SHADER_TYPE_SAMPLER1D;
