@@ -23,15 +23,25 @@ namespace Cell
         Type = type;
         Mipmapping = mipmap;
 
+        if (type == GL_HALF_FLOAT && format == GL_RGB)
+            InternalFormat = GL_RGB16F;
+        else if (type == GL_FLOAT && format == GL_RGB)
+            InternalFormat = GL_RGB32F;
+        else if (type == GL_HALF_FLOAT && format == GL_RGBA)
+            InternalFormat = GL_RGBA16F;
+        else if (type == GL_FLOAT && format == GL_RGBA)
+            InternalFormat = GL_RGBA32F;
+
         Bind();
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, FilterMin);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, FilterMax);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, WrapS);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, WrapT);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, WrapR);
 
         for (unsigned int i = 0; i < 6; ++i)
         {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, type, NULL);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, InternalFormat, width, height, 0, format, type, NULL);
         }
         if (mipmap)
             glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
@@ -54,6 +64,7 @@ namespace Cell
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, FilterMax);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, WrapS);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, WrapT);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, WrapR);
 
         glTexImage2D(face, 0, format, width, height, 0, format, type, data);
     }

@@ -76,13 +76,19 @@ namespace Cell
 				}
 				Log::Message("STBI MAX VALUE: " + std::to_string(max), LOG_DEBUG);
 
-                GLenum format;
+                GLenum internalFormat, format;
                 if (nrComponents == 3)
+                {
+                    internalFormat = GL_RGB32F;
                     format = GL_RGB;
+                }
                 else if (nrComponents == 4)
+                {
+                    internalFormat = GL_RGBA32F;
                     format = GL_RGBA;
+                }
 
-                texture.Generate(width, height, format, format, GL_FLOAT, data);
+                texture.Generate(width, height, internalFormat, format, GL_FLOAT, data);
                 stbi_image_free(data);
             }
             texture.Width = width;

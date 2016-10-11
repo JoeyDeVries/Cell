@@ -17,6 +17,9 @@ Feature List (complete)
 	1. Linear algebra: n-dimensional vectors, nxn-dimensional matrices, transformations, utility. 
 	2. Trigonemetry: unit circle utility functions, radian/degree conversions.
 	3. Utility functions: lerp, step, smoothstep, smootherstep, clamp etc.
+    
+* Engine utility namespace:
+	3. High-precision performance analysis and measurement.
 
 0. Configure and enable debugging and logging utility.
 1. Shader object w/ custom pre-processor (defines, includes):
@@ -40,7 +43,6 @@ Feature List (work-in-progress)
 * Engine utility namespace:
 	1. Random numbers.
 	2. Logging.
-	3. High-precision performance analysis and measurement.
 * Flexible OpenGL initialization.
 	
 2. Material pipeline; configure render state in materials, together with shader, uniform configuration and samplers used.
@@ -74,4 +76,6 @@ Feature List (todo)
 	1. Per-object Frustum culling.
 	2. Spatial partitioning.
 	3. Portal rendering (overkill perhaps)?
+    4. Cache GL state.
+    5. Store material-independent uniforms in UBO; together with barely changing shader parameters.
 	

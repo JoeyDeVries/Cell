@@ -2,6 +2,8 @@
 
 #include <assert.h>
 
+#include <utility/logging/log.h>
+
 namespace Cell
 {
     // ------------------------------------------------------------------------
@@ -50,7 +52,7 @@ namespace Cell
         InternalFormat = internalFormat;
         Format         = format;
         Type           = type;
-        
+
         assert(Target == GL_TEXTURE_2D);
         Bind();
             glTexImage2D(Target, 0, internalFormat, width, height, 0, format, type, data);

@@ -13,13 +13,13 @@ namespace Cell
     Background::Background()
     {
         m_Shader  = Resources::LoadShader("background", "shaders/background.vs", "shaders/background.fs");
-        m_CubeMap = Resources::LoadTextureCube("yokohama", "textures/backgrounds/yokohama/");
-        Material  = new Cell::Material;
+        //m_CubeMap = Resources::LoadTextureCube("yokohama", "textures/backgrounds/yokohama/");
+        Material  = new Cell::Material(m_Shader);
         Mesh      = new Cell::Cube;
 
         // default material configuration
-        Material->SetShader(m_Shader);
-        Material->SetTextureCube("background", m_CubeMap, 0);
+        //Material->SetShader(m_Shader);
+        //Material->SetTextureCube("background", m_CubeMap, 0);
 
         Material->DepthCompare = GL_LEQUAL;
     }

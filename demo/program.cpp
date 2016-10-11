@@ -114,23 +114,24 @@ int main(int argc, char *argv[])
 
 
     // NOTE(Joey): shapes
-    //Cell::Quad quad;
-    //Cell::LineStrip lineStrip(0.5f, 32);
     Cell::Plane plane(16, 16);
-    //Cell::Circle circle(16,16);
     Cell::Sphere sphere(64, 64);
     Cell::Torus torus(2.0f, 0.4f, 32, 32);
     Cell::Cube cube;
 
     // NOTE(Joey): material setup
     Cell::Material matPbr = renderer.CreateMaterial();
+    matPbr.SetTexture("TexAlbedo", Cell::Resources::LoadTexture("rusted metal albedo", "textures/pbr/rusted metal/albedo.png"), 3);
+    matPbr.SetTexture("TexNormal", Cell::Resources::LoadTexture("rusted metal normal", "textures/pbr/rusted metal/normal.png"), 4);
+    matPbr.SetTexture("TexMetallic", Cell::Resources::LoadTexture("rusted metal metallic", "textures/pbr/rusted metal/metallic.png"), 5);
+    matPbr.SetTexture("TexRoughness", Cell::Resources::LoadTexture("rusted metal roughness", "textures/pbr/rusted metal/roughness.png"), 6);
+    matPbr.SetTexture("TexAO", Cell::Resources::LoadTexture("rusted metal ao", "textures/pbr/rusted metal/ao.png"), 7);
     Cell::Material matPbrPink = renderer.CreateMaterial();
     matPbrPink.SetTexture("TexAlbedo",    Cell::Resources::LoadTexture("plastic albedo",    "textures/pbr/plastic/albedo.png"),    3);
     matPbrPink.SetTexture("TexNormal",    Cell::Resources::LoadTexture("plastic normal",    "textures/pbr/plastic/normal.png"),    4);
     matPbrPink.SetTexture("TexMetallic",  Cell::Resources::LoadTexture("plastic metallic",  "textures/pbr/plastic/metallic.png"),  5);
     matPbrPink.SetTexture("TexRoughness", Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/plastic/roughness.png"), 6);
     matPbrPink.SetTexture("TexAO",        Cell::Resources::LoadTexture("plastic ao",        "textures/pbr/plastic/ao.png"),        7);
-
  
     // NOTE(Joey): configure camera
     camera.SetPerspective(math::Deg2Rad(60.0f), renderer.GetRenderSize().x / renderer.GetRenderSize().y ,0.1f, 100.0f);
@@ -162,9 +163,6 @@ int main(int argc, char *argv[])
     Cell::Background background;
     Cell::TextureCube cubemap;
     cubemap.DefaultInitialize(1024, 1024, GL_RGB, GL_UNSIGNED_BYTE);
-
-    // NOTE(Joey): more complicated render stuff to test framework
-    Cell::RenderTarget target(512, 512, GL_UNSIGNED_BYTE, 2, true);
    
 
     // NOTE(Joey): pbr pre-compute
@@ -185,8 +183,8 @@ int main(int argc, char *argv[])
 
     // - convert HDR radiance image to HDR environment cubemap
     Cell::SceneNode *environmentCube = Cell::Scene::MakeSceneNode(&cube, &matHDRToCube);
-	//Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/factory_catwalk.hdr"); 
-	Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/Seascape02_downscaled.hdr"); 
+	Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/hamarikyu bridge.hdr"); 
+	//Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/Seascape02_downscaled.hdr"); 
     matHDRToCube.SetTexture("environment", hdrMap, 0);
     Cell::TextureCube hdrEnvMap;
     hdrEnvMap.DefaultInitialize(512, 512, GL_RGB, GL_FLOAT);
@@ -200,7 +198,7 @@ int main(int argc, char *argv[])
     // - prefilter 
     Cell::TextureCube prefilterMap;
     prefilterMap.FilterMin = GL_LINEAR_MIPMAP_LINEAR;
-    prefilterMap.DefaultInitialize(128, 128, GL_RGB, GL_FLOAT, true);
+    prefilterMap.DefaultInitialize(512, 512, GL_RGB, GL_FLOAT, true);
     matPrefilterCapture.SetTextureCube("environment", &hdrEnvMap, 0);
     environmentCube->Material = &matPrefilterCapture;
     // calculate prefilter for multiple roughness levels
@@ -221,16 +219,15 @@ int main(int argc, char *argv[])
     matPbr.SetTextureCube("EnvPrefilter", &prefilterMap, 1);
     matPbr.SetTexture("BRDFLUT", brdfTarget.GetColorTexture(0), 2);
     // - background
-    //background.SetCubemap(&prefilterMap);
+    background.SetCubemap(&prefilterMap);
     //background.SetCubemap(&cubemap);
-    background.SetCubemap(&hdrEnvMap);
+    //background.SetCubemap(&hdrEnvMap);
 	float lodLevel = 0.0f; // was 2.0
 	//background.Material->SetFloat("lodLevel", lodLevel);
 	background.Material->SetFloat("lodLevel", lodLevel);
 	float exposure = 1.0;
 	background.Material->SetFloat("Exposure", exposure);
-	matPbr.SetFloat("Exposure", exposure);
-
+    matPbr.SetFloat("Exposure", exposure);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -276,7 +273,7 @@ int main(int argc, char *argv[])
 			{
 				exposure += 1.0 * deltaTime;
 				background.Material->SetFloat("Exposure", exposure);
-				matPbr.SetFloat("Exposure", exposure);
+                matPbr.SetFloat("Exposure", exposure);
 				Log::Message("EXPOSURE:" + std::to_string(exposure));
 			}
 			if (keysPressed[GLFW_KEY_H])
@@ -284,7 +281,7 @@ int main(int argc, char *argv[])
 				exposure -= 1.0 * deltaTime;
 				background.Material->SetFloat("Exposure", exposure);
 				matPbr.SetFloat("Exposure", exposure);
-				Log::Message("EXPOSURE:" + std::to_string(exposure));
+                Log::Message("EXPOSURE:" + std::to_string(exposure));
 			}
             if (keysPressed[GLFW_KEY_Z]) {
                 wireframe = !wireframe;
@@ -308,11 +305,6 @@ int main(int argc, char *argv[])
             renderer.PushRender(pbrBall);
 
             renderer.PushRender(&background);
-
-            renderer.SetTarget(&target);
-            renderer.PushRender(&background);
-            renderer.PushRender(mainTorus);
-            renderer.SetTarget(nullptr);
 
             Cell::PointLight light;
             light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);

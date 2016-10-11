@@ -20,7 +20,13 @@ namespace Cell
             texture.FilterMin = GL_LINEAR;
             texture.FilterMax = GL_LINEAR;
             texture.Mipmapping = false;
-            texture.Generate(width, height, GL_RGBA, GL_RGBA, type, 0); 
+
+            GLenum internalFormat = GL_RGBA;
+            if(type == GL_HALF_FLOAT)
+                internalFormat = GL_RGBA16F;
+            else if (type == GL_FLOAT)
+                internalFormat = GL_RGBA32F;
+            texture.Generate(width, height, internalFormat, GL_RGBA, type, 0);
 
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, texture.ID, 0);
             m_ColorAttachments.push_back(texture);
