@@ -27,7 +27,9 @@ namespace Cell
     public:
 
     private:
-        std::map<RenderTarget*, std::vector<RenderCommand>> m_RenderCommands;
+        std::vector<RenderCommand> m_DeferredRenderCommands;
+        std::vector<RenderCommand> m_PostProcessingRenderCommands;
+        std::map<RenderTarget*, std::vector<RenderCommand>> m_CustomRenderCommands;
 
     public:
         CommandBuffer();
@@ -35,7 +37,7 @@ namespace Cell
         
         // NOTE(Joey): pushes render state relevant to a single render call
         // to the command buffer.
-        void Push(RenderTarget *target, Mesh *mesh, Material *material, math::mat4 transform);
+        void Push(Mesh *mesh, Material *material, math::mat4 transform, RenderTarget *target = nullptr);
 
         // NOTE(Joey): clears the command buffer; usually done after issuing
         // all the stored render commands.
@@ -47,7 +49,14 @@ namespace Cell
         // NOTE(Joey): returns the list of render commands. For minimizing
         // state changes it is advised to first call Sort() before retrieving
         // and issuing the render commands.
-        std::vector<RenderCommand> GetRenderCommands(RenderTarget *target);
+        std::vector<RenderCommand> GetDeferredRenderCommands();
+
+        // NOTE(Joey): returns the list of custom render commands per render
+        // target.
+        std::vector<RenderCommand> GetCustomRenderCommands(RenderTarget *target);
+
+        // NOTE(Joey): returns the list of post-processing render commands.
+        std::vector<RenderCommand> GetPostProcessingRenderCommands();
     };
 }
 

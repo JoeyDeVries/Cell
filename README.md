@@ -27,6 +27,8 @@ Feature List (complete)
 	2. Parse active vertex attributes and uniform variables, retrieve location and store in shader object.
 	3. Easy to use state configuration per shader.
     4. Support multiple build paths.
+2. Material pipeline; configure render state in materials, together with shader, uniform configuration and samplers used.
+	1. Allow for easy access of materials and storage; include set of default materials (default material, glass material etc.)
 3. Define Mesh object and encompassing Model class.
 	1. Define set of basic shape mesh generation; plane, cube, disk, sphere, cylinder, torus (donut)
 5. Flexible Framebuffer configuration utility:
@@ -45,8 +47,6 @@ Feature List (work-in-progress)
 	2. Logging.
 * Flexible OpenGL initialization.
 	
-2. Material pipeline; configure render state in materials, together with shader, uniform configuration and samplers used.
-	1. Allow for easy access of materials and storage; include set of default materials (default material, glass material etc.)
 5. Flexible Framebuffer configuration utility:
 	2. Post-processing.
 6. Create Render Buffer, draw commands encapsulated in push to render buffer w/ relevant state:

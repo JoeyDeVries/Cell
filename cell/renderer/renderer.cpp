@@ -118,9 +118,6 @@ namespace Cell
         Shader *defaultShader = Resources::LoadShader("default", "shaders/pbr.vs", "shaders/pbr.fs");
         // NOTE(Joey): and materials
         Material *defaultMat = new Material(defaultShader);
-     /*   defaultMat->Blend = true;
-        defaultMat->BlendSrc = GL_SRC_ALPHA;
-        defaultMat->BlendDst = GL_ONE_MINUS_SRC_ALPHA;*/
         defaultMat->SetTexture("TexAlbedo",    Resources::LoadTexture("default albedo",    "textures/checkerboard.png"), 3);
         defaultMat->SetTexture("TexNormal",    Resources::LoadTexture("default normal",    "textures/norm.png"),         4);
         defaultMat->SetTexture("TexMetallic",  Resources::LoadTexture("default metallic",  "textures/black.png"),        5);
@@ -130,6 +127,7 @@ namespace Cell
         // - glass
         Shader *glassShader = Resources::LoadShader("glass", "shaders/pbr.vs", "shaders/pbr.fs", { "ALPHA" });
         Material *glassMat = new Material(glassShader);
+        glassMat->Type = MATERIAL_CUSTOM; // this material can't fit in the deferred rendering pipeline (due to transparency sorting).
         glassMat->SetTexture("TexAlbedo", Cell::Resources::LoadTexture("glass albedo", "textures/glass.png"), 3);
         glassMat->SetTexture("TexNormal", Cell::Resources::LoadTexture("plastic normal", "textures/pbr/plastic/normal.png"), 4);
         glassMat->SetTexture("TexMetallic", Cell::Resources::LoadTexture("plastic metallic", "textures/pbr/plastic/metallic.png"), 5);
@@ -198,7 +196,14 @@ namespace Cell
     Material Renderer::CreateCustomMaterial(Shader *shader)
     {
         Material mat(shader);
-        // mat.custom = true;
+        mat.Type = MATERIAL_CUSTOM;
+        return mat;
+    }
+    // ------------------------------------------------------------------------
+    Material CreatePostProcessingMaterial(Shader *shader)
+    {
+        Material mat(shader);
+        mat.Type = MATERIAL_POST_PROCESS;
         return mat;
     }
     // ------------------------------------------------------------------------
@@ -268,6 +273,7 @@ namespace Cell
           - Then we do the forward 'custom' rendering pass where developers can
             write their own shaders and render stuff as they want, not sacrifcing
             flexibility; this also includes custom render targets.
+          - Then the alpha blended rendering pass.
           - Then we do post-processing, one can supply their own post-processing
             materials by setting the 'post-processing' flag of the material.
             Each material flagged as post-processing will run after the default
@@ -279,6 +285,14 @@ namespace Cell
         // the command buffer, later switch to a deferred render pipeline once
         // all sub-systems in place work properly.
         m_CommandBuffer.Sort();
+
+        // NOTE(Joey); deferred here:
+        // --
+        std::vector<RenderCommand> deferredRenderCommands = m_CommandBuffer.GetDeferredRenderCommands();
+        // 1. Geometry buffer
+        // 2. Render deferred shader for each light (full quad for directional, spheres for point lights)
+        // 3. blit buffers to default (or other buffer) for forward rendering
+
 
         // NOTE(Joey): push default render target to the end of the render
         // target buffer s.t. we always render the default buffer last.
@@ -316,7 +330,7 @@ namespace Cell
             }
 
             // NOTE(Joey): sort all render commands and retrieve the sorted array
-            std::vector<RenderCommand> renderCommands = m_CommandBuffer.GetRenderCommands(renderTarget);
+            std::vector<RenderCommand> renderCommands = m_CommandBuffer.GetCustomRenderCommands(renderTarget);
 
             // NOTE(Joey): iterate over all the render commands and execute
             for (unsigned int i = 0; i < renderCommands.size(); ++i)
@@ -324,6 +338,22 @@ namespace Cell
                 renderCustomCommand(&renderCommands[i], m_Camera);
             }
         }
+
+        // NOTE(Joey): get combined color/depth texture of deferred/custom pass
+        // TODO(Joey): - get actual render targets
+        Texture *colorBuffer = Resources::GetTexture("default");
+        Texture *depthBuffer = Resources::GetTexture("default");
+
+        // NOTE(Joey): then do post-processing
+        std::vector<RenderCommand> postProcessingCommands = m_CommandBuffer.GetPostProcessingRenderCommands();
+        for (unsigned int i = 0; i < postProcessingCommands.size(); ++i)
+        {
+            // NOTE(Joey): ping-pong between render textures
+        }
+
+        // NOTE(Joey): then do a final blit to the default framebuffer, with
+        // gamma correction and tone mapping post-processing step.
+        //Blit(postProcessingOne, nullptr, m_PostProcessingMat);
 
         // NOTE(Joey): clear the command buffer s.t. the next frame/call can
         // start from an empty slate again.

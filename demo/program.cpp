@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
 	//Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/Seascape02_downscaled.hdr"); 
     matHDRToCube.SetTexture("environment", hdrMap, 0);
     Cell::TextureCube hdrEnvMap;
-    hdrEnvMap.DefaultInitialize(512, 512, GL_RGB, GL_FLOAT);
+    hdrEnvMap.DefaultInitialize(128, 128, GL_RGB, GL_FLOAT);
     renderer.RenderToCubemap(environmentCube, &hdrEnvMap);
     // - irradiance
     Cell::TextureCube irradianceMap;
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
     // - prefilter 
     Cell::TextureCube prefilterMap;
     prefilterMap.FilterMin = GL_LINEAR_MIPMAP_LINEAR;
-    prefilterMap.DefaultInitialize(512, 512, GL_RGB, GL_FLOAT, true);
+    prefilterMap.DefaultInitialize(128, 128, GL_RGB, GL_FLOAT, true);
     matPrefilterCapture.SetTextureCube("environment", &hdrEnvMap, 0);
     environmentCube->Material = &matPrefilterCapture;
     // calculate prefilter for multiple roughness levels
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
 
     }
     // - brdf integration
-    Cell::RenderTarget brdfTarget(512, 512, GL_HALF_FLOAT, 1, true);
+    Cell::RenderTarget brdfTarget(128, 128, GL_HALF_FLOAT, 1, true);
     renderer.Blit(nullptr, &brdfTarget, &matIntegrateBrdf);
 
     // NOTE(Joey): use pre-computed PBR environment data
@@ -227,10 +227,7 @@ int main(int argc, char *argv[])
     matPbrGlass.SetTexture("BRDFLUT", brdfTarget.GetColorTexture(0), 2);
     // - background
     background.SetCubemap(&prefilterMap);
-    //background.SetCubemap(&cubemap);
-    //background.SetCubemap(&hdrEnvMap);
-	float lodLevel = 0.0f; // was 2.0
-	//background.Material->SetFloat("lodLevel", lodLevel);
+	float lodLevel = 1.5f; 
 	background.Material->SetFloat("lodLevel", lodLevel);
 	float exposure = 1.0;
 	background.Material->SetFloat("Exposure", exposure);
