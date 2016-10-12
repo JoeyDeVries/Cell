@@ -107,6 +107,9 @@ namespace Cell
         }
         Log::Message("Debug output initialized.");
 
+        // NOTE(Joey): pre-compute PBR 
+        // ---
+
 
         // TODO(Joey): load default set of shaders (do this in Init function!; here or in resources)
         Shader *shader = Resources::LoadShader("light", "shaders/light.vs", "shaders/light.fs");
@@ -124,6 +127,17 @@ namespace Cell
         defaultMat->SetTexture("TexRoughness", Resources::LoadTexture("default roughness", "textures/checkerboard.png"), 6);
         defaultMat->SetTexture("TexAO",        Resources::LoadTexture("default ao",        "textures/white.png"),        7);
         m_DefaultMaterials[SID("default")] = defaultMat;
+        // - glass
+        Shader *glassShader = Resources::LoadShader("glass", "shaders/pbr.vs", "shaders/pbr.fs", { "ALPHA" });
+        Material *glassMat = new Material(glassShader);
+        glassMat->SetTexture("TexAlbedo", Cell::Resources::LoadTexture("glass albedo", "textures/glass.png"), 3);
+        glassMat->SetTexture("TexNormal", Cell::Resources::LoadTexture("plastic normal", "textures/pbr/plastic/normal.png"), 4);
+        glassMat->SetTexture("TexMetallic", Cell::Resources::LoadTexture("plastic metallic", "textures/pbr/plastic/metallic.png"), 5);
+        glassMat->SetTexture("TexRoughness", Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/plastic/roughness.png"), 6);
+        glassMat->SetTexture("TexAO", Cell::Resources::LoadTexture("plastic ao", "textures/pbr/plastic/ao.png"), 7);
+        glassMat->Blend = true;
+        m_DefaultMaterials[SID("glass")] = glassMat;
+
 
         // NOTE(Joey): initialize render items
         // TODO(Joey): do we want to abstract this or not? as it is very specific.
@@ -433,6 +447,16 @@ namespace Cell
         // NOTE(Joey): set global GL state based on material
         // TODO(Joey): only change these if different value, and sort by major state changes
         glDepthFunc(material->DepthCompare);
+        if (material->Blend)
+        {
+            glEnable(GL_BLEND);
+            glBlendFunc(material->BlendSrc, material->BlendDst);
+        }
+        else
+        {
+            glDisable(GL_BLEND);
+        }
+
 
         // TODO(Joey): only use shader and set per-shader specific uniforms
         // (ViewProjection) if state requires change; otherwise ignore.

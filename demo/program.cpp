@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+        glfwWindowHint(GLFW_SAMPLES, 4);
         glfwWindowHint(GLFW_RESIZABLE, true);
     
         GLFWwindow *window = glfwCreateWindow(1280, 720, "Cell", nullptr, nullptr);           
@@ -105,6 +106,8 @@ int main(int argc, char *argv[])
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
+        glEnable(GL_MULTISAMPLE);
+
         glViewport(0, 0, width, height);
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
     Log::Message("OpenGL configured");
@@ -132,6 +135,7 @@ int main(int argc, char *argv[])
     matPbrPink.SetTexture("TexMetallic",  Cell::Resources::LoadTexture("plastic metallic",  "textures/pbr/plastic/metallic.png"),  5);
     matPbrPink.SetTexture("TexRoughness", Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/plastic/roughness.png"), 6);
     matPbrPink.SetTexture("TexAO",        Cell::Resources::LoadTexture("plastic ao",        "textures/pbr/plastic/ao.png"),        7);
+    Cell::Material matPbrGlass = renderer.CreateMaterial("glass");
  
     // NOTE(Joey): configure camera
     camera.SetPerspective(math::Deg2Rad(60.0f), renderer.GetRenderSize().x / renderer.GetRenderSize().y ,0.1f, 100.0f);
@@ -140,7 +144,7 @@ int main(int argc, char *argv[])
     Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, &matPbr);
     Cell::SceneNode *secondTorus = Cell::Scene::MakeSceneNode(&torus, &matPbr);
     Cell::SceneNode *thirdTorus  = Cell::Scene::MakeSceneNode(&torus, &matPbr);
-    Cell::SceneNode *sphereNode  = Cell::Scene::MakeSceneNode(&sphere, &matPbr);
+    Cell::SceneNode *sphereNode  = Cell::Scene::MakeSceneNode(&sphere, &matPbrGlass);
 
     mainTorus->AddChild(secondTorus);
     secondTorus->AddChild(thirdTorus);
@@ -218,6 +222,9 @@ int main(int argc, char *argv[])
     matPbr.SetTextureCube("EnvIrradiance", &irradianceMap, 0);
     matPbr.SetTextureCube("EnvPrefilter", &prefilterMap, 1);
     matPbr.SetTexture("BRDFLUT", brdfTarget.GetColorTexture(0), 2);
+    matPbrGlass.SetTextureCube("EnvIrradiance", &irradianceMap, 0);
+    matPbrGlass.SetTextureCube("EnvPrefilter", &prefilterMap, 1);
+    matPbrGlass.SetTexture("BRDFLUT", brdfTarget.GetColorTexture(0), 2);
     // - background
     background.SetCubemap(&prefilterMap);
     //background.SetCubemap(&cubemap);
@@ -228,6 +235,7 @@ int main(int argc, char *argv[])
 	float exposure = 1.0;
 	background.Material->SetFloat("Exposure", exposure);
     matPbr.SetFloat("Exposure", exposure);
+    matPbrGlass.SetFloat("Exposure", exposure);
 
     while (!glfwWindowShouldClose(window))
     {

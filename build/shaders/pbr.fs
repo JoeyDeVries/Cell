@@ -47,7 +47,13 @@ vec3 getNormal(vec3 worldNormal, vec3 tangentNormal)
 void main()
 {
 	// NOTE(Joey): retrieve PBR material parameters
+#ifndef ALPHA
 	vec3 albedo = pow(texture(TexAlbedo, TexCoords).rgb, vec3(2.2));
+#else 
+    vec4 sampledAlbedo = texture(TexAlbedo, TexCoords);
+    vec3 albedo = pow(sampledAlbedo.rgb, vec3(2.2));
+    float alpha = sampledAlbedo.a;
+#endif
 	vec3 tNormal = texture(TexNormal, TexCoords).xyz * 2.0 - 1.0;
 	float metallic = texture(TexMetallic, TexCoords).r;
 	float roughness = texture(TexRoughness, TexCoords).r;
@@ -114,5 +120,9 @@ void main()
         color += vec3(0.0, 1.0, 0.0);
     #endif
 	
+#ifndef ALPHA
 	FragColor = vec4(color, 1.0);
+#else
+    FragColor = vec4(color, alpha);
+#endif
 }
