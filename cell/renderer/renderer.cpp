@@ -213,7 +213,7 @@ namespace Cell
         RenderTarget *target = getCurrentRenderTarget();
         // NOTE(Joey): don't render right away but push to the command buffer
         // for later rendering.
-        m_CommandBuffer.Push(target, mesh, material, transform);
+        m_CommandBuffer.Push(mesh, material, transform, target);
     }
     // ------------------------------------------------------------------------
     void Renderer::PushRender(SceneNode *node)
@@ -223,7 +223,7 @@ namespace Cell
         // NOTE(Joey): traverse through all the scene nodes and for each node:
         // push its render state to the command buffer together with a 
         // calculated transform matrix.
-        m_CommandBuffer.Push(target, node->Mesh, node->Material, node->GetTransform());
+        m_CommandBuffer.Push(node->Mesh, node->Material, node->GetTransform(), target);
 
         // NOTE(Joey): originally a recursive function but transformed to 
         // iterative version by maintaining a stack.
@@ -234,7 +234,7 @@ namespace Cell
         {
             SceneNode *child = childStack.top();
             childStack.pop();
-            m_CommandBuffer.Push(target, child->Mesh, child->Material, child->GetTransform());
+            m_CommandBuffer.Push(child->Mesh, child->Material, child->GetTransform(), target);
             for(unsigned int i = 0; i < child->GetChildCount(); ++i)
                 childStack.push(child->GetChild(i));
         }
@@ -341,8 +341,8 @@ namespace Cell
 
         // NOTE(Joey): get combined color/depth texture of deferred/custom pass
         // TODO(Joey): - get actual render targets
-        Texture *colorBuffer = Resources::GetTexture("default");
-        Texture *depthBuffer = Resources::GetTexture("default");
+        //Texture *colorBuffer = Resources::GetTexture("default");
+        //Texture *depthBuffer = Resources::GetTexture("default");
 
         // NOTE(Joey): then do post-processing
         std::vector<RenderCommand> postProcessingCommands = m_CommandBuffer.GetPostProcessingRenderCommands();
@@ -412,7 +412,7 @@ namespace Cell
         // main command buffer)
         CommandBuffer commandBuffer;
         // TODO(Joey): code duplication! re-factor!
-        commandBuffer.Push(nullptr, scene->Mesh, scene->Material, scene->GetTransform());
+        commandBuffer.Push(scene->Mesh, scene->Material, scene->GetTransform());
         // NOTE(Joey): originally a recursive function but transformed to 
         // iterative version by maintaining a stack.
         std::stack<SceneNode*> childStack;
@@ -422,12 +422,12 @@ namespace Cell
         {
             SceneNode *child = childStack.top();
             childStack.pop();
-            commandBuffer.Push(nullptr, child->Mesh, child->Material, child->GetTransform());
+            commandBuffer.Push(child->Mesh, child->Material, child->GetTransform());
             for (unsigned int i = 0; i < child->GetChildCount(); ++i)
                 childStack.push(child->GetChild(i));
         }
         commandBuffer.Sort();
-        std::vector<RenderCommand> renderCommands = commandBuffer.GetRenderCommands(nullptr);
+        std::vector<RenderCommand> renderCommands = commandBuffer.GetCustomRenderCommands(nullptr);
 
         // NOTE(Joey): define 6 camera directions/lookup vectors
         Camera faceCameras[6] = {
@@ -461,6 +461,7 @@ namespace Cell
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             for (unsigned int i = 0; i < renderCommands.size(); ++i)
             {
+                assert(renderCommands[i].Material->Type == MATERIAL_CUSTOM); // NOTE(Joey): cubemap generation only works w/ custom materials (for now; not streamlined with deferred path yet)
                 renderCustomCommand(&renderCommands[i], camera);
             }
         }

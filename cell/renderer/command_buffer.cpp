@@ -27,11 +27,11 @@ namespace Cell
 
         // NOTE(Joey): check the type of the material and process differently
         // if necessary
-        if (material->Type == MATERIAL_DEFAULT)
-        {
-            m_DeferredRenderCommands.push_back(command);
-        }
-        else if (material->Type == MATERIAL_CUSTOM)
+        //if (material->Type == MATERIAL_DEFAULT)
+        //{
+            //m_DeferredRenderCommands.push_back(command);
+        //}
+        /*else*/ if (material->Type == MATERIAL_CUSTOM || material->Type == MATERIAL_DEFAULT) // NOTE(Joey): we include default here for now as we don't have the deferred pipeline yet
         {
             // NOTE(Joey): check if this render target has been pushed before, if
             // so add to vector, otherwise create new vector with this render
