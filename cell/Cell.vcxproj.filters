@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ProjectLinkTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="shading\shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -105,11 +102,11 @@
     <ClCompile Include="glad\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cell.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ProjectLinkTest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="mesh\mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -204,6 +201,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="glad\khrplatform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cell.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

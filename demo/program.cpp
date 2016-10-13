@@ -1,24 +1,9 @@
 #include <iostream>
 
 #include <math/math.h>
-#include <cell/ProjectLinkTest.h>
-#include <cell/resources/resources.h>
-#include <cell/shading/shader.h>
-#include <cell/shading/texture.h>
-#include <cell/mesh/quad.h>
-#include <cell/mesh/plane.h>
-#include <cell/mesh/circle.h>
-#include <cell/mesh/sphere.h>
-#include <cell/mesh/line_strip.h>
-#include <cell/mesh/torus.h>
-#include <cell/mesh/cube.h>
 #include <utility/logging/log.h>
-#include <cell/camera/fly_camera.h>
-#include <cell/scene/scene.h>
-#include <cell/scene/background.h>
-#include <cell/renderer/renderer.h>
-#include <cell/lighting/point_light.h>
-#include <cell/renderer/render_target.h>
+#include <cell/Cell.h>
+
 
 #include "scenes/pbr_test.h"
 
@@ -95,10 +80,9 @@ int main(int argc, char *argv[])
     Log::Message("GLFW initialized");
 
     Log::Message("Initializing render system");
-        Cell::Renderer renderer;
-        renderer.Init((GLADloadproc)glfwGetProcAddress);
-        renderer.SetRenderSize(width, height);
-        renderer.SetCamera(&camera);
+        Cell::Renderer *renderer = Cell::Init((GLADloadproc)glfwGetProcAddress);
+        renderer->SetRenderSize(width, height);
+        renderer->SetCamera(&camera);
     Log::Message("Render system initialized");
 
     // NOTE(Joey): configure default OpenGL state
@@ -123,22 +107,22 @@ int main(int argc, char *argv[])
     Cell::Cube cube;
 
     // NOTE(Joey): material setup
-    Cell::Material matPbr = renderer.CreateMaterial();
+    Cell::Material matPbr = renderer->CreateMaterial();
     matPbr.SetTexture("TexAlbedo", Cell::Resources::LoadTexture("rusted metal albedo", "textures/pbr/rusted metal/albedo.png"), 3);
     matPbr.SetTexture("TexNormal", Cell::Resources::LoadTexture("rusted metal normal", "textures/pbr/rusted metal/normal.png"), 4);
     matPbr.SetTexture("TexMetallic", Cell::Resources::LoadTexture("rusted metal metallic", "textures/pbr/rusted metal/metallic.png"), 5);
     matPbr.SetTexture("TexRoughness", Cell::Resources::LoadTexture("rusted metal roughness", "textures/pbr/rusted metal/roughness.png"), 6);
     matPbr.SetTexture("TexAO", Cell::Resources::LoadTexture("rusted metal ao", "textures/pbr/rusted metal/ao.png"), 7);
-    Cell::Material matPbrPink = renderer.CreateMaterial();
+    Cell::Material matPbrPink = renderer->CreateMaterial();
     matPbrPink.SetTexture("TexAlbedo",    Cell::Resources::LoadTexture("plastic albedo",    "textures/pbr/plastic/albedo.png"),    3);
     matPbrPink.SetTexture("TexNormal",    Cell::Resources::LoadTexture("plastic normal",    "textures/pbr/plastic/normal.png"),    4);
     matPbrPink.SetTexture("TexMetallic",  Cell::Resources::LoadTexture("plastic metallic",  "textures/pbr/plastic/metallic.png"),  5);
     matPbrPink.SetTexture("TexRoughness", Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/plastic/roughness.png"), 6);
     matPbrPink.SetTexture("TexAO",        Cell::Resources::LoadTexture("plastic ao",        "textures/pbr/plastic/ao.png"),        7);
-    Cell::Material matPbrGlass = renderer.CreateMaterial("glass");
+    Cell::Material matPbrGlass = renderer->CreateMaterial("glass");
  
     // NOTE(Joey): configure camera
-    camera.SetPerspective(math::Deg2Rad(60.0f), renderer.GetRenderSize().x / renderer.GetRenderSize().y ,0.1f, 100.0f);
+    camera.SetPerspective(math::Deg2Rad(60.0f), renderer->GetRenderSize().x / renderer->GetRenderSize().y ,0.1f, 100.0f);
 
     // NOTE(Joey): scene setup
     Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, &matPbr);
@@ -177,10 +161,10 @@ int main(int argc, char *argv[])
     Cell::Shader *irradianceCapture = Cell::Resources::LoadShader("irradiance", "shaders/cube_sample.vs", "shaders/irradiance_capture.fs");
     Cell::Shader *prefilterCapture = Cell::Resources::LoadShader("prefilter", "shaders/cube_sample.vs", "shaders/prefilter_capture.fs");
     Cell::Shader *integrateBrdf = Cell::Resources::LoadShader("integrate_brdf", "shaders/screen_quad.vs", "shaders/integrate_brdf.fs");
-    Cell::Material matHDRToCube = renderer.CreateCustomMaterial(hdrToCubemap);
-    Cell::Material matIrradianceCapture = renderer.CreateCustomMaterial(irradianceCapture);
-    Cell::Material matPrefilterCapture = renderer.CreateCustomMaterial(prefilterCapture);
-    Cell::Material matIntegrateBrdf = renderer.CreateCustomMaterial(integrateBrdf);
+    Cell::Material matHDRToCube = renderer->CreateCustomMaterial(hdrToCubemap);
+    Cell::Material matIrradianceCapture = renderer->CreateCustomMaterial(irradianceCapture);
+    Cell::Material matPrefilterCapture = renderer->CreateCustomMaterial(prefilterCapture);
+    Cell::Material matIntegrateBrdf = renderer->CreateCustomMaterial(integrateBrdf);
     matHDRToCube.DepthCompare = GL_LEQUAL;
     matIrradianceCapture.DepthCompare = GL_LEQUAL;
     matPrefilterCapture.DepthCompare = GL_LEQUAL;
@@ -192,13 +176,13 @@ int main(int argc, char *argv[])
     matHDRToCube.SetTexture("environment", hdrMap, 0);
     Cell::TextureCube hdrEnvMap;
     hdrEnvMap.DefaultInitialize(128, 128, GL_RGB, GL_FLOAT);
-    renderer.RenderToCubemap(environmentCube, &hdrEnvMap);
+    renderer->RenderToCubemap(environmentCube, &hdrEnvMap);
     // - irradiance
     Cell::TextureCube irradianceMap;
     irradianceMap.DefaultInitialize(32, 32, GL_RGB, GL_FLOAT);
     matIrradianceCapture.SetTextureCube("environment", &hdrEnvMap, 0);
     environmentCube->Material = &matIrradianceCapture;
-    renderer.RenderToCubemap(environmentCube, &irradianceMap, math::vec3(0.0f), 0);
+    renderer->RenderToCubemap(environmentCube, &irradianceMap, math::vec3(0.0f), 0);
     // - prefilter 
     Cell::TextureCube prefilterMap;
     prefilterMap.FilterMin = GL_LINEAR_MIPMAP_LINEAR;
@@ -210,12 +194,12 @@ int main(int argc, char *argv[])
     for (unsigned int i = 0; i < maxMipLevels; ++i)
     {
         matPrefilterCapture.SetFloat("roughness", (float)i / (float)(maxMipLevels - 1));
-        renderer.RenderToCubemap(environmentCube, &prefilterMap, math::vec3(0.0f), i);
+        renderer->RenderToCubemap(environmentCube, &prefilterMap, math::vec3(0.0f), i);
 
     }
     // - brdf integration
     Cell::RenderTarget brdfTarget(128, 128, GL_HALF_FLOAT, 1, true);
-    renderer.Blit(nullptr, &brdfTarget, &matIntegrateBrdf);
+    renderer->Blit(nullptr, &brdfTarget, &matIntegrateBrdf);
 
     // NOTE(Joey): use pre-computed PBR environment data
     // - pbr shader
@@ -305,21 +289,21 @@ int main(int argc, char *argv[])
 
         {
             //CLOCK(PUSH);
-            renderer.PushRender(mainTorus);
+            renderer->PushRender(mainTorus);
             //renderer.PushRender(floor);
-            renderer.PushRender(pbrBall);
+            renderer->PushRender(pbrBall);
 
-            renderer.PushRender(&background);
+            renderer->PushRender(&background);
 
             Cell::PointLight light;
             light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);
             light.Color = math::vec3(1.0f, 0.7f, 0.7f);
-            renderer.PushLight(&light, true);
+            renderer->PushLight(&light, true);
 
             Cell::PointLight light2;
             light2.Position = math::vec3(sin(glfwGetTime() * 0.3f) * 5.5, 0.0f, cos(glfwGetTime() * 0.1f) * 10.0f);
             light2.Color = math::vec3(0.5f, 0.5f, 1.0f);
-            renderer.PushLight(&light2, true);
+            renderer->PushLight(&light2, true);
         }
         {
             //CLOCK(CUBEMAP);
@@ -330,7 +314,7 @@ int main(int argc, char *argv[])
         {
             //CLOCK(RENDER);
             // NOTE(Joey): request Cell to render all currently pushed commands
-            renderer.RenderPushedCommands();
+            renderer->RenderPushedCommands();
         }
    
         // NOTE(Joey): display log messages / diagnostics
@@ -341,6 +325,7 @@ int main(int argc, char *argv[])
     }
 
     // TODO(Joey): clean up Cell
+    Cell::Clean();
 
     glfwTerminate();
 
