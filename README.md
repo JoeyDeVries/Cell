@@ -33,8 +33,10 @@ Feature List (complete)
 	1. Define set of basic shape mesh generation; plane, cube, disk, sphere, cylinder, torus (donut)
 5. Flexible Framebuffer configuration utility:
 	1. Including CubeMap use and generation (reflection probes, point shadow-maps)
+	2. Post-processing.
 6. Create Render Buffer, draw commands encapsulated in push to render buffer w/ relevant state:
 	1. Define list of render push commands (material, mesh)
+    2. Collect all render commands and seperate by pass.
 8. Functioning PBR render pipeline.
 	1. Calculate diffuse integral and store into cubemap.
 	2. Prefilter environment map w/ integral and store into cubemap as diffuse integral.
@@ -47,10 +49,7 @@ Feature List (work-in-progress)
 	2. Logging.
 * Flexible OpenGL initialization.
 	
-5. Flexible Framebuffer configuration utility:
-	2. Post-processing.
 6. Create Render Buffer, draw commands encapsulated in push to render buffer w/ relevant state:
-	2. Collect all render commands and seperate by pass.
 	3. Sort render commands per pass; execute (batch where necessary) to minimize state changes.
 	
 Feature List (todo)

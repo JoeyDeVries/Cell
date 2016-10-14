@@ -39,6 +39,12 @@ namespace Cell
         {
             delete it->second;
         }
+
+        delete m_CustomTarget;
+
+        // post-processing
+        delete m_PostProcessTarget1;
+        delete m_PostProcessingMaterial;
     }
     // ------------------------------------------------------------------------
     void Renderer::Init(GLADloadproc loadProcFunc)
@@ -64,11 +70,11 @@ namespace Cell
         Shader *glassShader = Resources::LoadShader("glass", "shaders/pbr.vs", "shaders/pbr.fs", { "ALPHA" });
         Material *glassMat = new Material(glassShader);
         glassMat->Type = MATERIAL_CUSTOM; // this material can't fit in the deferred rendering pipeline (due to transparency sorting).
-        glassMat->SetTexture("TexAlbedo", Cell::Resources::LoadTexture("glass albedo", "textures/glass.png"), 3);
-        glassMat->SetTexture("TexNormal", Cell::Resources::LoadTexture("plastic normal", "textures/pbr/plastic/normal.png"), 4);
-        glassMat->SetTexture("TexMetallic", Cell::Resources::LoadTexture("plastic metallic", "textures/pbr/plastic/metallic.png"), 5);
+        glassMat->SetTexture("TexAlbedo",    Cell::Resources::LoadTexture("glass albedo",      "textures/glass.png"), 3);
+        glassMat->SetTexture("TexNormal",    Cell::Resources::LoadTexture("plastic normal",    "textures/pbr/plastic/normal.png"), 4);
+        glassMat->SetTexture("TexMetallic",  Cell::Resources::LoadTexture("plastic metallic",  "textures/pbr/plastic/metallic.png"), 5);
         glassMat->SetTexture("TexRoughness", Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/plastic/roughness.png"), 6);
-        glassMat->SetTexture("TexAO", Cell::Resources::LoadTexture("plastic ao", "textures/pbr/plastic/ao.png"), 7);
+        glassMat->SetTexture("TexAO",        Cell::Resources::LoadTexture("plastic ao",        "textures/pbr/plastic/ao.png"), 7);
         glassMat->Blend = true;
         m_DefaultMaterials[SID("glass")] = glassMat;
 
@@ -78,12 +84,23 @@ namespace Cell
         m_NDCPlane = new Quad;
         glGenFramebuffers(1, &m_FramebufferCubemap);
         glGenRenderbuffers(1, &m_CubemapDepthRBO);
+
+        m_CustomTarget = new RenderTarget(1, 1, GL_FLOAT, 1, true);
+        m_PostProcessTarget1 = new RenderTarget(1, 1, GL_UNSIGNED_BYTE, 1, false);
+
+        Shader *postProcessing = Cell::Resources::LoadShader("post processing", 
+                                                             "shaders/screen_quad.vs", 
+                                                             "shaders/post_processing.fs");
+        m_PostProcessingMaterial = new Material(postProcessing);
     }
     // ------------------------------------------------------------------------
     void Renderer::SetRenderSize(unsigned int width, unsigned int height)
     {
         m_RenderSize.x = width;
         m_RenderSize.y = height;
+
+        m_CustomTarget->Resize(width, height);
+        m_PostProcessTarget1->Resize(width, height);
     }
     // ------------------------------------------------------------------------
     math::vec2 Renderer::GetRenderSize()
@@ -96,7 +113,8 @@ namespace Cell
         m_CurrentRenderTargetCustom = renderTarget;
         if (renderTarget != nullptr) 
         {
-            if (std::find(m_RenderTargetsCustom.begin(), m_RenderTargetsCustom.end(), renderTarget) == m_RenderTargetsCustom.end())
+            if (std::find(m_RenderTargetsCustom.begin(), m_RenderTargetsCustom.end(), renderTarget)
+                == m_RenderTargetsCustom.end())
             {
                 m_RenderTargetsCustom.push_back(renderTarget);
             }
@@ -136,7 +154,7 @@ namespace Cell
         return mat;
     }
     // ------------------------------------------------------------------------
-    Material CreatePostProcessingMaterial(Shader *shader)
+    Material Renderer::CreatePostProcessingMaterial(Shader *shader)
     {
         Material mat(shader);
         mat.Type = MATERIAL_POST_PROCESS;
@@ -181,6 +199,12 @@ namespace Cell
         // NOTE(Joey): propagate scene to SceneNode push call from its top
         // root node, effectively pushing the entire scene.
         PushRender(scene->GetRootNode());
+    }
+    // ------------------------------------------------------------------------
+    void Renderer::PushPostProcessor(Material *postProcessor)
+    {
+        // NOTE(Joey): we only care about the material, mesh as NDC quad is pre-defined.
+        m_CommandBuffer.Push(nullptr, postProcessor, math::mat4());
     }
     // ------------------------------------------------------------------------
     void Renderer::PushLight(DirectionalLight *light)
@@ -254,15 +278,19 @@ namespace Cell
                     glClear(GL_COLOR_BUFFER_BIT);
                 // TODO(Joey): enable multiple color targets
                 // TODO(Joey): more configurable camera settings, what about orthographic? and near/far plane?
-                m_Camera->SetPerspective(m_Camera->FOV, (float)renderTarget->Width / (float)renderTarget->Height, 0.1, 100.0f); 
+                m_Camera->SetPerspective(m_Camera->FOV, 
+                                         (float)renderTarget->Width / (float)renderTarget->Height, 
+                                         0.1, 100.0f); 
             }
             else
             {
+                // NOTE(Joey): don't render to default framebuffer, but to ustom target framebuffer
+                // which we'll use for post-processing.
                 glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
-                m_Camera->SetPerspective(m_Camera->FOV, m_RenderSize.x / m_RenderSize.y, 0.1, 100.0f);
-                // NOTE(Joey): don't clear the default color buffer.
-                //glClear(GL_COLOR_BUFFER_BIT);
+                glBindFramebuffer(GL_FRAMEBUFFER, m_CustomTarget->m_ID);
+                m_Camera->SetPerspective(m_Camera->FOV, m_RenderSize.x / m_RenderSize.y, 0.1, 
+                                         100.0f);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             }
 
             // NOTE(Joey): sort all render commands and retrieve the sorted array
@@ -276,20 +304,23 @@ namespace Cell
         }
 
         // NOTE(Joey): get combined color/depth texture of deferred/custom pass
-        // TODO(Joey): - get actual render targets
-        //Texture *colorBuffer = Resources::GetTexture("default");
-        //Texture *depthBuffer = Resources::GetTexture("default");
+
 
         // NOTE(Joey): then do post-processing
         std::vector<RenderCommand> postProcessingCommands = m_CommandBuffer.GetPostProcessingRenderCommands();
         for (unsigned int i = 0; i < postProcessingCommands.size(); ++i)
         {
             // NOTE(Joey): ping-pong between render textures
+            bool even = i % 2 == 0;
+            Blit(even ? m_CustomTarget : m_PostProcessTarget1,
+                 even ? m_PostProcessTarget1 : m_CustomTarget, 
+                 postProcessingCommands[i].Material);
         }
 
-        // NOTE(Joey): then do a final blit to the default framebuffer, with
-        // gamma correction and tone mapping post-processing step.
-        //Blit(postProcessingOne, nullptr, m_PostProcessingMat);
+        // NOTE(Joey): then do a final blit to the default framebuffer, with gamma correction and 
+        // tone mapping post-processing step.
+        Blit(postProcessingCommands.size() % 2 == 0 ? m_CustomTarget : m_PostProcessTarget1,
+             nullptr, m_PostProcessingMaterial);
 
         // NOTE(Joey): clear the command buffer s.t. the next frame/call can
         // start from an empty slate again.
@@ -300,12 +331,16 @@ namespace Cell
         m_PointLights.clear();
         m_RenderTargetsCustom.clear();
         // TODO(Joey): this can probably be done in a cleaner fashion:
-        //m_RenderTargetsCustom.push_back(nullptr); // NOTE(Joey): always add the default render target to the queue.
+        //m_RenderTargetsCustom.push_back(nullptr); // NOTE(Joey): always add the default render 
+        // target to the queue.
         m_CurrentRenderTargetCustom = nullptr;
 
     }
     // ------------------------------------------------------------------------
-    void Renderer::Blit(RenderTarget *src, RenderTarget *dst, Material *material, std::string textureUniformName)
+    void Renderer::Blit(RenderTarget *src, 
+                        RenderTarget *dst, 
+                        Material     *material, 
+                        std::string   textureUniformName)
     {
         // NOTE(Joey): if a destination target is given, bind to its framebuffer
         if (dst)
@@ -327,7 +362,7 @@ namespace Cell
         // as input to the material shader.
         if (src)
         {
-            material->SetTexture(textureUniformName, src->GetColorTexture(0));
+            material->SetTexture(textureUniformName, src->GetColorTexture(0), 0);
         }
         // NOTE(Joey): render screen-space material to quad which will be 
         // stored/displayer inside dst's buffers.
@@ -342,10 +377,13 @@ namespace Cell
         glViewport(0, 0, m_RenderSize.x, m_RenderSize.y); 
     }
     // ------------------------------------------------------------------------
-    void Renderer::RenderToCubemap(SceneNode *scene, TextureCube *target, math::vec3 position, unsigned int mipLevel)
+    void Renderer::RenderToCubemap(SceneNode *  scene, 
+                                   TextureCube *target, 
+                                   math::vec3   position, 
+                                   unsigned int mipLevel)
     {
-        // NOTE(Joey): create a command buffer specifically for this operation (as to not conflict with 
-        // main command buffer)
+        // NOTE(Joey): create a command buffer specifically for this operation (as to not conflict 
+        // with main command buffer)
         CommandBuffer commandBuffer;
         // TODO(Joey): code duplication! re-factor!
         commandBuffer.Push(scene->Mesh, scene->Material, scene->GetTransform());
@@ -383,7 +421,8 @@ namespace Cell
         glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferCubemap);
         glBindRenderbuffer(GL_RENDERBUFFER, m_CubemapDepthRBO);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_CubemapDepthRBO);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 
+                                  m_CubemapDepthRBO);
 
         // NOTE(Joey): resize relevant buffers
         glViewport(0, 0, width, height);
@@ -393,11 +432,14 @@ namespace Cell
         {
             Camera *camera = &faceCameras[i];
             camera->SetPerspective(math::Deg2Rad(90.0f), width/height, 0.1f, 100.0f);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, target->ID, mipLevel);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 
+                                   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, target->ID, mipLevel);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             for (unsigned int i = 0; i < renderCommands.size(); ++i)
             {
-                assert(renderCommands[i].Material->Type == MATERIAL_CUSTOM); // NOTE(Joey): cubemap generation only works w/ custom materials (for now; not streamlined with deferred path yet)
+                // NOTE(Joey): cubemap generation only works w/ custom materials (for now; not 
+                // streamlined with deferred path yet)
+                assert(renderCommands[i].Material->Type == MATERIAL_CUSTOM); 
                 renderCustomCommand(&renderCommands[i], camera);
             }
         }

@@ -42,6 +42,9 @@ namespace Cell
         // NOTE(Joey): 3D texture generation
         void Generate(unsigned int width, unsigned int height, unsigned int depth, GLenum internalFormat, GLenum format, GLenum type, void *data);
 
+        // NOTE(Joey): resizes the texture; allocates new (empty) texture memory
+        void Resize(unsigned int width, unsigned int height = 0, unsigned int depth = 0);
+
         void Bind(int unit = -1);
         void Unbind();
     };

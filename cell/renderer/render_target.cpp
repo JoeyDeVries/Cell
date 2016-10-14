@@ -65,6 +65,22 @@ namespace Cell
         }
     }
     // ------------------------------------------------------------------------
+    void RenderTarget::Resize(unsigned int width, unsigned int height)
+    {
+        Width = width;
+        Height = height;
+
+        for (unsigned int i = 0; i < m_ColorAttachments.size(); ++i)
+        {
+            m_ColorAttachments[i].Resize(width, height);
+        }
+        // NOTE(Joey): then generate Depth/Stencil texture if requested
+        if (HasDepthAndStencil)
+        {
+            m_DepthStencil.Resize(width, height);
+        }
+    }
+    // ------------------------------------------------------------------------
     void RenderTarget::SetTarget(GLenum target)
     {
         m_Target = target;

@@ -218,6 +218,13 @@ int main(int argc, char *argv[])
     matPbr.SetFloat("Exposure", exposure);
     matPbrGlass.SetFloat("Exposure", exposure);
 
+    // NOTE(Joey): post processing
+    Cell::Shader *postProcessing1 = Cell::Resources::LoadShader("postprocessing1", "shaders/screen_quad.vs", "shaders/custom_post_1.fs");
+    Cell::Shader *postProcessing2 = Cell::Resources::LoadShader("postprocessing2", "shaders/screen_quad.vs", "shaders/custom_post_2.fs");
+    Cell::Material customPostProcessing1 = renderer->CreatePostProcessingMaterial(postProcessing1);
+    Cell::Material customPostProcessing2 = renderer->CreatePostProcessingMaterial(postProcessing2);
+    
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -309,6 +316,12 @@ int main(int argc, char *argv[])
             //CLOCK(CUBEMAP);
             // NOTE(Joey): also generate dynamic cubemap from scene
             //renderer.RenderToCubemap(mainTorus, &cubemap, math::vec3(0.0f, 8.0f, 0.0f), 0);
+        }
+
+        {
+            // NOTE(Joey): push post-processing calls
+            renderer->PushPostProcessor(&customPostProcessing1);
+            renderer->PushPostProcessor(&customPostProcessing2);
         }
 
         {

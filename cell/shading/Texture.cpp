@@ -89,6 +89,25 @@ namespace Cell
         Unbind();
     }
     // ------------------------------------------------------------------------
+    void Texture::Resize(unsigned int width, unsigned int height, unsigned int depth)
+    {
+        Bind();
+        if (Target == GL_TEXTURE_1D)
+        {
+            glTexImage1D(GL_TEXTURE_1D, 0, InternalFormat, width, 0, Format, Type, 0);
+        }
+        else if (Target == GL_TEXTURE_2D)
+        {
+            assert(height > 0);
+            glTexImage2D(GL_TEXTURE_2D, 0, InternalFormat, width, height, 0, Format, Type, 0);
+        }
+        else if (Target == GL_TEXTURE_3D)
+        {
+            assert(height > 0 && depth > 0);
+            glTexImage3D(GL_TEXTURE_3D, 0, InternalFormat, width, height, depth, 0, Format, Type, 0);
+        }
+    }
+    // ------------------------------------------------------------------------
     void Texture::Bind(int unit)
     {
         if(unit >= 0)

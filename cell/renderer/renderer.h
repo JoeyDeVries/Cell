@@ -55,6 +55,12 @@ namespace Cell
         RenderTarget               *m_CurrentRenderTargetCustom = nullptr;
         Quad                       *m_NDCPlane; 
 
+        RenderTarget               *m_CustomTarget;
+
+        // final post-processing
+        RenderTarget *m_PostProcessTarget1;
+        Material     *m_PostProcessingMaterial;
+
         // (dynamic) cubemap generation
         unsigned int m_FramebufferCubemap; // NOTE(Joey): cubemap render targets are a very specific case so we can do these without abstractions.
         unsigned int m_CubemapDepthRBO;
@@ -84,6 +90,7 @@ namespace Cell
         void PushRender(Mesh *mesh, Material *material, math::mat4 transform = math::mat4());
         void PushRender(SceneNode *node);
         void PushRender(Scene *scene);
+        void PushPostProcessor(Material *postProcessor);
 
         void PushLight(DirectionalLight *light);
         void PushLight(PointLight       *light, bool render = false);        

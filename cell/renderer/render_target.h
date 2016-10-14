@@ -31,6 +31,8 @@ namespace Cell
         Texture *GetDepthStencilTexture();
         Texture *GetColorTexture(unsigned int index);
 
+        void Resize(unsigned int width, unsigned int height);
+
         void SetTarget(GLenum target);
     };
 }
