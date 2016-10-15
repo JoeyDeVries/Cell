@@ -25,7 +25,7 @@ namespace Cell
         // NOTE(Joey): compile both shaders and link them
         unsigned int vs = glCreateShader(GL_VERTEX_SHADER);
         unsigned int fs = glCreateShader(GL_FRAGMENT_SHADER);
-        m_ID = glCreateProgram();
+        ID = glCreateProgram();
         int status;
         char log[1024];
 
@@ -107,14 +107,14 @@ namespace Cell
             Log::Message("Fragment shader compilation error at: " + name + "!\n" + std::string(log), LOG_ERROR);
         }
 
-        glAttachShader(m_ID, vs);
-        glAttachShader(m_ID, fs);
-        glLinkProgram(m_ID);
+        glAttachShader(ID, vs);
+        glAttachShader(ID, fs);
+        glLinkProgram(ID);
 
-        glGetProgramiv(m_ID, GL_LINK_STATUS, &status);
+        glGetProgramiv(ID, GL_LINK_STATUS, &status);
         if (!status)
         {
-            glGetProgramInfoLog(m_ID, 1024, NULL, log);
+            glGetProgramInfoLog(ID, 1024, NULL, log);
             Log::Message("Shader program linking error: \n" + std::string(log), LOG_ERROR);
         }
 
@@ -123,8 +123,8 @@ namespace Cell
 
         // NOTE(Joey): query the number of active uniforms and attributes
         int nrAttributes, nrUniforms;
-        glGetProgramiv(m_ID, GL_ACTIVE_ATTRIBUTES, &nrAttributes);
-        glGetProgramiv(m_ID, GL_ACTIVE_UNIFORMS, &nrUniforms);
+        glGetProgramiv(ID, GL_ACTIVE_ATTRIBUTES, &nrAttributes);
+        glGetProgramiv(ID, GL_ACTIVE_UNIFORMS, &nrUniforms);
         Attributes.resize(nrAttributes);
         Uniforms.resize(nrUniforms);
 
@@ -133,28 +133,28 @@ namespace Cell
         for (unsigned int i = 0; i < nrAttributes; ++i)
         {
             GLenum glType;
-            glGetActiveAttrib(m_ID, i, sizeof(buffer), 0, &Attributes[i].Size, &glType, buffer);
+            glGetActiveAttrib(ID, i, sizeof(buffer), 0, &Attributes[i].Size, &glType, buffer);
             Attributes[i].Name = std::string(buffer);
             Attributes[i].Type = SHADER_TYPE_BOOL; // TODO(Joey): think of clean way to manage type conversions of OpenGL and custom type
 
-            Attributes[i].Location = glGetAttribLocation(m_ID, buffer);
+            Attributes[i].Location = glGetAttribLocation(ID, buffer);
         }
 
         // NOTE(Joey): iterate over all active uniforms
         for (unsigned int i = 0; i < nrUniforms; ++i)
         {
             GLenum glType;
-            glGetActiveUniform(m_ID, i, sizeof(buffer), 0, &Uniforms[i].Size, &glType, buffer);
+            glGetActiveUniform(ID, i, sizeof(buffer), 0, &Uniforms[i].Size, &glType, buffer);
             Uniforms[i].Name = std::string(buffer);
             Uniforms[i].Type = SHADER_TYPE_BOOL;  // TODO(Joey): think of clean way to manage type conversions of OpenGL and custom type
 
-            Uniforms[i].Location = glGetUniformLocation(m_ID, buffer);
+            Uniforms[i].Location = glGetUniformLocation(ID, buffer);
         }
     }
     // ------------------------------------------------------------------------
     void Shader::Use()
     {
-        glUseProgram(m_ID);
+        glUseProgram(ID);
     }
     // ------------------------------------------------------------------------
     bool Shader::HasUniform(std::string name)

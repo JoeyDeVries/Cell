@@ -57,27 +57,33 @@ namespace Cell
         m_PostProcessingRenderCommands.clear();
     }
     // ------------------------------------------------------------------------
+    // TODO(Joey): can we combine these render sorts in one sort? First attempts failed so it's 
+    // likely this isn't possible; check w/ community!
     // NOTE(Joey): custom per-element sort compare function used by the 
     // CommandBuffer::Sort() function.
-    bool renderSortDeferred(RenderCommand &a, RenderCommand &b)
+    bool renderSortDeferred(const RenderCommand &a, const RenderCommand &b)
     {
-        return true;
+        return false;
     }
-    bool renderSortCustom(RenderCommand &a, RenderCommand &b)
-    {
-        return true;
+    // NOTE(Joey): first sort on alpha state
+    bool renderSortAlpha(const RenderCommand &a, const RenderCommand &b)
+    {       
+        return a.Material->Blend < b.Material->Blend;
     }
-    bool renderSortPostProcessing(RenderCommand &a, RenderCommand &b)
+    bool renderSortShader(const RenderCommand &a, const RenderCommand &b)
     {
-        //return a.Material->
-        return true;
+        return a.Material->GetShader()->ID < b.Material->GetShader()->ID;
     }
     // ------------------------------------------------------------------------
     void CommandBuffer::Sort()
     {
-        //std::sort(m_RenderCommands.begin(), m_RenderCommands.end(), renderSortDeferred);
-        //std::sort(m_RenderCommands.begin(), m_RenderCommands.end(), renderSortCustom);
-        //std::sort(m_RenderCommands.begin(), m_RenderCommands.end(), renderSortPostProcessing);
+        std::sort(m_DeferredRenderCommands.begin(), m_DeferredRenderCommands.end(), renderSortDeferred);
+        for (auto rtIt = m_CustomRenderCommands.begin(); rtIt != m_CustomRenderCommands.end(); rtIt++) 
+        {
+            // NOTE(Joey): remember to sort in reverse order of signifiance
+            std::sort(rtIt->second.begin(), rtIt->second.end(), renderSortShader);
+            std::sort(rtIt->second.begin(), rtIt->second.end(), renderSortAlpha);
+        }
     }
     // ------------------------------------------------------------------------
     std::vector<RenderCommand> CommandBuffer::GetDeferredRenderCommands()
@@ -88,6 +94,11 @@ namespace Cell
     std::vector<RenderCommand> CommandBuffer::GetCustomRenderCommands(RenderTarget *target)
     {
         return m_CustomRenderCommands[target];
+    }
+    // ------------------------------------------------------------------------
+    std::vector<RenderCommand> CommandBuffer::GetDeferredAlphaRenderCommands()
+    {
+        return m_DeferredAlphaRenderCommands;
     }
     // ------------------------------------------------------------------------
     std::vector<RenderCommand> CommandBuffer::GetPostProcessingRenderCommands()

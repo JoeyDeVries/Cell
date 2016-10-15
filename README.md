@@ -37,6 +37,7 @@ Feature List (complete)
 6. Create Render Buffer, draw commands encapsulated in push to render buffer w/ relevant state:
 	1. Define list of render push commands (material, mesh)
     2. Collect all render commands and seperate by pass.
+    3. Sort render commands per pass; execute (batch where necessary) to minimize state changes.
 8. Functioning PBR render pipeline.
 	1. Calculate diffuse integral and store into cubemap.
 	2. Prefilter environment map w/ integral and store into cubemap as diffuse integral.
@@ -48,10 +49,7 @@ Feature List (work-in-progress)
 	1. Random numbers.
 	2. Logging.
 * Flexible OpenGL initialization.
-	
-6. Create Render Buffer, draw commands encapsulated in push to render buffer w/ relevant state:
-	3. Sort render commands per pass; execute (batch where necessary) to minimize state changes.
-	
+		
 Feature List (todo)
 ------
 3. Define Mesh object and encompassing Model class.

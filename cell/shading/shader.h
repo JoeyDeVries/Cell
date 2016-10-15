@@ -22,10 +22,10 @@ namespace Cell
     class Shader
     {
     public:
+        unsigned int ID;
+
         std::vector<Uniform>         Uniforms;
         std::vector<VertexAttribute> Attributes;
-    private:
-        unsigned int m_ID;
 
     public:
         Shader();

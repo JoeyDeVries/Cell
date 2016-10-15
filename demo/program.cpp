@@ -320,8 +320,8 @@ int main(int argc, char *argv[])
 
         {
             // NOTE(Joey): push post-processing calls
-            renderer->PushPostProcessor(&customPostProcessing1);
-            renderer->PushPostProcessor(&customPostProcessing2);
+            //renderer->PushPostProcessor(&customPostProcessing1);
+            //renderer->PushPostProcessor(&customPostProcessing2);
         }
 
         {
