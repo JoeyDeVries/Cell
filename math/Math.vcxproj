@@ -139,7 +139,7 @@
     <ClInclude Include="trigonometry\conversions.h" />
     <ClInclude Include="trigonometry\polar.h" />
     <ClInclude Include="trigonometry\spherical.h" />
-    <ClInclude Include="utility\common.h" />
+    <ClInclude Include="common.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="geometry\plane.cpp" />

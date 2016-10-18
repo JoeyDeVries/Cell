@@ -8,6 +8,7 @@
 #include "scenes/pbr_test.h"
 
 #include <utility/timing/diagnostics.h>
+#include <utility/random/random.h>
 
 #include <GLFW/glfw3.h>
 
@@ -18,6 +19,7 @@ void framebufferSizeFunc(GLFWwindow *window, int width, int height);
 void keyFunc(GLFWwindow *window, int key, int scancode, int action, int mods);
 void mousePosFunc(GLFWwindow *window, double xpos, double ypos);
 
+Cell::Renderer *renderer;
 Cell::FlyCamera camera(math::vec3(0.0f, 0.0f, 5.0f), math::vec3(0.0f, 0.0f, -1.0f));
 float deltaTime     = 0.0f;
 float lastFrameTime = 0.0f;
@@ -80,7 +82,7 @@ int main(int argc, char *argv[])
     Log::Message("GLFW initialized");
 
     Log::Message("Initializing render system");
-        Cell::Renderer *renderer = Cell::Init((GLADloadproc)glfwGetProcAddress);
+        renderer = Cell::Init((GLADloadproc)glfwGetProcAddress);
         renderer->SetRenderSize(width, height);
         renderer->SetCamera(&camera);
     Log::Message("Render system initialized");
@@ -152,65 +154,9 @@ int main(int argc, char *argv[])
     Cell::TextureCube cubemap;
     cubemap.DefaultInitialize(1024, 1024, GL_RGB, GL_UNSIGNED_BYTE);
    
-
-    // NOTE(Joey): pbr pre-compute
-    // TODO(Joey): think of a way we can have a default pre-computed shader set that works at start, without
-    // having to require the developer to pre-compute one first; or use build paths and only use IBL if a 
-    // cubemap is supplied.   
-    Cell::Shader *hdrToCubemap = Cell::Resources::LoadShader("hdr to cubemap", "shaders/cube_sample.vs", "shaders/spherical_to_cube.fs");
-    Cell::Shader *irradianceCapture = Cell::Resources::LoadShader("irradiance", "shaders/cube_sample.vs", "shaders/irradiance_capture.fs");
-    Cell::Shader *prefilterCapture = Cell::Resources::LoadShader("prefilter", "shaders/cube_sample.vs", "shaders/prefilter_capture.fs");
-    Cell::Shader *integrateBrdf = Cell::Resources::LoadShader("integrate_brdf", "shaders/screen_quad.vs", "shaders/integrate_brdf.fs");
-    Cell::Material matHDRToCube = renderer->CreateCustomMaterial(hdrToCubemap);
-    Cell::Material matIrradianceCapture = renderer->CreateCustomMaterial(irradianceCapture);
-    Cell::Material matPrefilterCapture = renderer->CreateCustomMaterial(prefilterCapture);
-    Cell::Material matIntegrateBrdf = renderer->CreateCustomMaterial(integrateBrdf);
-    matHDRToCube.DepthCompare = GL_LEQUAL;
-    matIrradianceCapture.DepthCompare = GL_LEQUAL;
-    matPrefilterCapture.DepthCompare = GL_LEQUAL;
-
-    // - convert HDR radiance image to HDR environment cubemap
-    Cell::SceneNode *environmentCube = Cell::Scene::MakeSceneNode(&cube, &matHDRToCube);
-	Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/hamarikyu bridge.hdr"); 
-	//Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/Seascape02_downscaled.hdr"); 
-    matHDRToCube.SetTexture("environment", hdrMap, 0);
-    Cell::TextureCube hdrEnvMap;
-    hdrEnvMap.DefaultInitialize(128, 128, GL_RGB, GL_FLOAT);
-    renderer->RenderToCubemap(environmentCube, &hdrEnvMap);
-    // - irradiance
-    Cell::TextureCube irradianceMap;
-    irradianceMap.DefaultInitialize(32, 32, GL_RGB, GL_FLOAT);
-    matIrradianceCapture.SetTextureCube("environment", &hdrEnvMap, 0);
-    environmentCube->Material = &matIrradianceCapture;
-    renderer->RenderToCubemap(environmentCube, &irradianceMap, math::vec3(0.0f), 0);
-    // - prefilter 
-    Cell::TextureCube prefilterMap;
-    prefilterMap.FilterMin = GL_LINEAR_MIPMAP_LINEAR;
-    prefilterMap.DefaultInitialize(128, 128, GL_RGB, GL_FLOAT, true);
-    matPrefilterCapture.SetTextureCube("environment", &hdrEnvMap, 0);
-    environmentCube->Material = &matPrefilterCapture;
-    // calculate prefilter for multiple roughness levels
-    unsigned int maxMipLevels = 5;
-    for (unsigned int i = 0; i < maxMipLevels; ++i)
-    {
-        matPrefilterCapture.SetFloat("roughness", (float)i / (float)(maxMipLevels - 1));
-        renderer->RenderToCubemap(environmentCube, &prefilterMap, math::vec3(0.0f), i);
-
-    }
-    // - brdf integration
-    Cell::RenderTarget brdfTarget(128, 128, GL_HALF_FLOAT, 1, true);
-    renderer->Blit(nullptr, &brdfTarget, &matIntegrateBrdf);
-
-    // NOTE(Joey): use pre-computed PBR environment data
-    // - pbr shader
-    matPbr.SetTextureCube("EnvIrradiance", &irradianceMap, 0);
-    matPbr.SetTextureCube("EnvPrefilter", &prefilterMap, 1);
-    matPbr.SetTexture("BRDFLUT", brdfTarget.GetColorTexture(0), 2);
-    matPbrGlass.SetTextureCube("EnvIrradiance", &irradianceMap, 0);
-    matPbrGlass.SetTextureCube("EnvPrefilter", &prefilterMap, 1);
-    matPbrGlass.SetTexture("BRDFLUT", brdfTarget.GetColorTexture(0), 2);
     // - background
-    background.SetCubemap(&prefilterMap);
+    Cell::PBREnvironment pbrEnv = renderer->GetPBREnvironment();
+    background.SetCubemap(pbrEnv.Prefiltered);
 	float lodLevel = 1.5f; 
 	background.Material->SetFloat("lodLevel", lodLevel);
 	float exposure = 1.0;
@@ -329,7 +275,7 @@ int main(int argc, char *argv[])
             // NOTE(Joey): request Cell to render all currently pushed commands
             renderer->RenderPushedCommands();
         }
-   
+
         // NOTE(Joey): display log messages / diagnostics
         Log::Display();
         Log::Clear();
@@ -337,7 +283,7 @@ int main(int argc, char *argv[])
         glfwSwapBuffers(window);
     }
 
-    // TODO(Joey): clean up Cell
+    // NOTE(Joey): clean up Cell
     Cell::Clean();
 
     glfwTerminate();
@@ -347,7 +293,8 @@ int main(int argc, char *argv[])
 
 void framebufferSizeFunc(GLFWwindow *window, int width, int height)
 {
-    // TODO(Joey): reset viewport, but remain proper aspect ratio
+    renderer->SetRenderSize(width, height);
+    camera.SetPerspective(math::Deg2Rad(60.0f), (float)width / (float)height, 0.1f, 100.0f);
 }
 
 void keyFunc(GLFWwindow *window, int key, int scancode, int action, int mods)

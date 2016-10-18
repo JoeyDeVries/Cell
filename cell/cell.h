@@ -3,6 +3,7 @@
 
 #include "renderer/renderer.h"
 #include "renderer/render_target.h"
+#include "renderer/pbr_environment.h"
 #include "camera/fly_camera.h"
 #include "resources/resources.h"
 #include "mesh/mesh.h"

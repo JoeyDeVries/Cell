@@ -47,7 +47,7 @@ namespace Cell
             int        Int;
             float      Float;
 
-            //math::vec2 Vec2;
+            math::vec2 Vec2;
             math::vec3 Vec3;
             math::vec4 Vec4;
             math::mat2 Mat2;

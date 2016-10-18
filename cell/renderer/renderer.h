@@ -7,6 +7,7 @@
 #include "../lighting/directional_light.h"
 #include "../mesh/quad.h"
 #include "command_buffer.h"
+#include "pbr_environment.h"
 
 #include "../glad/glad.h"
 
@@ -68,6 +69,16 @@ namespace Cell
         // set of default materials 
         // NOTE(Joey): do we want to abstract this from the renderer?
         std::map<unsigned int, Material*> m_DefaultMaterials;
+
+        // pbr
+        std::vector<PBREnvironment> m_PBREnvironments;
+        unsigned int m_PBREnvironmentIndex;
+        RenderTarget  *m_TargetBRDFLUT;
+        Mesh     *m_PBRCaptureCube;
+        Material *m_PBRHdrToCubemap;
+        Material *m_PBRIrradianceCapture;
+        Material *m_PBRPrefilterCapture;
+        Material *m_PBRIntegrateBRDF;
     public:
         Renderer();
         ~Renderer();
@@ -99,6 +110,9 @@ namespace Cell
 
         void Blit(RenderTarget *src, RenderTarget *dst, Material *material, std::string textureUniformName = "TexSrc");
         void RenderToCubemap(SceneNode *scene, TextureCube *target, math::vec3 position = math::vec3(0.0f), unsigned int mipLevel = 0);
+        PBREnvironment PBREnvMapPrecompute(Texture *hdriEnvironment, math::vec3 location = math::vec3(0.0f));
+        void SetPBREnvironment(PBREnvironment pbrEnvironment);
+        PBREnvironment GetPBREnvironment();
     private:
         void renderCustomCommand(RenderCommand *command, Camera *camera);
         RenderTarget *getCurrentRenderTarget();

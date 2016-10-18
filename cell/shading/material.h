@@ -39,7 +39,7 @@ namespace Cell
         std::map<std::string, UniformValue>        m_Uniforms;
         std::map<std::string, UniformValueSampler> m_SamplerUniforms; // NOTE(Joey): process samplers differently 
     public:
-        MaterialType Type = MATERIAL_DEFAULT;
+        MaterialType Type = MATERIAL_CUSTOM;
         math::vec4 Color  = math::vec4(1.0f);
 
         // depth state
