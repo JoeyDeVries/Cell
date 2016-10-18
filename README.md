@@ -19,7 +19,8 @@ Feature List (complete)
 	3. Utility functions: lerp, step, smoothstep, smootherstep, clamp etc.
     
 * Engine utility namespace:
-	3. High-precision performance analysis and measurement.
+	1. High-precision performance analysis and measurement.
+    2. Logging.
 
 0. Configure and enable debugging and logging utility.
 1. Shader object w/ custom pre-processor (defines, includes):
@@ -47,7 +48,6 @@ Feature List (work-in-progress)
 ------
 * Engine utility namespace:
 	1. Random numbers.
-	2. Logging.
 * Flexible OpenGL initialization.
 		
 Feature List (todo)

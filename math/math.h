@@ -14,6 +14,6 @@
 #include "trigonometry/spherical.h"
 
 // NOTE(Joey): common operations
-#include "utility/common.h"
+#include "common.h"
 
 #endif

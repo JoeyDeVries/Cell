@@ -1,5 +1,7 @@
-#ifndef MATH_UTILITY_COMMON_H
-#define MATH_UTILITY_COMMON_H
+#ifndef MATH_COMMON_H
+#define MATH_COMMON_H
+
+#include "linear_algebra/vector.h"
 
 namespace math
 {
