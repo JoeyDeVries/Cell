@@ -171,6 +171,9 @@ int main(int argc, char *argv[])
     Cell::Material customPostProcessing2 = renderer->CreatePostProcessingMaterial(postProcessing2);
     
 
+    // NOTE(Joey): test mesh loading
+    //Cell::SceneNode *test = Cell::Resources::LoadMesh("nanosuit", "meshes/nanosuit.obj");
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();

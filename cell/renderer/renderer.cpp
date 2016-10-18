@@ -523,6 +523,7 @@ namespace Cell
 
         }
         m_PBREnvironments.push_back(result);
+        delete environmentCube; // TODO(Joey): scene should manage memory, not client code!
         return result;
     }
     // ------------------------------------------------------------------------

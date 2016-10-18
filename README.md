@@ -20,7 +20,7 @@ Feature List (complete)
     
 * Engine utility namespace:
 	1. High-precision performance analysis and measurement.
-    2. Logging.
+    2. Random numbers.
 
 0. Configure and enable debugging and logging utility.
 1. Shader object w/ custom pre-processor (defines, includes):
@@ -47,14 +47,15 @@ Feature List (complete)
 Feature List (work-in-progress)
 ------
 * Engine utility namespace:
-	1. Random numbers.
+    1. Logging.
 * Flexible OpenGL initialization.
-		
-Feature List (todo)
-------
+
 3. Define Mesh object and encompassing Model class.
 	2. Load artist defined 3D models w/ Assimp (pre-process to custom binary format?).
 4. Add Camera functionality; add multiple camera variations: FPS, FlightSim, ArcBall.
+		
+Feature List (todo)
+------
 7. Configure Deferred rendering pipeline:
 	1. Set up light architecture; types of light, material interaction, volume calculation.
 	2. Configure render buffer w/ geometry pass.

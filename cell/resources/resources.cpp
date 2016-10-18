@@ -1,5 +1,7 @@
 #include "resources.h"
 
+#include "../scene/scene_node.h"
+
 #include <utility/string_id.h>
 #include <utility/logging/log.h>
 
@@ -126,18 +128,20 @@ namespace Cell
         }
     }
     // ------------------------------------------------------------------------
-    Mesh* Resources::LoadMesh(std::string name, std::string path)
+    SceneNode* Resources::LoadMesh(std::string name, std::string path)
     {
         unsigned int id = SID(name);
         Mesh mesh;
 
         // NOTE(Joey): if mesh already exists, return that handle
-        if (Resources::m_Meshes.find(id) != Resources::m_Meshes.end())
-            return &Resources::m_Meshes[id];
+     /*   if (Resources::m_Meshes.find(id) != Resources::m_Meshes.end())
+            return &Resources::m_Meshes[id];*/
 
+        SceneNode *node = MeshLoader::LoadMesh(path);
 
-        Resources::m_Meshes[id] = mesh;
-        return &Resources::m_Meshes[id];
+        //Resources::m_Meshes[id] = mesh;
+        //return &Resources::m_Meshes[id];
+        return nullptr;
     }
     // ------------------------------------------------------------------------
     Mesh* Resources::GetMesh(std::string name)

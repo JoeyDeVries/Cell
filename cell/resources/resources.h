@@ -21,6 +21,8 @@
 
 namespace Cell
 {
+    class SceneNode;
+
     /* NOTE(Joey):
 
       Resources
@@ -54,8 +56,8 @@ namespace Cell
         static Texture*     GetTexture(std::string name);
         static TextureCube* GetTextureCube(std::string name);
         // NOTE(Joey): mesh/scene resources
-        static Mesh*        LoadMesh(std::string name, std::string path);
-        static Mesh*        GetMesh(std::string name);
+        static SceneNode*  LoadMesh(std::string name, std::string path);
+        static Mesh*       GetMesh(std::string name);
     };
 }
 

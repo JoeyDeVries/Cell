@@ -16,13 +16,11 @@ namespace Cell
     // ------------------------------------------------------------------------
     SceneNode::~SceneNode()
     {
-        //// NOTE(Joey): traverse the linked list and for any node pointer that
-        //// is not pointing to a null pointer, de-allocate that scene node.
-        //for (SceneNode *child = m_Next; child; child = child->m_Next)
-        //{
-        //    delete child;
-        //}
-        // no longer necessary as we're now storing the children in a vector
+        // NOTE(Joey): traverse the list of children and delete accordingly.
+        for (unsigned int i = 0; i < m_Children.size(); ++i)
+        {
+            delete m_Children[i];
+        }
     }
     // ------------------------------------------------------------------------
     void SceneNode::AddChild(SceneNode *node)

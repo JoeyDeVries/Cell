@@ -34,6 +34,8 @@ namespace Cell
       as commonly found in videogames.
 
     */
+    // TODO(Joey): memory management; leak! connect all scene nodes to a root node? Or maintain a 
+    // list of all created top scene nodes and delete when scene gets deleted?
     class Scene
     {
     public:
