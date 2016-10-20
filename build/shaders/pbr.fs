@@ -125,4 +125,6 @@ void main()
 #else
     FragColor = vec4(color, alpha);
 #endif
+    // FragColor = vec4(albedo, 1.0);
+    // FragColor = vec4(TexCoords, 0.0, 1.0);
 }

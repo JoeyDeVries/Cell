@@ -14,14 +14,10 @@
 #include "../shading/texture_cube.h"
 #include "../mesh/mesh.h"
 
-#include "shader_loader.h"
-#include "texture_loader.h"
-#include "mesh_loader.h"
-
-
 namespace Cell
 {
     class SceneNode;
+    class Renderer;
 
     /* NOTE(Joey):
 
@@ -56,7 +52,7 @@ namespace Cell
         static Texture*     GetTexture(std::string name);
         static TextureCube* GetTextureCube(std::string name);
         // NOTE(Joey): mesh/scene resources
-        static SceneNode*  LoadMesh(std::string name, std::string path);
+        static SceneNode*  LoadMesh(Renderer *renderer, std::string name, std::string path);
         static Mesh*       GetMesh(std::string name);
     };
 }

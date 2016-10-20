@@ -1,5 +1,9 @@
 #include "resources.h"
 
+#include "shader_loader.h"
+#include "texture_loader.h"
+#include "mesh_loader.h"
+
 #include "../scene/scene_node.h"
 
 #include <utility/string_id.h>
@@ -66,8 +70,16 @@ namespace Cell
             return &Resources::m_Textures[id];
 
         Texture texture = TextureLoader::LoadTexture(path, target, format);
-        Resources::m_Textures[id] = texture;
-        return &Resources::m_Textures[id];
+        // NOTE(Joey): make sure texture got properly loaded
+        if (texture.Width > 0)
+        {
+            Resources::m_Textures[id] = texture;
+            return &Resources::m_Textures[id];
+        }
+        else
+        {
+            return nullptr;
+        }
     }
     // ------------------------------------------------------------------------
     Texture* Resources::LoadHDR(std::string name, std::string path)
@@ -79,8 +91,16 @@ namespace Cell
             return &Resources::m_Textures[id];
 
         Texture texture = TextureLoader::LoadHDRTexture(path);
-        Resources::m_Textures[id] = texture;
-        return &Resources::m_Textures[id];
+        // NOTE(Joey): make sure texture got properly loaded
+        if (texture.Width > 0)
+        {
+            Resources::m_Textures[id] = texture;
+            return &Resources::m_Textures[id];
+        }
+        else
+        {
+            return nullptr;
+        }
     }
     // ------------------------------------------------------------------------
     Texture* Resources::GetTexture(std::string name)
@@ -128,7 +148,7 @@ namespace Cell
         }
     }
     // ------------------------------------------------------------------------
-    SceneNode* Resources::LoadMesh(std::string name, std::string path)
+    SceneNode* Resources::LoadMesh(Renderer *renderer, std::string name, std::string path)
     {
         unsigned int id = SID(name);
         Mesh mesh;
@@ -137,11 +157,11 @@ namespace Cell
      /*   if (Resources::m_Meshes.find(id) != Resources::m_Meshes.end())
             return &Resources::m_Meshes[id];*/
 
-        SceneNode *node = MeshLoader::LoadMesh(path);
+        SceneNode *node = MeshLoader::LoadMesh(renderer, path);
 
         //Resources::m_Meshes[id] = mesh;
         //return &Resources::m_Meshes[id];
-        return nullptr;
+        return node;
     }
     // ------------------------------------------------------------------------
     Mesh* Resources::GetMesh(std::string name)

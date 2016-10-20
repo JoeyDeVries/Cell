@@ -109,28 +109,28 @@ int main(int argc, char *argv[])
     Cell::Cube cube;
 
     // NOTE(Joey): material setup
-    Cell::Material matPbr = renderer->CreateMaterial();
-    matPbr.SetTexture("TexAlbedo", Cell::Resources::LoadTexture("rusted metal albedo", "textures/pbr/rusted metal/albedo.png"), 3);
-    matPbr.SetTexture("TexNormal", Cell::Resources::LoadTexture("rusted metal normal", "textures/pbr/rusted metal/normal.png"), 4);
-    matPbr.SetTexture("TexMetallic", Cell::Resources::LoadTexture("rusted metal metallic", "textures/pbr/rusted metal/metallic.png"), 5);
-    matPbr.SetTexture("TexRoughness", Cell::Resources::LoadTexture("rusted metal roughness", "textures/pbr/rusted metal/roughness.png"), 6);
-    matPbr.SetTexture("TexAO", Cell::Resources::LoadTexture("rusted metal ao", "textures/pbr/rusted metal/ao.png"), 7);
-    Cell::Material matPbrPink = renderer->CreateMaterial();
-    matPbrPink.SetTexture("TexAlbedo",    Cell::Resources::LoadTexture("plastic albedo",    "textures/pbr/plastic/albedo.png"),    3);
-    matPbrPink.SetTexture("TexNormal",    Cell::Resources::LoadTexture("plastic normal",    "textures/pbr/plastic/normal.png"),    4);
-    matPbrPink.SetTexture("TexMetallic",  Cell::Resources::LoadTexture("plastic metallic",  "textures/pbr/plastic/metallic.png"),  5);
-    matPbrPink.SetTexture("TexRoughness", Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/plastic/roughness.png"), 6);
-    matPbrPink.SetTexture("TexAO",        Cell::Resources::LoadTexture("plastic ao",        "textures/pbr/plastic/ao.png"),        7);
-    Cell::Material matPbrGlass = renderer->CreateMaterial("glass");
+    Cell::Material *matPbr = renderer->CreateMaterial();
+    matPbr->SetTexture("TexAlbedo", Cell::Resources::LoadTexture("rusted metal albedo", "textures/pbr/rusted metal/albedo.png"), 3);
+    matPbr->SetTexture("TexNormal", Cell::Resources::LoadTexture("rusted metal normal", "textures/pbr/rusted metal/normal.png"), 4);
+    matPbr->SetTexture("TexMetallic", Cell::Resources::LoadTexture("rusted metal metallic", "textures/pbr/rusted metal/metallic.png"), 5);
+    matPbr->SetTexture("TexRoughness", Cell::Resources::LoadTexture("rusted metal roughness", "textures/pbr/rusted metal/roughness.png"), 6);
+    matPbr->SetTexture("TexAO", Cell::Resources::LoadTexture("rusted metal ao", "textures/pbr/rusted metal/ao.png"), 7);
+    Cell::Material *matPbrPink = renderer->CreateMaterial();
+    matPbrPink->SetTexture("TexAlbedo",    Cell::Resources::LoadTexture("plastic albedo",    "textures/pbr/plastic/albedo.png"),    3);
+    matPbrPink->SetTexture("TexNormal",    Cell::Resources::LoadTexture("plastic normal",    "textures/pbr/plastic/normal.png"),    4);
+    matPbrPink->SetTexture("TexMetallic",  Cell::Resources::LoadTexture("plastic metallic",  "textures/pbr/plastic/metallic.png"),  5);
+    matPbrPink->SetTexture("TexRoughness", Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/plastic/roughness.png"), 6);
+    matPbrPink->SetTexture("TexAO",        Cell::Resources::LoadTexture("plastic ao",        "textures/pbr/plastic/ao.png"),        7);
+    Cell::Material *matPbrGlass = renderer->CreateMaterial("glass");
  
     // NOTE(Joey): configure camera
     camera.SetPerspective(math::Deg2Rad(60.0f), renderer->GetRenderSize().x / renderer->GetRenderSize().y ,0.1f, 100.0f);
 
     // NOTE(Joey): scene setup
-    Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, &matPbr);
-    Cell::SceneNode *secondTorus = Cell::Scene::MakeSceneNode(&torus, &matPbr);
-    Cell::SceneNode *thirdTorus  = Cell::Scene::MakeSceneNode(&torus, &matPbr);
-    Cell::SceneNode *sphereNode  = Cell::Scene::MakeSceneNode(&sphere, &matPbrGlass);
+    Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, matPbr);
+    Cell::SceneNode *secondTorus = Cell::Scene::MakeSceneNode(&torus, matPbr);
+    Cell::SceneNode *thirdTorus  = Cell::Scene::MakeSceneNode(&torus, matPbr);
+    Cell::SceneNode *sphereNode  = Cell::Scene::MakeSceneNode(&sphere, matPbrGlass);
 
     mainTorus->AddChild(secondTorus);
     secondTorus->AddChild(thirdTorus);
@@ -142,12 +142,12 @@ int main(int argc, char *argv[])
     thirdTorus->Scale   = math::vec3(0.65f);
     sphereNode->Scale   = math::vec3(1.35f);
 
-    Cell::SceneNode *floor = Cell::Scene::MakeSceneNode(&plane, &matPbr);
+    Cell::SceneNode *floor = Cell::Scene::MakeSceneNode(&plane, matPbr);
     floor->Rotation        = math::vec4(1.0f, 0.0f, 0.0f, math::Deg2Rad(-90.0f));
     floor->Scale           = math::vec3(10.0f);
     floor->Position        = math::vec3(0.0f, -2.0f, 0.0f);
 
-    Cell::SceneNode *pbrBall = Cell::Scene::MakeSceneNode(&sphere, &matPbrPink);
+    Cell::SceneNode *pbrBall = Cell::Scene::MakeSceneNode(&sphere, matPbrPink);
     pbrBall->Position = math::vec3(5.0f, 5.0f, 4.0f);
 
     Cell::Background background;
@@ -161,18 +161,19 @@ int main(int argc, char *argv[])
 	background.Material->SetFloat("lodLevel", lodLevel);
 	float exposure = 1.0;
 	background.Material->SetFloat("Exposure", exposure);
-    matPbr.SetFloat("Exposure", exposure);
-    matPbrGlass.SetFloat("Exposure", exposure);
+    matPbr->GetShader()->Use();
+    matPbr->GetShader()->SetFloat("Exposure", exposure);
+    matPbrGlass->SetFloat("Exposure", exposure);
 
     // NOTE(Joey): post processing
     Cell::Shader *postProcessing1 = Cell::Resources::LoadShader("postprocessing1", "shaders/screen_quad.vs", "shaders/custom_post_1.fs");
     Cell::Shader *postProcessing2 = Cell::Resources::LoadShader("postprocessing2", "shaders/screen_quad.vs", "shaders/custom_post_2.fs");
-    Cell::Material customPostProcessing1 = renderer->CreatePostProcessingMaterial(postProcessing1);
-    Cell::Material customPostProcessing2 = renderer->CreatePostProcessingMaterial(postProcessing2);
+    Cell::Material *customPostProcessing1 = renderer->CreatePostProcessingMaterial(postProcessing1);
+    Cell::Material *customPostProcessing2 = renderer->CreatePostProcessingMaterial(postProcessing2);
     
 
     // NOTE(Joey): test mesh loading
-    //Cell::SceneNode *test = Cell::Resources::LoadMesh("nanosuit", "meshes/nanosuit.obj");
+    Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
 
     while (!glfwWindowShouldClose(window))
     {
@@ -218,14 +219,14 @@ int main(int argc, char *argv[])
 			{
 				exposure += 1.0 * deltaTime;
 				background.Material->SetFloat("Exposure", exposure);
-                matPbr.SetFloat("Exposure", exposure);
+                matPbr->SetFloat("Exposure", exposure);
 				Log::Message("EXPOSURE:" + std::to_string(exposure));
 			}
 			if (keysPressed[GLFW_KEY_H])
 			{
 				exposure -= 1.0 * deltaTime;
 				background.Material->SetFloat("Exposure", exposure);
-				matPbr.SetFloat("Exposure", exposure);
+				matPbr->SetFloat("Exposure", exposure);
                 Log::Message("EXPOSURE:" + std::to_string(exposure));
 			}
             if (keysPressed[GLFW_KEY_Z]) {
@@ -241,6 +242,9 @@ int main(int argc, char *argv[])
             secondTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
             thirdTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
             sphereNode->Rotation = math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime());
+
+            test->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 0.25f);
+            test->Position = math::vec3(4.0f, -2.0f,  0.0f);
         }
 
         {
@@ -250,6 +254,8 @@ int main(int argc, char *argv[])
             renderer->PushRender(pbrBall);
 
             renderer->PushRender(&background);
+
+            renderer->PushRender(test);
 
             Cell::PointLight light;
             light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);

@@ -59,6 +59,12 @@ namespace Cell
             delete m_PBREnvironments[i].Irradiance;
             delete m_PBREnvironments[i].Prefiltered;
         }
+
+        // mats
+        for (unsigned int i = 0; i < m_Materials.size(); ++i)
+        {
+            delete m_Materials[i];
+        }
     }
     // ------------------------------------------------------------------------
     void Renderer::Init(GLADloadproc loadProcFunc)
@@ -173,33 +179,38 @@ namespace Cell
         m_Camera = camera;
     }
     // ------------------------------------------------------------------------
-    Material Renderer::CreateMaterial(std::string base)
+    Material* Renderer::CreateMaterial(std::string base)
     {
         // NOTE(Joey): first check if the given base material exists, otherwise
         // log error.
         auto found = m_DefaultMaterials.find(SID(base));
         if (found != m_DefaultMaterials.end())
         {
-            return m_DefaultMaterials[SID(base)]->Copy();
+            Material copy = found->second->Copy();
+            Material *mat = new Material(copy);
+            m_Materials.push_back(mat); // TODO(Joey): a bit ugly for now, come up with more proper memory management scheme for materials
+            return mat;
         }
         else
         {
             Log::Message("Material of template: " + base + " requested, but template did not exist.", LOG_ERROR);
-            return Material();
+            return nullptr;
         }
     }
     // ------------------------------------------------------------------------
-    Material Renderer::CreateCustomMaterial(Shader *shader)
+    Material* Renderer::CreateCustomMaterial(Shader *shader)
     {
-        Material mat(shader);
-        mat.Type = MATERIAL_CUSTOM;
+        Material *mat = new Material(shader);
+        mat->Type = MATERIAL_CUSTOM;
+        m_Materials.push_back(mat);
         return mat;
     }
     // ------------------------------------------------------------------------
-    Material Renderer::CreatePostProcessingMaterial(Shader *shader)
+    Material* Renderer::CreatePostProcessingMaterial(Shader *shader)
     {
-        Material mat(shader);
-        mat.Type = MATERIAL_POST_PROCESS;
+        Material *mat = new Material(shader);
+        mat->Type = MATERIAL_POST_PROCESS;
+        m_Materials.push_back(mat);
         return mat;
     }
     // ------------------------------------------------------------------------
@@ -219,7 +230,12 @@ namespace Cell
         // NOTE(Joey): traverse through all the scene nodes and for each node:
         // push its render state to the command buffer together with a 
         // calculated transform matrix.
-        m_CommandBuffer.Push(node->Mesh, node->Material, node->GetTransform(), target);
+        // But only push the first command if it has a mesh/material, otherwise it's likely a 
+        // container scene node.
+        if (node->Mesh) 
+        {
+            m_CommandBuffer.Push(node->Mesh, node->Material, node->GetTransform(), target);
+        }
 
         // NOTE(Joey): originally a recursive function but transformed to 
         // iterative version by maintaining a stack.
@@ -230,7 +246,11 @@ namespace Cell
         {
             SceneNode *child = childStack.top();
             childStack.pop();
-            m_CommandBuffer.Push(child->Mesh, child->Material, child->GetTransform(), target);
+            // NOTE(Joey): again, only push render command if the child isn't a container node.
+            if (child->Mesh)
+            {
+                m_CommandBuffer.Push(child->Mesh, child->Material, child->GetTransform(), target);
+            }
             for(unsigned int i = 0; i < child->GetChildCount(); ++i)
                 childStack.push(child->GetChild(i));
         }

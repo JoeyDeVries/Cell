@@ -48,7 +48,7 @@ namespace Cell
         std::vector<math::vec3> Tangents;
         std::vector<math::vec3> Bitangents;
 
-        TOPOLOGY Topology;
+        TOPOLOGY Topology = TRIANGLES;
         std::vector<unsigned int> Indices;
 
         // NOTE(Joey): we support multiple ways of initializing a mesh

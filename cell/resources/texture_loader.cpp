@@ -40,7 +40,7 @@ namespace Cell
         }
         else
         {
-            Log::Message("Texture at path: " + path + " failed to load.", LOG_WARNING);
+            Log::Message("Texture failed to load at path: " + path, LOG_WARNING);
             stbi_image_free(data);
             return texture;
         }

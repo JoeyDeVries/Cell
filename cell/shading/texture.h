@@ -27,9 +27,9 @@ namespace Cell
         GLenum WrapR          = GL_CLAMP_TO_EDGE;        // NOTE(Joey): wrapping method of the R coordinate
         bool Mipmapping       = true;
 
-        unsigned int Width;
-        unsigned int Height;
-        unsigned int Depth;
+        unsigned int Width  = 0;
+        unsigned int Height = 0;
+        unsigned int Depth  = 0;
     private:
     public:
          Texture();

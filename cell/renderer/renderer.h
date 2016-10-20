@@ -69,6 +69,7 @@ namespace Cell
         // set of default materials 
         // NOTE(Joey): do we want to abstract this from the renderer?
         std::map<unsigned int, Material*> m_DefaultMaterials;
+        std::vector<Material*> m_Materials; // NOTE(Joey): store generated materials here for easy memory management (TODO(Joey): think of cleaner way; same for scene!)
 
         // pbr
         std::vector<PBREnvironment> m_PBREnvironments;
@@ -94,9 +95,9 @@ namespace Cell
         void    SetCamera(Camera *camera);
 
         // NOTE(Joey): idea, create either a deferred default material (based on default set of materials available (like glass)), or a custom material (with custom you have to supply your own shader)
-        Material CreateMaterial(std::string base = "default"); // NOTE(Joey): these don't have the custom flag set (default material has default state and uses checkerboard texture as albedo (and black metallic, half roughness, purple normal, white ao)
-        Material CreateCustomMaterial(Shader *shader);         // NOTE(Joey): these have the custom flag set (will be rendered in forward pass)
-        Material CreatePostProcessingMaterial(Shader *shader); // NOTE(Joey): these have the post-processing flag set (will be rendered after deferred/forward pass)
+        Material* CreateMaterial(std::string base = "default"); // NOTE(Joey): these don't have the custom flag set (default material has default state and uses checkerboard texture as albedo (and black metallic, half roughness, purple normal, white ao)
+        Material* CreateCustomMaterial(Shader *shader);         // NOTE(Joey): these have the custom flag set (will be rendered in forward pass)
+        Material* CreatePostProcessingMaterial(Shader *shader); // NOTE(Joey): these have the post-processing flag set (will be rendered after deferred/forward pass)
 
         void PushRender(Mesh *mesh, Material *material, math::mat4 transform = math::mat4());
         void PushRender(SceneNode *node);
