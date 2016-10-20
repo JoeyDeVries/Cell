@@ -163,45 +163,64 @@ namespace Cell
             std::string fileName = MeshLoader::processPath(&file, directory);
             // NOTE(Joey): we name the texture the same as the filename as to reduce naming 
             // conflicts while still only loading unique textures.
-            Texture *diffuse = Resources::LoadTexture(fileName, fileName); 
-            if(diffuse)
-                material->SetTexture("TexAlbedo", diffuse, 3);
+            Texture *texture = Resources::LoadTexture(fileName, fileName); 
+            if (texture)
+            {
+                //texture->SetWrapMode(GL_REPEAT, true);
+                material->SetTexture("TexAlbedo", texture, 3);
+            }
         }
         if (aMaterial->GetTextureCount(aiTextureType_NORMALS) > 0)
         {
             aiString file;
             aMaterial->GetTexture(aiTextureType_NORMALS, 0, &file);
             std::string fileName = MeshLoader::processPath(&file, directory);
-            Texture *normal = Resources::LoadTexture(fileName, fileName);
-            if(normal)
-                material->SetTexture("TexNormal", normal, 4);
+
+            Texture *texture = Resources::LoadTexture(fileName, fileName);
+            if (texture)
+            {
+                //texture->SetWrapMode(GL_REPEAT, true);
+                material->SetTexture("TexNormal", texture, 4);
+            }
         }
         if (aMaterial->GetTextureCount(aiTextureType_SPECULAR) > 0)
         {
             aiString file;
             aMaterial->GetTexture(aiTextureType_SPECULAR, 0, &file);
             std::string fileName = MeshLoader::processPath(&file, directory);
-            Texture *metallic = Resources::LoadTexture(fileName, fileName);
-            if(metallic)
-                material->SetTexture("TexMetallic", metallic, 5);
+
+            Texture *texture = Resources::LoadTexture(fileName, fileName);
+            if (texture)
+            {
+                //texture->SetWrapMode(GL_REPEAT, true);
+                material->SetTexture("TexMetallic", texture, 5);
+            }
         }
         if (aMaterial->GetTextureCount(aiTextureType_SHININESS) > 0)
         {
             aiString file;
             aMaterial->GetTexture(aiTextureType_SHININESS, 0, &file);
             std::string fileName = MeshLoader::processPath(&file, directory);
-            Texture *roughness = Resources::LoadTexture(fileName, fileName);
-            if(roughness)
-                material->SetTexture("TexRoughness", roughness, 6);
+          
+            Texture *texture = Resources::LoadTexture(fileName, fileName);
+            if (texture)
+            {
+                //texture->SetWrapMode(GL_REPEAT, true);
+                material->SetTexture("TexRoughness", texture, 6);
+            }
         }
         if (aMaterial->GetTextureCount(aiTextureType_AMBIENT) > 0)
         {
             aiString file;
             aMaterial->GetTexture(aiTextureType_AMBIENT, 0, &file);
             std::string fileName = MeshLoader::processPath(&file, directory);
-            Texture *ao = Resources::LoadTexture(fileName, fileName);
-            if(ao)
-                material->SetTexture("TexAO", ao, 7);
+         
+            Texture *texture = Resources::LoadTexture(fileName, fileName);
+            if (texture)
+            {
+                //texture->SetWrapMode(GL_REPEAT, true);
+                material->SetTexture("TexAO", texture, 7);
+            }
         }     
 
         return material;
@@ -210,8 +229,8 @@ namespace Cell
     std::string MeshLoader::processPath(aiString *aPath, std::string directory)
     {
         std::string path = std::string(aPath->C_Str());
-        //assert(path.find("/") == std::string::npos); // TODO(Joey): parse path directly if path contains "/" indicating it is an absolute path; otherwise parse as relative.
-        //path = directory + "/" + path;
+        assert(path.find("/") == std::string::npos); // TODO(Joey): parse path directly if path contains "/" indicating it is an absolute path; otherwise parse as relative.
+        path = directory + "/" + path;
         return path;
     }
 }

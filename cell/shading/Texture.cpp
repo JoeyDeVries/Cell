@@ -119,4 +119,45 @@ namespace Cell
     {
         glBindTexture(Target, 0);
     }
+    // ------------------------------------------------------------------------
+    void Texture::SetWrapMode(GLenum wrapMode, bool bind)
+    {
+        if(bind)
+            Bind();
+        if (Target == GL_TEXTURE_1D)
+        {
+            WrapS = wrapMode;
+            glTexParameteri(Target, GL_TEXTURE_WRAP_S, wrapMode);
+        }
+        else if (Target == GL_TEXTURE_2D)
+        {
+            WrapS = wrapMode;
+            WrapT = wrapMode;
+            glTexParameteri(Target, GL_TEXTURE_WRAP_S, wrapMode);
+            glTexParameteri(Target, GL_TEXTURE_WRAP_T, wrapMode);
+        }
+        else if (Target == GL_TEXTURE_3D)
+        {
+            WrapS = wrapMode;
+            WrapT = wrapMode;
+            WrapR = wrapMode;
+            glTexParameteri(Target, GL_TEXTURE_WRAP_S, wrapMode);
+            glTexParameteri(Target, GL_TEXTURE_WRAP_T, wrapMode);
+            glTexParameteri(Target, GL_TEXTURE_WRAP_R, wrapMode);
+        }
+    }
+    // ------------------------------------------------------------------------
+    void Texture::SetFilterMin(GLenum filter, bool bind)
+    {
+        if(bind)
+            Bind();
+        glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, filter);
+    }
+    // ------------------------------------------------------------------------
+    void Texture::SetFilterMax(GLenum filter, bool bind)
+    {
+        if (bind)
+            Bind();
+        glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, filter);
+    }
 }

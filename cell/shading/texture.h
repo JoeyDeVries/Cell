@@ -22,9 +22,9 @@ namespace Cell
         GLenum Type           = GL_UNSIGNED_BYTE;
         GLenum FilterMin      = GL_LINEAR_MIPMAP_LINEAR; // NOTE(Joey): what filter method to use during minification
         GLenum FilterMax      = GL_LINEAR;               // NOTE(Joey): what filter method to use during magnification
-        GLenum WrapS          = GL_CLAMP_TO_EDGE;        // NOTE(Joey): wrapping method of the S coordinate
-        GLenum WrapT          = GL_CLAMP_TO_EDGE;        // NOTE(Joey): wrapping method of the T coordinate
-        GLenum WrapR          = GL_CLAMP_TO_EDGE;        // NOTE(Joey): wrapping method of the R coordinate
+        GLenum WrapS          = GL_REPEAT;        // NOTE(Joey): wrapping method of the S coordinate
+        GLenum WrapT          = GL_REPEAT;        // NOTE(Joey): wrapping method of the T coordinate
+        GLenum WrapR          = GL_REPEAT;        // NOTE(Joey): wrapping method of the R coordinate
         bool Mipmapping       = true;
 
         unsigned int Width  = 0;
@@ -47,6 +47,11 @@ namespace Cell
 
         void Bind(int unit = -1);
         void Unbind();
+
+        // NOTE(Joey): update relevant texture state
+        void SetWrapMode(GLenum wrapMode, bool bind = false);
+        void SetFilterMin(GLenum filter, bool bind = false);
+        void SetFilterMax(GLenum filter, bool bind = false);
     };
 }
 
