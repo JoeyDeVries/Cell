@@ -19,6 +19,8 @@ namespace Cell
             Texture texture;
             texture.FilterMin = GL_LINEAR;
             texture.FilterMax = GL_LINEAR;
+            texture.WrapS = GL_CLAMP_TO_EDGE;
+            texture.WrapT = GL_CLAMP_TO_EDGE;
             texture.Mipmapping = false;
 
             GLenum internalFormat = GL_RGBA;

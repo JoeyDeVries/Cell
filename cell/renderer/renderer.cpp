@@ -236,6 +236,11 @@ namespace Cell
         {
             m_CommandBuffer.Push(node->Mesh, node->Material, node->GetTransform(), target);
         }
+        else
+        {
+            // do make sure we do always update the parent's transform.
+            node->GetTransform();
+        }
 
         // NOTE(Joey): originally a recursive function but transformed to 
         // iterative version by maintaining a stack.

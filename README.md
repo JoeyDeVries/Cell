@@ -32,6 +32,7 @@ Feature List (complete)
 	1. Allow for easy access of materials and storage; include set of default materials (default material, glass material etc.)
 3. Define Mesh object and encompassing Model class.
 	1. Define set of basic shape mesh generation; plane, cube, disk, sphere, cylinder, torus (donut)
+    2. Load artist defined 3D models w/ Assimp.
 5. Flexible Framebuffer configuration utility:
 	1. Including CubeMap use and generation (reflection probes, point shadow-maps)
 	2. Post-processing.
@@ -50,9 +51,8 @@ Feature List (work-in-progress)
     1. Logging.
 * Flexible OpenGL initialization.
 
-3. Define Mesh object and encompassing Model class.
-	2. Load artist defined 3D models w/ Assimp (pre-process to custom binary format?).
 4. Add Camera functionality; add multiple camera variations: FPS, FlightSim, ArcBall.
+5. Proper scene management (current system easily allows for code oversights and memory leaks).
 		
 Feature List (todo)
 ------

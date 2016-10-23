@@ -229,8 +229,10 @@ namespace Cell
     std::string MeshLoader::processPath(aiString *aPath, std::string directory)
     {
         std::string path = std::string(aPath->C_Str());
-        assert(path.find("/") == std::string::npos); // TODO(Joey): parse path directly if path contains "/" indicating it is an absolute path; otherwise parse as relative.
-        path = directory + "/" + path;
+        // NOTE(Joey): parse path directly if path contains "/" indicating it is an absolute path; 
+        // otherwise parse as relative.
+        if(path.find("/") == std::string::npos) 
+            path = directory + "/" + path;
         return path;
     }
 }

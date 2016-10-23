@@ -243,8 +243,8 @@ int main(int argc, char *argv[])
             thirdTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
             sphereNode->Rotation = math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime());
 
-            test->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 0.25f);
-            test->Position = math::vec3(4.0f, -2.0f,  0.0f);
+            test->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 0.1f);
+            test->Position = math::vec3(7.0f, -2.0f,  0.0f);
         }
 
         {
