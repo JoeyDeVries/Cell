@@ -1,10 +1,6 @@
 #ifndef CELL_RESOURCES_RESOURCES
 #define CELL_RESOURCES_RESOURCES
 
-#include <map>
-#include <string>
-
-
 //class ShaderLoader;  class Shader; 
 //class TextureLoader; class Texture; 
 //class MeshLoader;    class Mesh
@@ -13,6 +9,9 @@
 #include "../shading/texture.h"
 #include "../shading/texture_cube.h"
 #include "../mesh/mesh.h"
+
+#include <map>
+#include <string>
 
 namespace Cell
 {
@@ -31,9 +30,7 @@ namespace Cell
         static std::map<unsigned int, Shader>      m_Shaders;
         static std::map<unsigned int, Texture>     m_Textures;
         static std::map<unsigned int, TextureCube> m_TexturesCube;
-        // TODO(Joey): we can't store meshes directly as loaded models often contain more than 1 mesh
-        // so we have to store them directlry into a scene graph or intermediate structure.
-        static std::map<unsigned int, Mesh>        m_Meshes;
+        static std::map<unsigned int, SceneNode*>  m_Meshes;
     public:
 
     private:
@@ -41,6 +38,7 @@ namespace Cell
         Resources(); 
     public:
         static void Init();
+        static void Clean();
 
         // NOTE(Joey): shader resources
         static Shader*      LoadShader(std::string name, std::string vsPath, std::string fsPath, std::vector<std::string> defines = std::vector<std::string>());
@@ -53,7 +51,7 @@ namespace Cell
         static TextureCube* GetTextureCube(std::string name);
         // NOTE(Joey): mesh/scene resources
         static SceneNode*  LoadMesh(Renderer *renderer, std::string name, std::string path);
-        static Mesh*       GetMesh(std::string name);
+        static SceneNode*  GetMesh(std::string name);
     };
 }
 

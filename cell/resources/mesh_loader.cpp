@@ -5,7 +5,6 @@
 #include "../renderer/renderer.h"
 #include "../mesh/mesh.h" 
 #include "../shading/material.h"
-#include "../scene/scene.h"
 #include "../scene/scene_node.h"
 #include "../shading/texture.h"
 
@@ -35,7 +34,10 @@ namespace Cell
     // ------------------------------------------------------------------------
     SceneNode* MeshLoader::processNode(Renderer *renderer, aiNode *aNode, const aiScene *aScene, std::string directory, bool setDefaultMaterial)
     {
-        SceneNode *node = Scene::MakeSceneNode();
+        // NOTE(Joey): note that we allocate memory ourselves and pass memory responsibility to 
+        // calling resource manager. The resource manager is responsible for holding the scene
+        // node pointer and deleting where appropriate.
+        SceneNode *node = new SceneNode;
 
         for (unsigned int i = 0; i < aNode->mNumMeshes; ++i)
         {
@@ -60,7 +62,10 @@ namespace Cell
             // NOTE(Joey): otherwise, the meshes are considered on equal depth of its children
             else
             {
-                node->AddChild(Scene::MakeSceneNode(mesh, material));
+                SceneNode* child = new SceneNode;
+                child->Mesh = mesh;
+                child->Material = material;
+                node->AddChild(child);
             }
         }
 

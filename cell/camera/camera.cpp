@@ -45,7 +45,7 @@ namespace Cell
     {
         if (Perspective)
         {
-             //return 2.0f * distance * tanf(math::Deg2Rad(m_Fov * 0.5));
+             return 2.0f * distance * tanf(math::Deg2Rad(FOV * 0.5));
         }
         else
         {
@@ -57,7 +57,7 @@ namespace Cell
     {
         if (Perspective)
         {
-            //return frustumHeight * 0.5f / tanf(math::Deg2Rad(m_Fov * 0.5f));
+            return frustumHeight * 0.5f / tanf(math::Deg2Rad(FOV * 0.5f));
         }
         else
         {

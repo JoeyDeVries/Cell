@@ -16,11 +16,19 @@ namespace Cell
     // ------------------------------------------------------------------------
     SceneNode::~SceneNode()
     {
+        // NOTE(Joey): this is now managed by the global static scene object.
         // NOTE(Joey): traverse the list of children and delete accordingly.
-        for (unsigned int i = 0; i < m_Children.size(); ++i)
-        {
-            delete m_Children[i];
-        }
+        //for (unsigned int i = 0; i < m_Children.size(); ++i)
+        //{
+        //    // NOTE(Joey): it can always happen a scene node was childed by a different scene node
+        //    // that has been previously deleted before, making this a dangling pointer.
+        //    // TODO(Joey): is this bad design?
+        //    if (m_Children[i])
+        //    {
+        //        delete m_Children[i];
+        //        m_Children[i] = nullptr;
+        //    }
+        //}
     }
     // ------------------------------------------------------------------------
     void SceneNode::AddChild(SceneNode *node)

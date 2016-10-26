@@ -1,13 +1,13 @@
 #ifndef CELL_SCENE_SCENE_H
 #define CELL_SCENE_SCENE_H
 
-#include "scene_node.h"
+#include <vector>
 
 namespace Cell
 {
     class Mesh;
     class Material;
-
+    class SceneNode;
 
     /* NOTE(Joey):
 
@@ -41,20 +41,12 @@ namespace Cell
     public:
 
     private:
-        SceneNode *m_Root;
-
-
+        static std::vector<SceneNode*> m_SceneNodes;
     public:
-        Scene();
-        ~Scene();
-
-        // NOTE(Joey): updates all of the scene nodes' transforms (and
-        // their children) if any of them are flagged as dirty.
-        void UpdateTransforms();
-
-        SceneNode *GetRootNode();
-
-
+        
+        // TODO(Joey): do we want this? 
+        static void Clear();
+ 
         // NOTE(Joey): static helper function that directly builds an
         // empty scene node. Other sub-engines can directly add children
         // to this empty scene node (w/ identity matrix as transform).
@@ -62,6 +54,9 @@ namespace Cell
         // NOTE(Joey): similar to the MakeScene function, but directly
         // builds a node w/ attached mesh and material.
         static SceneNode *MakeSceneNode(Mesh *mesh, Material *material);
+        // NOTE(Joey): because the scene manages we have to copy the nodes from here.
+        // TODO(Joey): is this what we want!?
+        static SceneNode *MakeSceneNode(SceneNode* node);
     };
 }
 #endif

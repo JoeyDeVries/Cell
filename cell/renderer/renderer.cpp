@@ -65,6 +65,10 @@ namespace Cell
         {
             delete m_Materials[i];
         }
+
+        // clean up all still stored scene nodes managed globally by static scene class
+        Scene::Clear();
+        Resources::Clean();
     }
     // ------------------------------------------------------------------------
     void Renderer::Init(GLADloadproc loadProcFunc)
@@ -261,12 +265,12 @@ namespace Cell
         }
     }
     // ------------------------------------------------------------------------
-    void Renderer::PushRender(Scene *scene)
-    {
-        // NOTE(Joey): propagate scene to SceneNode push call from its top
-        // root node, effectively pushing the entire scene.
-        PushRender(scene->GetRootNode());
-    }
+    //void Renderer::PushRender(Scene *scene)
+    //{
+    //    // NOTE(Joey): propagate scene to SceneNode push call from its top
+    //    // root node, effectively pushing the entire scene.
+    //    PushRender(scene->GetRootNode());
+    //}
     // ------------------------------------------------------------------------
     void Renderer::PushPostProcessor(Material *postProcessor)
     {

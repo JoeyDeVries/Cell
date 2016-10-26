@@ -153,6 +153,38 @@ int main(int argc, char *argv[])
     Cell::Background background;
     Cell::TextureCube cubemap;
     cubemap.DefaultInitialize(1024, 1024, GL_RGB, GL_UNSIGNED_BYTE);
+
+
+    /* NOTE(Joey):
+
+      Options: 
+      1. Don't use pointers, but create scenes by value; the caller is responsible
+      for any memory management as he sees fits, store the value or pass it around
+      by value. SHouldn't be too much of a problem, as scene nodes are relatively
+      small (80 bytes each), but could be just 8 bytes w/ a pointer. We can with 
+      relatively easy clean them up, but destructor doesn't work due to pass by value.
+
+      2. Create a global static (singleton-like) scene list that contains all the
+      generated scene nodes. Creating and deleting should go through this scene list
+      that holds all the scene nodes on some arbitrary root node. Memory management
+      is managed here, but does require manual clean-up which isn't too nice. OR
+      no cleanup and at the end of cell, the pointers are cleaned by default.
+        - I'm liking this option the most.
+
+      3. Create scene objects, where each scene manages its own list of scene nodes.
+      Memory management is similar to 2. but we can easily not do any clean-up at all
+      as scenes are largely self-contained by themselves and we can easily clean those 
+      up. We can store multiple scenes this way and easily switch between them. The
+      problem is however that this doesn't make sense in a global scope. Take model
+      loading for instance, we want to return a scene node hierarchy (similar with
+      skeleton animation): but who owns these cell nodes (could be the resource
+      manager though, but we do need to copy them when used as we can't delete/
+      remove the scene nodes as obtained from the resource manager). Plus this 
+      approach takes up extra maintanance on the user.
+
+      4. ????
+
+    */
    
     // - background
     Cell::PBREnvironment pbrEnv = renderer->GetPBREnvironment();
@@ -174,6 +206,7 @@ int main(int argc, char *argv[])
 
     // NOTE(Joey): test mesh loading
     Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
+    Cell::SceneNode *test2 = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
 
     while (!glfwWindowShouldClose(window))
     {

@@ -33,6 +33,7 @@ Feature List (complete)
 3. Define Mesh object and encompassing Model class.
 	1. Define set of basic shape mesh generation; plane, cube, disk, sphere, cylinder, torus (donut)
     2. Load artist defined 3D models w/ Assimp.
+        - Note: Assimp is built as a static library that is statically linked/merged with Cell. I also built the static zlib library for the ingration to work properly with Assimp (both 32 bit).
 5. Flexible Framebuffer configuration utility:
 	1. Including CubeMap use and generation (reflection probes, point shadow-maps)
 	2. Post-processing.

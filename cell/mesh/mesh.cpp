@@ -73,7 +73,7 @@ namespace Cell
         }
 
         // NOTE(Joey): preprocess buffer data as interleaved or seperate when specified
-        std::vector<float> data; // NOTE(Joey): make sure the gl drivers do a deep copy s.t. the memory on the stack won't be lost.
+        std::vector<float> data; 
         if (interleaved)
         {
             for (int i = 0; i < Positions.size(); ++i)
