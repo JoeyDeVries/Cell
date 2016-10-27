@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
     Cell::SceneNode *pbrBall = Cell::Scene::MakeSceneNode(&sphere, matPbrPink);
     pbrBall->Position = math::vec3(5.0f, 5.0f, 4.0f);
 
-    Cell::Background background;
+    //Cell::Background background;
     Cell::TextureCube cubemap;
     cubemap.DefaultInitialize(1024, 1024, GL_RGB, GL_UNSIGNED_BYTE);
 
@@ -188,11 +188,11 @@ int main(int argc, char *argv[])
    
     // - background
     Cell::PBREnvironment pbrEnv = renderer->GetPBREnvironment();
-    background.SetCubemap(pbrEnv.Prefiltered);
+    //background.SetCubemap(pbrEnv.Prefiltered);
 	float lodLevel = 1.5f; 
-	background.Material->SetFloat("lodLevel", lodLevel);
+	//background.Material->SetFloat("lodLevel", lodLevel);
 	float exposure = 1.0;
-	background.Material->SetFloat("Exposure", exposure);
+	//background.Material->SetFloat("Exposure", exposure);
     matPbr->GetShader()->Use();
     matPbr->GetShader()->SetFloat("Exposure", exposure);
     matPbrGlass->SetFloat("Exposure", exposure);
@@ -205,8 +205,8 @@ int main(int argc, char *argv[])
     
 
     // NOTE(Joey): test mesh loading
-    Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
-    Cell::SceneNode *test2 = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
+    //Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
+    //Cell::SceneNode *test2 = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
 
     while (!glfwWindowShouldClose(window))
     {
@@ -239,26 +239,26 @@ int main(int argc, char *argv[])
             if (keysPressed[GLFW_KEY_T])
             {
                 lodLevel += 1.0 * deltaTime;
-				background.Material->SetFloat("lodLevel", lodLevel);
+				//background.Material->SetFloat("lodLevel", lodLevel);
                 Log::Message("LOD:" + std::to_string(lodLevel));
             }
             if (keysPressed[GLFW_KEY_G])
             {
                 lodLevel -= 1.0 * deltaTime;
-				background.Material->SetFloat("lodLevel", lodLevel);
+				//background.Material->SetFloat("lodLevel", lodLevel);
                 Log::Message("LOD:" + std::to_string(lodLevel));
             }
 			if (keysPressed[GLFW_KEY_Y])
 			{
 				exposure += 1.0 * deltaTime;
-				background.Material->SetFloat("Exposure", exposure);
+				//background.Material->SetFloat("Exposure", exposure);
                 matPbr->SetFloat("Exposure", exposure);
 				Log::Message("EXPOSURE:" + std::to_string(exposure));
 			}
 			if (keysPressed[GLFW_KEY_H])
 			{
 				exposure -= 1.0 * deltaTime;
-				background.Material->SetFloat("Exposure", exposure);
+				//background.Material->SetFloat("Exposure", exposure);
 				matPbr->SetFloat("Exposure", exposure);
                 Log::Message("EXPOSURE:" + std::to_string(exposure));
 			}
@@ -276,8 +276,8 @@ int main(int argc, char *argv[])
             thirdTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
             sphereNode->Rotation = math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime());
 
-            test->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 0.1f);
-            test->Position = math::vec3(7.0f, -2.0f,  0.0f);
+          /*  test->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 0.1f);
+            test->Position = math::vec3(7.0f, -2.0f,  0.0f);*/
         }
 
         {
@@ -286,9 +286,9 @@ int main(int argc, char *argv[])
             //renderer.PushRender(floor);
             renderer->PushRender(pbrBall);
 
-            renderer->PushRender(&background);
+            //renderer->PushRender(&background);
 
-            renderer->PushRender(test);
+            //renderer->PushRender(test);
 
             Cell::PointLight light;
             light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);

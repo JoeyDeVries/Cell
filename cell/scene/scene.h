@@ -9,6 +9,25 @@ namespace Cell
     class Material;
     class SceneNode;
 
+    //namespace Scene
+    //{
+    //    // NOTE(Joey): hold a single root node that acts as the global scene; every newly created
+    //    // scene node is by default a child of Root.
+    //    static SceneNode *Root = new SceneNode;
+
+    //    // TODO(Joey): get all code over to scene.cpp
+    //    static void Clear()
+    //    {
+    //        // NOTE(Joey): due to scene node's destructor, all root's children and thus the entire
+    //        // scene will get deleted/cleared.
+    //        delete Root;
+    //    }
+
+    //    //static SceneNode *MakeSceneNode();
+
+    //    //static void DeleteSceneNode(SceneNode *node);
+    //}
+
     /* NOTE(Joey):
 
       Manages the scene's list of scene nodes.
@@ -39,9 +58,8 @@ namespace Cell
     class Scene
     {
     public:
-
-    private:
-        static std::vector<SceneNode*> m_SceneNodes;
+        static SceneNode *Root;
+        static unsigned int CounterID;
     public:
         
         // TODO(Joey): do we want this? 
@@ -57,6 +75,10 @@ namespace Cell
         // NOTE(Joey): because the scene manages we have to copy the nodes from here.
         // TODO(Joey): is this what we want!?
         static SceneNode *MakeSceneNode(SceneNode* node);
+
+        // NOTE(Joey): deletes a scene node from the global scene hierarchy (together with its 
+        // children).
+        static void DeleteSceneNode(SceneNode *node);
     };
 }
 #endif

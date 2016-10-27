@@ -66,9 +66,6 @@ namespace Cell
             delete m_Materials[i];
         }
 
-        // clean up all still stored scene nodes managed globally by static scene class
-        Scene::Clear();
-        Resources::Clean();
     }
     // ------------------------------------------------------------------------
     void Renderer::Init(GLADloadproc loadProcFunc)
@@ -250,7 +247,7 @@ namespace Cell
         // iterative version by maintaining a stack.
         std::stack<SceneNode*> childStack;
         for (unsigned int i = 0; i < node->GetChildCount(); ++i)
-            childStack.push(node->GetChild(i));
+            childStack.push(node->GetChildByIndex(i));
         while (!childStack.empty())
         {
             SceneNode *child = childStack.top();
@@ -261,7 +258,7 @@ namespace Cell
                 m_CommandBuffer.Push(child->Mesh, child->Material, child->GetTransform(), target);
             }
             for(unsigned int i = 0; i < child->GetChildCount(); ++i)
-                childStack.push(child->GetChild(i));
+                childStack.push(child->GetChildByIndex(i));
         }
     }
     // ------------------------------------------------------------------------
@@ -462,14 +459,14 @@ namespace Cell
         // iterative version by maintaining a stack.
         std::stack<SceneNode*> childStack;
         for (unsigned int i = 0; i < scene->GetChildCount(); ++i)
-            childStack.push(scene->GetChild(i));
+            childStack.push(scene->GetChildByIndex(i));
         while (!childStack.empty())
         {
             SceneNode *child = childStack.top();
             childStack.pop();
             commandBuffer.Push(child->Mesh, child->Material, child->GetTransform());
             for (unsigned int i = 0; i < child->GetChildCount(); ++i)
-                childStack.push(child->GetChild(i));
+                childStack.push(child->GetChildByIndex(i));
         }
         commandBuffer.Sort();
         std::vector<RenderCommand> renderCommands = commandBuffer.GetCustomRenderCommands(nullptr);
@@ -552,7 +549,7 @@ namespace Cell
 
         }
         m_PBREnvironments.push_back(result);
-        delete environmentCube; // TODO(Joey): scene should manage memory, not client code!
+        Scene::DeleteSceneNode(environmentCube);
         return result;
     }
     // ------------------------------------------------------------------------

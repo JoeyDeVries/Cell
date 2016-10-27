@@ -1,5 +1,7 @@
 #include "background.h"
 
+#include "scene.h"
+
 #include "../renderer/renderer.h"
 #include "../resources/resources.h"
 #include "../shading/material.h"
@@ -10,7 +12,7 @@
 namespace Cell
 {
     // ------------------------------------------------------------------------
-    Background::Background()
+    Background::Background() : SceneNode(Scene::CounterID++)
     {
         m_Shader  = Resources::LoadShader("background", "shaders/background.vs", "shaders/background.fs");
         //m_CubeMap = Resources::LoadTextureCube("yokohama", "textures/backgrounds/yokohama/");

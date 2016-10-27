@@ -86,6 +86,9 @@ namespace Cell
     void Clean()
     {
         delete renderer;
+        // clean up all still stored scene nodes managed globally by static scene class
+        Scene::Clear();
+        Resources::Clean();
     }
 
 

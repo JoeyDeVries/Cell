@@ -37,7 +37,7 @@ namespace Cell
         // NOTE(Joey): note that we allocate memory ourselves and pass memory responsibility to 
         // calling resource manager. The resource manager is responsible for holding the scene
         // node pointer and deleting where appropriate.
-        SceneNode *node = new SceneNode;
+        SceneNode *node = new SceneNode(0);
 
         for (unsigned int i = 0; i < aNode->mNumMeshes; ++i)
         {
@@ -62,7 +62,7 @@ namespace Cell
             // NOTE(Joey): otherwise, the meshes are considered on equal depth of its children
             else
             {
-                SceneNode* child = new SceneNode;
+                SceneNode* child = new SceneNode(0);
                 child->Mesh = mesh;
                 child->Material = material;
                 node->AddChild(child);

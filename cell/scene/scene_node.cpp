@@ -1,40 +1,54 @@
 #include "scene_node.h"
 
-#include <assert.h>
+#include "scene.h"
 
 #include "../mesh/mesh.h"
 #include "../shading/material.h"
 
+#include <assert.h>
 
 namespace Cell
 {
     // ------------------------------------------------------------------------
-    SceneNode::SceneNode()
+    SceneNode::SceneNode(unsigned int id) : m_ID(id)
     {
-
+        
     }
     // ------------------------------------------------------------------------
     SceneNode::~SceneNode()
     {
-        // NOTE(Joey): this is now managed by the global static scene object.
         // NOTE(Joey): traverse the list of children and delete accordingly.
-        //for (unsigned int i = 0; i < m_Children.size(); ++i)
-        //{
-        //    // NOTE(Joey): it can always happen a scene node was childed by a different scene node
-        //    // that has been previously deleted before, making this a dangling pointer.
-        //    // TODO(Joey): is this bad design?
-        //    if (m_Children[i])
-        //    {
-        //        delete m_Children[i];
-        //        m_Children[i] = nullptr;
-        //    }
-        //}
+        for (unsigned int i = 0; i < m_Children.size(); ++i)
+        {
+            // NOTE(Joey): it should not be possible that a scene node is childed by more than one
+            // parent, thus we don't need to care about deleting dangling pointers.
+            delete m_Children[i];
+        }
+    }
+    // ------------------------------------------------------------------------
+    unsigned int SceneNode::GetID()
+    {
+        return m_ID;
     }
     // ------------------------------------------------------------------------
     void SceneNode::AddChild(SceneNode *node)
     {
+        // NOTE(Joey): check if this child already has a parent that's not the root scene node. If 
+        // so, first remove this scene node from its current parent. Scene nodes aren't allowed to
+        // exist under multiple parents.
+        if (node->m_Parent && node->m_Parent != Scene::Root)
+        {
+            node->m_Parent->RemoveChild(m_ID);
+        }
         node->m_Parent = this;
         m_Children.push_back(node);
+    }
+    // ------------------------------------------------------------------------
+    void SceneNode::RemoveChild(unsigned int id)
+    {
+        auto it = std::find(m_Children.begin(), m_Children.end(), GetChild(id));
+        if(it != m_Children.end())
+            m_Children.erase(it);
     }
     // ------------------------------------------------------------------------
     std::vector<SceneNode*> SceneNode::GetChildren()
@@ -47,9 +61,19 @@ namespace Cell
         return m_Children.size();
     }
     // ------------------------------------------------------------------------
-    SceneNode *SceneNode::GetChild(unsigned int index)
+    SceneNode *SceneNode::GetChild(unsigned int id)
     {
-        assert(index < m_Children.size());
+        for (unsigned int i = 0; i < m_Children.size(); ++i)
+        {
+            if(m_Children[i]->GetID() == id)
+                return m_Children[i];
+        }
+        return nullptr;
+    }
+    // ------------------------------------------------------------------------
+    SceneNode* SceneNode::GetChildByIndex(unsigned int index)
+    {
+        assert(index < GetChildCount());
         return m_Children[index];
     }
     // ------------------------------------------------------------------------
