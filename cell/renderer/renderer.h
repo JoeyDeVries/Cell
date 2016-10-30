@@ -72,7 +72,7 @@ namespace Cell
         std::vector<Material*> m_Materials; // NOTE(Joey): store generated materials here for easy memory management (TODO(Joey): think of cleaner way; same for scene!)
 
         // pbr
-        std::vector<PBREnvironment> m_PBREnvironments;
+        std::vector<PBREnvironment*> m_PBREnvironments;
         unsigned int m_PBREnvironmentIndex;
         RenderTarget  *m_TargetBRDFLUT;
         Mesh     *m_PBRCaptureCube;
@@ -110,9 +110,9 @@ namespace Cell
 
         void Blit(RenderTarget *src, RenderTarget *dst, Material *material, std::string textureUniformName = "TexSrc");
         void RenderToCubemap(SceneNode *scene, TextureCube *target, math::vec3 position = math::vec3(0.0f), unsigned int mipLevel = 0);
-        PBREnvironment PBREnvMapPrecompute(Texture *hdriEnvironment, math::vec3 location = math::vec3(0.0f));
-        void SetPBREnvironment(PBREnvironment pbrEnvironment);
-        PBREnvironment GetPBREnvironment();
+        PBREnvironment* PBREnvMapPrecompute(Texture *hdriEnvironment, math::vec3 location = math::vec3(0.0f));
+        void SetPBREnvironment(PBREnvironment *pbrEnvironment);
+        PBREnvironment* GetPBREnvironment();
     private:
         void renderCustomCommand(RenderCommand *command, Camera *camera);
         RenderTarget *getCurrentRenderTarget();

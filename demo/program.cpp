@@ -150,8 +150,8 @@ int main(int argc, char *argv[])
     cubemap.DefaultInitialize(1024, 1024, GL_RGB, GL_UNSIGNED_BYTE);
   
     // - background
-    Cell::PBREnvironment pbrEnv = renderer->GetPBREnvironment();
-    background.SetCubemap(pbrEnv.Prefiltered);
+    Cell::PBREnvironment *pbrEnv = renderer->GetPBREnvironment();
+    background.SetCubemap(pbrEnv->Prefiltered);
 	float lodLevel = 1.5f; 
 	background.Material->SetFloat("lodLevel", lodLevel);
 	float exposure = 1.0;
@@ -201,26 +201,26 @@ int main(int argc, char *argv[])
             if (keysPressed[GLFW_KEY_T])
             {
                 lodLevel += 1.0 * deltaTime;
-				//background.Material->SetFloat("lodLevel", lodLevel);
+				background.Material->SetFloat("lodLevel", lodLevel);
                 Log::Message("LOD:" + std::to_string(lodLevel));
             }
             if (keysPressed[GLFW_KEY_G])
             {
                 lodLevel -= 1.0 * deltaTime;
-				//background.Material->SetFloat("lodLevel", lodLevel);
+				background.Material->SetFloat("lodLevel", lodLevel);
                 Log::Message("LOD:" + std::to_string(lodLevel));
             }
 			if (keysPressed[GLFW_KEY_Y])
 			{
 				exposure += 1.0 * deltaTime;
-				//background.Material->SetFloat("Exposure", exposure);
+				background.Material->SetFloat("Exposure", exposure);
                 matPbr->SetFloat("Exposure", exposure);
 				Log::Message("EXPOSURE:" + std::to_string(exposure));
 			}
 			if (keysPressed[GLFW_KEY_H])
 			{
 				exposure -= 1.0 * deltaTime;
-				//background.Material->SetFloat("Exposure", exposure);
+				background.Material->SetFloat("Exposure", exposure);
 				matPbr->SetFloat("Exposure", exposure);
                 Log::Message("EXPOSURE:" + std::to_string(exposure));
 			}
