@@ -33,10 +33,10 @@ namespace Cell
     // ------------------------------------------------------------------------
     void SceneNode::AddChild(SceneNode *node)
     {
-        // NOTE(Joey): check if this child already has a parent that's not the root scene node. If 
-        // so, first remove this scene node from its current parent. Scene nodes aren't allowed to
-        // exist under multiple parents.
-        if (node->m_Parent && node->m_Parent != Scene::Root)
+        // NOTE(Joey): check if this child already has a parent. If so, first remove this scene 
+        // node from its current parent. Scene nodes aren't allowed to exist under multiple 
+        // parents.
+        if (node->m_Parent)
         {
             node->m_Parent->RemoveChild(m_ID);
         }

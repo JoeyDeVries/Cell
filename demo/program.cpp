@@ -142,57 +142,20 @@ int main(int argc, char *argv[])
     thirdTorus->Scale   = math::vec3(0.65f);
     sphereNode->Scale   = math::vec3(1.35f);
 
-    Cell::SceneNode *floor = Cell::Scene::MakeSceneNode(&plane, matPbr);
-    floor->Rotation        = math::vec4(1.0f, 0.0f, 0.0f, math::Deg2Rad(-90.0f));
-    floor->Scale           = math::vec3(10.0f);
-    floor->Position        = math::vec3(0.0f, -2.0f, 0.0f);
-
     Cell::SceneNode *pbrBall = Cell::Scene::MakeSceneNode(&sphere, matPbrPink);
     pbrBall->Position = math::vec3(5.0f, 5.0f, 4.0f);
 
-    //Cell::Background background;
+    Cell::Background background;
     Cell::TextureCube cubemap;
     cubemap.DefaultInitialize(1024, 1024, GL_RGB, GL_UNSIGNED_BYTE);
-
-
-    /* NOTE(Joey):
-
-      Options: 
-      1. Don't use pointers, but create scenes by value; the caller is responsible
-      for any memory management as he sees fits, store the value or pass it around
-      by value. SHouldn't be too much of a problem, as scene nodes are relatively
-      small (80 bytes each), but could be just 8 bytes w/ a pointer. We can with 
-      relatively easy clean them up, but destructor doesn't work due to pass by value.
-
-      2. Create a global static (singleton-like) scene list that contains all the
-      generated scene nodes. Creating and deleting should go through this scene list
-      that holds all the scene nodes on some arbitrary root node. Memory management
-      is managed here, but does require manual clean-up which isn't too nice. OR
-      no cleanup and at the end of cell, the pointers are cleaned by default.
-        - I'm liking this option the most.
-
-      3. Create scene objects, where each scene manages its own list of scene nodes.
-      Memory management is similar to 2. but we can easily not do any clean-up at all
-      as scenes are largely self-contained by themselves and we can easily clean those 
-      up. We can store multiple scenes this way and easily switch between them. The
-      problem is however that this doesn't make sense in a global scope. Take model
-      loading for instance, we want to return a scene node hierarchy (similar with
-      skeleton animation): but who owns these cell nodes (could be the resource
-      manager though, but we do need to copy them when used as we can't delete/
-      remove the scene nodes as obtained from the resource manager). Plus this 
-      approach takes up extra maintanance on the user.
-
-      4. ????
-
-    */
-   
+  
     // - background
     Cell::PBREnvironment pbrEnv = renderer->GetPBREnvironment();
-    //background.SetCubemap(pbrEnv.Prefiltered);
+    background.SetCubemap(pbrEnv.Prefiltered);
 	float lodLevel = 1.5f; 
-	//background.Material->SetFloat("lodLevel", lodLevel);
+	background.Material->SetFloat("lodLevel", lodLevel);
 	float exposure = 1.0;
-	//background.Material->SetFloat("Exposure", exposure);
+	background.Material->SetFloat("Exposure", exposure);
     matPbr->GetShader()->Use();
     matPbr->GetShader()->SetFloat("Exposure", exposure);
     matPbrGlass->SetFloat("Exposure", exposure);
@@ -202,11 +165,10 @@ int main(int argc, char *argv[])
     Cell::Shader *postProcessing2 = Cell::Resources::LoadShader("postprocessing2", "shaders/screen_quad.vs", "shaders/custom_post_2.fs");
     Cell::Material *customPostProcessing1 = renderer->CreatePostProcessingMaterial(postProcessing1);
     Cell::Material *customPostProcessing2 = renderer->CreatePostProcessingMaterial(postProcessing2);
-    
 
     // NOTE(Joey): test mesh loading
-    //Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
-    //Cell::SceneNode *test2 = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
+    Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
+    Cell::SceneNode *test2 = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
 
     while (!glfwWindowShouldClose(window))
     {
@@ -276,19 +238,17 @@ int main(int argc, char *argv[])
             thirdTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
             sphereNode->Rotation = math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime());
 
-          /*  test->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 0.1f);
-            test->Position = math::vec3(7.0f, -2.0f,  0.0f);*/
+            test->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 0.1f);
+            test->Position = math::vec3(7.0f, -2.0f,  0.0f);
         }
 
         {
             //CLOCK(PUSH);
             renderer->PushRender(mainTorus);
-            //renderer.PushRender(floor);
             renderer->PushRender(pbrBall);
+            renderer->PushRender(test);
 
-            //renderer->PushRender(&background);
-
-            //renderer->PushRender(test);
+            renderer->PushRender(&background);
 
             Cell::PointLight light;
             light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);
