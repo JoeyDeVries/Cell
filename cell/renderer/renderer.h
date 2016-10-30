@@ -101,7 +101,6 @@ namespace Cell
 
         void PushRender(Mesh *mesh, Material *material, math::mat4 transform = math::mat4());
         void PushRender(SceneNode *node);
-        //void PushRender(Scene *scene);
         void PushPostProcessor(Material *postProcessor);
 
         void PushLight(DirectionalLight *light);

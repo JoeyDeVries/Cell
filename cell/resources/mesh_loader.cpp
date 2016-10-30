@@ -16,6 +16,16 @@
 
 namespace Cell
 {
+    std::vector<Mesh*> MeshLoader::meshStore = std::vector<Mesh*>();
+    // ------------------------------------------------------------------------
+    void MeshLoader::Clean()
+    {
+        for (unsigned int i = 0; i < MeshLoader::meshStore.size(); ++i)
+        {
+            delete MeshLoader::meshStore[i];
+        }
+    }
+    // ------------------------------------------------------------------------
     SceneNode* MeshLoader::LoadMesh(Renderer *renderer, std::string path, bool setDefaultMaterial)
     {
         Assimp::Importer importer;
@@ -123,7 +133,7 @@ namespace Cell
                 indices[f * 3 + i] = aMesh->mFaces[f].mIndices[i];
             }
         }
-        // TODO(Joey): memory management!
+
         Mesh *mesh = new Mesh;
         mesh->Positions = positions;
         mesh->UV = uv;
@@ -133,12 +143,16 @@ namespace Cell
         mesh->Topology = TRIANGLES;
         mesh->Finalize(true);
 
+        // NOTE(Joey): store newly generated mesh in globally stored mesh store for clean memory
+        // de-allocation when a clean is required.
+        MeshLoader::meshStore.push_back(mesh);
+
         return mesh;
     }
     // ------------------------------------------------------------------------
     Material *MeshLoader::parseMaterial(Renderer *renderer, aiMaterial *aMaterial, const aiScene *aScene, std::string directory)
     {
-        // TODO(Joey): pass renderer, and create default material from renderer
+        // NOTE(Joey): create a unique default material for each loaded mesh.
         Material *material = renderer->CreateMaterial();
 
         /* NOTE(Joey):

@@ -112,7 +112,7 @@ namespace Cell
     void Material::SetVector(std::string name, math::vec2 value)
     {
         m_Uniforms[name].Type = SHADER_TYPE_VEC2;
-        //m_Uniforms[name].Vec2 = value;
+        m_Uniforms[name].Vec2 = value;
     }
     // ------------------------------------------------------------------------
     void Material::SetVector(std::string name, math::vec3 value)

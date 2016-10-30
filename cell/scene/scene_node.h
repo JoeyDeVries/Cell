@@ -24,9 +24,6 @@ namespace Cell
       parent node.
 
     */
-    // TODO(Joey): tag each node with some unique ID. I suggest doing this with
-    // a hashed string ID to maintain readability while also keeping strong
-    // performance characteristics; comparing ints is much faster than strings!
     class SceneNode
     {
     public:

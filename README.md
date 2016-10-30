@@ -53,7 +53,6 @@ Feature List (work-in-progress)
 * Flexible OpenGL initialization.
 
 4. Add Camera functionality; add multiple camera variations: FPS, FlightSim, ArcBall.
-5. Proper scene management (current system easily allows for code oversights and memory leaks).
 		
 Feature List (todo)
 ------

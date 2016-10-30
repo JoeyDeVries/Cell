@@ -21,9 +21,6 @@ namespace Cell
     std::map<unsigned int, SceneNode*>  Resources::m_Meshes       = std::map<unsigned int, SceneNode*>();
 
     // ------------------------------------------------------------------------
-    // TODO(Joey): think of a proper way to call or default initalize w/ this function.
-    // Perhaps a global Cell.h header file, that also hosts a global Cell::Init() function
-    // to completely initalize all required Cell modules (like this here)?
     void Resources::Init()
     {
         // NOTE(Joey): initialize default assets/resources that should 
@@ -39,22 +36,10 @@ namespace Cell
         // NOTE(Joey): traverse all stored mesh scene nodes and delete accordingly.
         // Note that this time we don't care about deleting dangling pointers as each scene node is
         // unique and shouldn't reference other scene nodes than their children.
-        //std::stack<SceneNode*> nodeStack;
         for(auto it = m_Meshes.begin(); it != m_Meshes.end(); it++)
         {
             delete it->second;
-            //nodeStack.push(it->second);
         }
-        //while (!nodeStack.empty())
-        //{
-            //SceneNode *top = nodeStack.top();
-            //nodeStack.pop();
-            //for (unsigned int i = 0; i < top->GetChildCount(); ++i)
-            //{
-                //nodeStack.push(top->GetChild(i));
-            //}
-            //delete top;
-        //}
     }
 
     // ------------------------------------------------------------------------

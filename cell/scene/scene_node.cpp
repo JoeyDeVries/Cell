@@ -88,7 +88,6 @@ namespace Cell
     // the spot (no dirty flags required).
     math::mat4 SceneNode::GetTransform()
     {
-        // TODO(Joey): generate transform here:
         m_Transform = math::translate(Position);
         m_Transform = math::scale(m_Transform, Scale);
         m_Transform = math::rotate(m_Transform, Rotation.xyz, Rotation.w);

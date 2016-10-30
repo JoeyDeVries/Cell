@@ -2,6 +2,7 @@
 #define CELL_RESOURCES_MESH_LOADER_H
 
 #include <string>
+#include <vector>
 
 struct aiNode;
 struct aiScene;
@@ -23,9 +24,12 @@ namespace Cell
     */
     class MeshLoader
     {
+    private:
+        // NOTE(Joey): keep track of all loaded mesh
+        static std::vector<Mesh*> meshStore;
     public:
+        static void       Clean();
         static SceneNode* LoadMesh(Renderer *renderer, std::string path, bool setDefaultMaterial = true);
-
     private:
         static SceneNode* processNode(Renderer *renderer, aiNode *aNode, const aiScene *aScene, std::string directory, bool setDefaultMaterial);
         static Mesh*      parseMesh(aiMesh *aMesh, const aiScene *aScene);
