@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-        glfwWindowHint(GLFW_SAMPLES, 4);
+        glfwWindowHint(GLFW_SAMPLES, 16);
         glfwWindowHint(GLFW_RESIZABLE, true);
     
         GLFWwindow *window = glfwCreateWindow(1280, 720, "Cell", nullptr, nullptr);           
@@ -116,11 +116,16 @@ int main(int argc, char *argv[])
     matPbr->SetTexture("TexRoughness", Cell::Resources::LoadTexture("rusted metal roughness", "textures/pbr/rusted metal/roughness.png"), 6);
     matPbr->SetTexture("TexAO", Cell::Resources::LoadTexture("rusted metal ao", "textures/pbr/rusted metal/ao.png"), 7);
     Cell::Material *matPbrPink = renderer->CreateMaterial();
-    matPbrPink->SetTexture("TexAlbedo",    Cell::Resources::LoadTexture("plastic albedo",    "textures/pbr/plastic/albedo.png"),    3);
+    /*matPbrPink->SetTexture("TexAlbedo",    Cell::Resources::LoadTexture("plastic albedo",    "textures/pbr/plastic/albedo.png"),    3);
     matPbrPink->SetTexture("TexNormal",    Cell::Resources::LoadTexture("plastic normal",    "textures/pbr/plastic/normal.png"),    4);
     matPbrPink->SetTexture("TexMetallic",  Cell::Resources::LoadTexture("plastic metallic",  "textures/pbr/plastic/metallic.png"),  5);
     matPbrPink->SetTexture("TexRoughness", Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/plastic/roughness.png"), 6);
-    matPbrPink->SetTexture("TexAO",        Cell::Resources::LoadTexture("plastic ao",        "textures/pbr/plastic/ao.png"),        7);
+    matPbrPink->SetTexture("TexAO",        Cell::Resources::LoadTexture("plastic ao",        "textures/pbr/plastic/ao.png"),        7);*/
+    matPbrPink->SetTexture("TexAlbedo", Cell::Resources::LoadTexture("plastic albedo", "textures/pbr/tiles/albedo.png"), 3);
+    matPbrPink->SetTexture("TexNormal", Cell::Resources::LoadTexture("plastic normal", "textures/pbr/tiles/normal.png"), 4);
+    matPbrPink->SetTexture("TexMetallic", Cell::Resources::LoadTexture("plastic metallic", "textures/pbr/tiles/metallic.png"), 5);
+    matPbrPink->SetTexture("TexRoughness", Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/tiles/roughness.png"), 6);
+    matPbrPink->SetTexture("TexAO", Cell::Resources::LoadTexture("plastic ao", "textures/pbr/tiles/ao.png"), 7);
     Cell::Material *matPbrGlass = renderer->CreateMaterial("glass");
  
     // NOTE(Joey): configure camera
@@ -143,7 +148,7 @@ int main(int argc, char *argv[])
     sphereNode->Scale   = math::vec3(1.35f);
 
     Cell::SceneNode *pbrBall = Cell::Scene::MakeSceneNode(&sphere, matPbrPink);
-    pbrBall->Position = math::vec3(5.0f, 5.0f, 4.0f);
+    //pbrBall->Position = math::vec3(5.0f, 5.0f, 4.0f);
 
     Cell::Background background;
     Cell::TextureCube cubemap;
@@ -158,6 +163,7 @@ int main(int argc, char *argv[])
 	background.Material->SetFloat("Exposure", exposure);
     matPbr->GetShader()->Use();
     matPbr->GetShader()->SetFloat("Exposure", exposure);
+    matPbrPink->SetFloat("Exposure", exposure);
     matPbrGlass->SetFloat("Exposure", exposure);
 
     // NOTE(Joey): post processing
@@ -215,6 +221,8 @@ int main(int argc, char *argv[])
 				exposure += 1.0 * deltaTime;
 				background.Material->SetFloat("Exposure", exposure);
                 matPbr->SetFloat("Exposure", exposure);
+                matPbrPink->SetFloat("Exposure", exposure);
+
 				Log::Message("EXPOSURE:" + std::to_string(exposure));
 			}
 			if (keysPressed[GLFW_KEY_H])
@@ -222,6 +230,8 @@ int main(int argc, char *argv[])
 				exposure -= 1.0 * deltaTime;
 				background.Material->SetFloat("Exposure", exposure);
 				matPbr->SetFloat("Exposure", exposure);
+                matPbrPink->SetFloat("Exposure", exposure);
+
                 Log::Message("EXPOSURE:" + std::to_string(exposure));
 			}
             if (keysPressed[GLFW_KEY_Z]) {
@@ -245,12 +255,12 @@ int main(int argc, char *argv[])
         {
             //CLOCK(PUSH);
             renderer->PushRender(mainTorus);
-            renderer->PushRender(pbrBall);
-            renderer->PushRender(test);
+            //renderer->PushRender(pbrBall);
+            //renderer->PushRender(test);
 
             renderer->PushRender(&background);
 
-            Cell::PointLight light;
+  /*          Cell::PointLight light;
             light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);
             light.Color = math::vec3(1.0f, 0.7f, 0.7f);
             renderer->PushLight(&light, true);
@@ -258,7 +268,7 @@ int main(int argc, char *argv[])
             Cell::PointLight light2;
             light2.Position = math::vec3(sin(glfwGetTime() * 0.3f) * 5.5, 0.0f, cos(glfwGetTime() * 0.1f) * 10.0f);
             light2.Color = math::vec3(0.5f, 0.5f, 1.0f);
-            renderer->PushLight(&light2, true);
+            renderer->PushLight(&light2, true);*/
         }
         {
             //CLOCK(CUBEMAP);
