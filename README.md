@@ -67,10 +67,12 @@ Feature List (todo)
 	8. Environment reflection support.
 	9. Per-object motion blur.
 	10. Number of lights optimization.
-8. Functioning PBR render pipeline.
+8. GUI
+    1. IMGUI
+9. Functioning PBR render pipeline.
 	1. Reflection probes: pre-calculate environment lighting from cubemap and scene at any world location.
 	2. Interpolate between world-space reflection probes.
-9. Optimization:
+10. Optimization:
 	1. Per-object Frustum culling.
 	2. Spatial partitioning.
 	3. Portal rendering (overkill perhaps)?
