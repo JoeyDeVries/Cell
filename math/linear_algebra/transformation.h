@@ -10,21 +10,23 @@ namespace math
 {
     // NOTE(Joey): scale
     // -----------------
-    template <unsigned int n, typename T>
-    matrix<n, n, T> scale(vector<n, T> scale)
+    template <std::size_t n, typename T>
+    matrix<n, n, T> scale(vector<n, T>& scale)
     {
         matrix<n, n, T> mat;
-        for (unsigned int i = 0; i < n; ++i)
-            mat[i][i] = scale[i];
+		for (std::size_t i = 0; i < n; ++i) {
+			mat[i][i] = scale[i];
+		}
         return mat;
     }
     // NOTE(Joey): version w/ reference
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     matrix<n, n, T>& scale(matrix<n, n, T>& result, vector<n, T> scale)
     {
         // NOTE(Joey): we can do a manual operation on the matrix scale
-        for (unsigned int i = 0; i < n; ++i)
-            result[i][i] *= scale[i];
+		for (std::size_t i = 0; i < n; ++i) {
+			result[i][i] *= scale[i];
+		}
         return result;
     }
 
@@ -34,17 +36,19 @@ namespace math
     matrix<4, 4, T> scale(vector<3, T> scale)
     {
         matrix<4, 4, T> mat;
-        for (unsigned int i = 0; i < 3; ++i)
-            mat[i][i] = scale[i];
+		for (std::size_t i = 0; i < 3; ++i) {
+			mat[i][i] = scale[i];
+		}
         return mat;
     }
     // NOTE(Joey): version w/ reference
     template <typename T>
-    matrix<4, 4, T>& scale(matrix<4, 4, T>& result, vector<3, T> scale)
+    matrix<4, 4, T>& scale(matrix<4, 4, T>& result, vector<3, T>& scale)
     {
         // NOTE(Joey): we can do a manual operation on the matrix scale
-        for(unsigned int i = 0; i < 3; ++i)
-            result[i][i] *= scale[i];
+		for (std::size_t i = 0; i < 3; ++i) {
+			result[i][i] *= scale[i];
+		}
         return result;
     }
 
@@ -52,13 +56,13 @@ namespace math
     // --------------------
     // NOTE(Joey): getting a direct rotation matrix is only allowed on 3 dimensions
     template <typename T>
-    matrix<4, 4, T> rotate(vector<3, T> axis, T angle)
+    matrix<4, 4, T> rotate(const vector<3, T>& axis, const T& angle)
     {
         matrix<4, 4, T> result;
 
-        float c = cos(angle);
-        float s = sin(angle);
-        float t = 1.0f - c;
+        const float c = cos(angle);
+        const float s = sin(angle);
+        const float t = 1.0f - c;
 
         result[0][0] = t*axis.x*axis.x + c;
         result[0][1] = t*axis.x*axis.y + s*axis.z;
@@ -76,7 +80,7 @@ namespace math
     }
    
     template <typename T>
-    matrix<4, 4, T>& rotate(matrix<4, 4, T> &result, vector<3, T> axis, T angle)
+    matrix<4, 4, T>& rotate(matrix<4, 4, T> &result, const vector<3, T>& axis, const T& angle)
     {
         matrix<4, 4, T> rot = rotate(axis, angle);
         result = result * rot;
@@ -88,7 +92,7 @@ namespace math
     // -----------------------
     // NOTE(Joey): translations are only defined for 4-dimensional matrices/vectors
     template <typename T>
-    matrix<4, 4, T> translate(vector<3, T> translation)
+    matrix<4, 4, T> translate(const vector<3, T>& translation)
     {
         matrix<4, 4, T> mat;
         mat[3] = vector<4, T>(translation, 1.0);
@@ -96,7 +100,7 @@ namespace math
     }
 
     template <typename T>
-    matrix<4, 4, T>& translate(matrix<4, 4, T> &result, vector<3, T> translation)
+    matrix<4, 4, T>& translate(matrix<4, 4, T> &result, const vector<3, T>& translation)
     {
         matrix<4, 4, T> mat;
         mat[3] = vector<4, T>(translation, 1.0);
@@ -108,7 +112,7 @@ namespace math
     // NOTE(Joey): view-space 
     // ----------------------
     template <typename T>
-    matrix<4, 4, T> lookAt(vector<3, T> position, vector<3, T> target, vector<3, T> worldUp)
+    matrix<4, 4, T> lookAt(vector<3, T>& position, vector<3, T>& target, vector<3, T>& worldUp)
     {
         matrix<4, 4, T> frame;
         matrix<4, 4, T> translate;
@@ -136,7 +140,7 @@ namespace math
     // NOTE(Joey): projection
     // ----------------------
     template <typename T>
-    matrix<4, 4, T> orthographic(T left, T right, T top, T bottom, T near, T far)
+    matrix<4, 4, T> orthographic(const T& left, const T& right, const T& top, const T& bottom, const T& near, const T& far)
     {
         matrix<4, 4, T> result;
 
@@ -155,7 +159,7 @@ namespace math
     }
 
     template <typename T>
-    matrix<4, 4, T> perspective(T fov, T aspect, T near, T far)
+    matrix<4, 4, T> perspective(const T& fov, const T& aspect, const T& near, const T& far)
     {
         matrix<4, 4, T> result;
 
@@ -179,5 +183,5 @@ namespace math
 
         return result;
     }
-}
+} // namespace math
 #endif

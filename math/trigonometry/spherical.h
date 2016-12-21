@@ -16,13 +16,13 @@ namespace math
         float phi;   // NOTE(Joey): counter-clockwise rotation from xy plane to z (z being up-axis in conventional math).
         float theta; // NOTE(Joey): counter-clockwise rotation from x axis on xy plane.
 
-        spherical(float rho, float phi, float theta);
+        spherical(const float rho, const float phi, const float theta);
         // NOTE(Joey): convert from cartesian.
-        spherical(vec3 cartesian); 
+        spherical(const vec3& cartesian); 
 
         // NOTE(Joey): convert to cartesian.
-        vec3 ToCartesian();
+        vec3 ToCartesian() const;
     };
-}
+} // namespace math
 
 #endif

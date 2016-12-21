@@ -4,7 +4,7 @@
 
 namespace math
 {
-    plane::plane(float a, float b, float c, float d)
+    plane::plane(const float a, const float b, const float c, const float d)
     {
         Normal.x = a;
         Normal.y = b;
@@ -12,9 +12,9 @@ namespace math
         Distance = d;
     }
 
-    plane::plane(vec3 normal, vec3 point)
+    plane::plane(const vec3& normal, const vec3& point)
     {
         Normal   = normal;
         Distance = -dot(normal, point);
     }
-}
+} // namespace math

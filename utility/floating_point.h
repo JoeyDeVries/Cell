@@ -1,7 +1,7 @@
 #ifndef UTILITY_FLOATING_POINT_H
 #define UTILITY_FLOATING_POINT_H
 
-#include <math.h>
+#include <algorithm>
 
 /* NOTE(Joey):
 
@@ -35,14 +35,16 @@ namespace floating_point
       Applications'.
 
     */
-    inline bool compare(float a, float b, float epsilon)
+
+	// NOTE(Nabil/htmlboss): The STL has an overloaded abs()
+    inline bool compare(const float a, const float b, const float epsilon)
     {
-        float diff = abs(a - b);
+        const float diff = std::abs(a - b);
         // NOTE(Joey): originally we want to take the absolute max of either
         // a or b or 1.0 (s.t. we don't scale epsilon down) to make sure we 
         // scale epsilon by the biggest value; however, max() can be 
         // expensive so we approximate by adding all 3 values together.
-        float compare = epsilon * (abs(a) + abs(b) + 1.0f);
+        const float compare = epsilon * (std::abs(a) + std::abs(b) + 1.0f);
         return diff <= compare;
     }
 
@@ -50,10 +52,10 @@ namespace floating_point
     // slow in performance critical code. Here we use a more efficient absolute
     // epsilon check which is fine if one takes the relative magnitude of the
     // inputs into account.
-    inline bool compareAbsolute(float a, float b, float epsilon)
+    inline bool compareAbsolute(const float a, const float b, const float epsilon)
     {
-        return abs(a - b) <= epsilon;
+        return std::abs(a - b) <= epsilon;
     }
-}
+} // namespace floating_point
 
 #endif

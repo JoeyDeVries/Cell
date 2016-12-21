@@ -3,6 +3,7 @@
 
 #include <initializer_list>
 #include <assert.h>
+#include <array>
 
 namespace math
 {
@@ -20,11 +21,11 @@ namespace math
       specify the template variables.
 
     */
-    template <unsigned int n, class T>
+    template <std::size_t n, class T>
     struct vector
     {
     public:
-        T e[n];
+		std::array<T, n> data;
 
         // NOTE(Joey): constructor0: default empty constructor; default initialize all vector elements
         vector()
@@ -36,25 +37,24 @@ namespace math
                 e[i] = {};*/
         }
         // NOTE(Joey): constructor1: one argument given: initialize all vectors elements w/ same value
-        vector(T v)
+        vector(const T& v)
         {
-            for (unsigned int i = 0; i < n; ++i)
-                e[i] = v;
+			for (auto& el : data) {
+				el = v;
+			}
         }
         // NOTE(Joey): constructor2: use std::initializer list for accepting any number of arguments
-        vector(std::initializer_list<T> args)
+        vector(const std::initializer_list<T> args)
         {
             assert(args.size() < n);
-            int index = 0;
-            for (auto begin = args.begin(); begin != args.end(); ++begin)
-                e[index++] = *begin;
+			data = args;
         }
 
         // NOTE(Joey): subscript operator
-        T& operator[] (const unsigned int index)
+        T& operator[] (const std::size_t index)
         {
             assert(index >= 0 && index < n);
-            return e[index];
+            return data.at(index);
         }
 
         // NOTE(Joey): math member operators (defined in operation.h)
@@ -73,7 +73,7 @@ namespace math
     {
         union 
         {
-            T e[2];
+			std::array<T, 2> data;
             // position
             struct 
             {
@@ -101,35 +101,33 @@ namespace math
         // NOTE(Joey): constructor0: default empty constructor; default initialize all vector elements
         vector()
         {
-            for (unsigned int i = 0; i < 2; ++i)
-                e[i] = {};
+			data = { };
         }
         // NOTE(Joey): constructor1: one argument given: initialize all vectors elements w/ same value
-        vector(T v)
+        vector(const T& v)
         {
-            for (unsigned int i = 0; i < 2; ++i)
-                e[i] = v;
+			data = { v, v };
         }
         // NOTE(Joey): constructor2: use std::initializer list for accepting any number of arguments
-        vector(std::initializer_list<T> args)
+        vector(const std::initializer_list<T> args)
         {
             assert(args.size() <= 2);
             int index = 0;
-            for (auto begin = args.begin(); begin != args.end(); ++begin)
-                e[index++] = *begin;
+			for (auto begin = args.begin(); begin != args.end(); ++begin) {
+				data.at(index++) = *begin;
+			}
         }
         // NOTE(Joey): constructor3: vec2 per-element initialization
-        vector(T x, T y)
+        vector(const T& x, const T& y)
         {
-            e[0] = x;
-            e[1] = y;
+			data = { x, y };
         }
 
         // NOTE(Joey): subscript operator
-        T& operator[] (const unsigned int index)
+        T& operator[] (const std::size_t index)
         {
             assert(index >= 0 && index < 2);
-            return e[index];
+            return data.at(index);
         }
 
         // NOTE(Joey): math operators (defined in operation.h)
@@ -148,7 +146,7 @@ namespace math
     {
         union 
         {
-            T e[3];
+			std::array<T, 3> data;
             // position
             struct
             {
@@ -191,50 +189,43 @@ namespace math
         // NOTE(Joey): constructor0: default empty constructor; default initialize all vector elements
         vector()
         {
-            for (unsigned int i = 0; i < 3; ++i)
-                e[i] = {};
+			data = {};
         }
         // NOTE(Joey): constructor1: one argument given: initialize all vectors elements w/ same value
-        vector(T v)
+        vector(const T& v)
         {
-            for (unsigned int i = 0; i < 3; ++i)
-                e[i] = v;
+			data = { v, v, v };
         }
         // NOTE(Joey): constructor2: use std::initializer list for accepting any number of arguments
-        vector(std::initializer_list<T> args)
+        vector(const std::initializer_list<T> args)
         {
             assert(args.size() <= 3);
             int index = 0;
-            for (auto begin = args.begin(); begin != args.end(); ++begin)
-                e[index++] = *begin;
+			for (auto begin = args.begin(); begin != args.end(); ++begin) {
+				data.at(index++) = *begin;
+			}
         }
         // NOTE(Joey): constructor3: vec3 per-element initialization
-        vector(T x, T y, T z)
+        vector(const T& x, const T& y, const T& z)
         {
-            e[0] = x;
-            e[1] = y;
-            e[2] = z;
+			data = { x, y, z };
         }
         // NOTE(Joey): constructor4: vec2 initialization
-        vector(vector<2, T> vec, T z)
+        vector(const vector<2, T>& vec, const T& z)
         {
-            e[0] = vec.x;
-            e[1] = vec.y;
-            e[2] = z;
+			data = { vec.x, vec.y, z };
         }
         // NOTE(Joey): constructor5: vec2 initialization
-        vector(T x, vector<2, T> vec)
+        vector(const T& x, const vector<2, T>& vec)
         {
-            e[0] = x;
-            e[1] = vec.x;
-            e[2] = vec.y;
+			data = { x, vec.x, vec.y };
         }
 
         // NOTE(Joey): subscript operator
-        T& operator[] (const unsigned int index)
+        T& operator[] (const std::size_t index)
         {
             assert(index >= 0 && index < 3);
-            return e[index];
+            return data.at(index);
         }
 
         // NOTE(Joey): math operators (defined in operation.h)
@@ -261,7 +252,7 @@ namespace math
     {
         union
         {
-            T e[4];
+			std::array<T, 4> data;
             // position
             struct
             {
@@ -317,53 +308,43 @@ namespace math
         // NOTE(Joey): constructor0: default empty constructor; default initialize all vector elements
         vector()
         {
-            for (unsigned int i = 0; i < 4; ++i)
-                e[i] = {};
+			data = { };
         }
         // NOTE(Joey): constructor1: one argument given: initialize all vectors elements w/ same value
-        vector(T v)
+        vector(const T& v)
         {
-            for (unsigned int i = 0; i < 4; ++i)
-                e[i] = v;
+			data = { v, v, v, v };
         }
         // NOTE(Joey): constructor2: use std::initializer list for accepting any number of arguments
-        vector(std::initializer_list<T> args)
+        vector(const std::initializer_list<T> args)
         {
             assert(args.size() <= 4);
             int index = 0;
-            for (auto begin = args.begin(); begin != args.end(); ++begin)
-                e[index++] = *begin;
+			for (auto begin = args.begin(); begin != args.end(); ++begin) {
+				data.at(index++) = *begin;
+			}
         }
         // NOTE(Joey): constructor3: vec3 per-element initialization
-        vector(T x, T y, T z, T w)
+        vector(const T& x, const T& y, const T& z, const T& w)
         {
-            e[0] = x;
-            e[1] = y;
-            e[2] = z;
-            e[3] = w;
+			data = { x, y, z, w };
         }
         // NOTE(Joey): constructor4: vec2 initialization
-        vector(vector<2, T> xy, vector<2, T> zw)
+        vector(const vector<2, T>& xy, const vector<2, T>& zw)
         {
-            e[0] = xy.x;
-            e[1] = xy.y;
-            e[2] = zw.x;
-            e[3] = zw.y;
+			data = { xy.x, xy.y, zw.z, zw.w };
         }
         // NOTE(Joey): constructor5: vec3 initialization
-        vector(vector<3, T> xyz, T w)
+        vector(const vector<3, T>& xyz, const T& w)
         {
-            e[0] = xyz.x;
-            e[1] = xyz.y;
-            e[2] = xyz.z;
-            e[3] = w;
+			data = { xyz.x, xyz.y, xyz.z, w };
         }
 
         // NOTE(Joey): subscript operator
-        T& operator[] (const unsigned int index)
+        T& operator[] (const std::size_t index)
         {
             assert(index >= 0 && index < 4);
-            return e[index];
+            return data.at(index);
         }     
 
         // NOTE(Joey): math operators (defined in operation.h)
@@ -387,12 +368,13 @@ namespace math
     // NOTE(Joey): negate operator
     // NOTE(Joey): because this is a member operator, we have to
     // define this for each specialization.
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     inline vector<n, T> vector<n, T>::operator-()
     {
         vector<n, T> result;
-        for (unsigned int i = 0; i < n; ++i)
-            result[i] = -e[i];
+		for (std::size_t i = 0; i < n; ++i) {
+			result[i] = -data[i];
+		}
         return result;
     }
     template <typename T>
@@ -412,101 +394,109 @@ namespace math
     }
 
     // NOTE(Joey): addition
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     inline vector<n, T> operator+(vector<n, T> lhs, T scalar)
     {
         vector<n, T> result;
-        for (unsigned int i = 0; i < n; ++i)
-            result[i] = lhs[i] + scalar;
+		for (std::size_t i = 0; i < n; ++i) {
+			result[i] = lhs[i] + scalar;
+		}
         return result;
     }
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     inline vector<n, T> operator+(T scalar, vector<n, T> rhs)
     {
         vector<n, T> result;
-        for (unsigned int i = 0; i < n; ++i)
+        for (std::size_t i = 0; i < n; ++i)
             result[i] = lhs[i] + scalar;
         return result;
     }
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     inline vector<n, T> operator+(vector<n, T> lhs, vector<n, T> rhs)
     {
         vector<n, T> result;
-        for (unsigned int i = 0; i < n; ++i)
+        for (std::size_t i = 0; i < n; ++i)
             result[i] = lhs[i] + rhs[i];
         return result;
     }
 
     // NOTE(Joey): subtraction
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     inline vector<n, T> operator-(vector<n, T> lhs, T scalar)
     {
         vector<n, T> result;
-        for (unsigned int i = 0; i < n; ++i)
-            result[i] = lhs[i] - scalar;
+		for (std::size_t i = 0; i < n; ++i) {
+			result[i] = lhs[i] - scalar;
+		}
         return result;
     }
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     inline vector<n, T> operator-(vector<n, T> lhs, vector<n, T> rhs)
     {
         vector<n, T> result;
-        for (unsigned int i = 0; i < n; ++i)
-            result[i] = lhs[i] - rhs[i];
+		for (std::size_t i = 0; i < n; ++i) {
+			result[i] = lhs[i] - rhs[i];
+		}
         return result;
     }
 
     // NOTE(Joey): multiplication
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     inline vector<n, T> operator*(vector<n, T> lhs, T scalar)
     {
         vector<n, T> result;
-        for (unsigned int i = 0; i < n; ++i)
-            result[i] = lhs[i] * scalar;
+		for (std::size_t i = 0; i < n; ++i) {
+			result[i] = lhs[i] * scalar;
+		}
         return result;
     }
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     inline vector<n, T> operator*(T scalar, vector<n, T> lhs)
     {
         vector<n, T> result;
-        for (unsigned int i = 0; i < n; ++i)
-            result[i] = lhs[i] * scalar;
+		for (std::size_t i = 0; i < n; ++i) {
+			result[i] = lhs[i] * scalar;
+		}
         return result;
     }
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     inline vector<n, T> operator*(vector<n, T> lhs, vector<n, T> rhs) // NOTE(Joey): hadamard product
     {
         vector<n, T> result;
-        for (unsigned int i = 0; i < n; ++i)
-            result[i] = lhs[i] * rhs[i];
+		for (std::size_t i = 0; i < n; ++i) {
+			result[i] = lhs[i] * rhs[i];
+		}
         return result;
     }
 
     // NOTE(Joey): division
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     inline vector<n, T> operator/(vector<n, T> lhs, T scalar)
     {
         vector<n, T> result;
-        for (unsigned int i = 0; i < n; ++i)
-            result[i] = lhs[i] / scalar;
+		for (unsigned int i = 0; i < n; ++i) {
+			result[i] = lhs[i] / scalar;
+		}
         return result;
     }
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     inline vector<n, T> operator/(T scalar, vector<n, T> lhs)
     {
         vector<n, T> result;
-        for (unsigned int i = 0; i < n; ++i)
-            result[i] = lhs[i] / scalar;
+		for (std::size_t i = 0; i < n; ++i) {
+			result[i] = lhs[i] / scalar;
+		}
         return result;
     }
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     inline vector<n, T> operator/(vector<n, T> lhs, vector<n, T> rhs) // NOTE(Joey): hadamard product
     {
         vector<n, T> result;
-        for (unsigned int i = 0; i < n; ++i)
-            result[i] = lhs[i] / rhs[i];
+		for (std::size_t i = 0; i < n; ++i) {
+			result[i] = lhs[i] / rhs[i];
+		}
         return result;
     }
-}
-
+} // namespace math
 
 #endif

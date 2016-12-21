@@ -38,7 +38,7 @@ namespace math
       There is no need for matrix template specialization.
 
     */
-    template <unsigned int m, unsigned int n, typename T>
+    template <std::size_t m, std::size_t n, typename T>
     struct matrix
     {
         union
@@ -56,34 +56,35 @@ namespace math
         // NOTE(Joey): consturctor0: default initializes matrix to identity matrix 
         matrix()
         {
-            for (unsigned int col = 0; col < n; ++col)
+            for (std::size_t col = 0; col < n; ++col)
             {
-                for (unsigned int row = 0; row < m; ++row)
+                for (std::size_t row = 0; row < m; ++row)
                 {
-                    e[col][row] = (col == row) ? T(1.0) : T(0.0);
+                    e[col][row] = (col == row) ? T(1.0f) : T(0.0f);
                 }
             }
         }
 
         // NOTE(Joey): constructor1: initialize matrix with initializer list
-        matrix(std::initializer_list<T> args)
+        matrix(const std::initializer_list<T> args)
         {
             assert(args.size() <= m * n);
-            unsigned int cols = 0, rows = 0;
-            for (auto begin = args.begin(); begin != args.end(); ++begin)
-            {
-                e[cols][rows++] = *begin;
-                if (rows >= m)
-                {
-                    ++cols;
-                    rows = 0;
-                }
-            }
+            std::size_t cols = 0, rows = 0;
+
+			for (auto& it : args)
+			{
+				e[cols][rows++] = it;
+				if (rows >= m)
+				{
+					++cols;
+					rows = 0;
+				}
+			}
         }
 
         // NOTE(Joey): returns a column vector, that can again be indexed with the vector subscript 
         // operator. In effect: [][] and [] indexing is possible.
-        vector<m, T>& operator[](const unsigned int colIndex)
+        vector<m, T>& operator[](const std::size_t colIndex)
         {
             assert(colIndex >= 0 && colIndex < n);
             return col[colIndex];
@@ -106,13 +107,13 @@ namespace math
     // TODO(Joey): consider using pointers/references instead of using the
     // stack for passing arguments here as the memory savings might now 
     // outweigh the cost of walking the pointers.
-    template <unsigned int m, unsigned int n, typename T>
-    matrix<m, n, T> operator+(matrix<m, n, T> lhs, matrix<m, n, T> rhs)
+    template <std::size_t m, std::size_t n, typename T>
+    matrix<m, n, T> operator+(matrix<m, n, T>& lhs, matrix<m, n, T>& rhs)
     {
         matrix<m, n, T> result;
-        for (unsigned int col = 0; col < n; ++col)
+        for (std::size_t col = 0; col < n; ++col)
         {
-            for (unsigned int row = 0; row < m; ++row)
+            for (std::size_t row = 0; row < m; ++row)
             {
                 result[col][row] = lhs[col][row] + rhs[col][row];
             }
@@ -120,13 +121,13 @@ namespace math
         return result;
     }
     // NOTE(Joey): subtraction
-    template <unsigned int m, unsigned int n, typename T>
-    matrix<m, n, T> operator-(matrix<m, n, T> lhs, matrix<m, n, T> rhs)
+    template <std::size_t m, std::size_t n, typename T>
+    matrix<m, n, T> operator-(matrix<m, n, T>& lhs, matrix<m, n, T>& rhs)
     {
         matrix<m, n, T> result;
-        for (unsigned int col = 0; col < n; ++col)
+        for (std::size_t col = 0; col < n; ++col)
         {
-            for (unsigned int row = 0; row < m; ++row)
+            for (std::size_t row = 0; row < m; ++row)
             {
                 result[col][row] = lhs[col][row] - rhs[col][row];
             }
@@ -140,16 +141,16 @@ namespace math
     //   of rows (n) on the RHS matrix.
     // The result of the matrix multiplication is then always a matrix of 
     // dimensions m x o (LHS:rows x RHS:cols) dimensions.
-    template <unsigned int m, unsigned int n, unsigned int o, typename T>
-    matrix<m, o, T> operator*(matrix<m, n, T> lhs, matrix<n, o, T> rhs)
+    template <std::size_t m, std::size_t n, std::size_t o, typename T>
+    matrix<m, o, T> operator*(matrix<m, n, T>& lhs, matrix<n, o, T>& rhs)
     {
         matrix<m, o, T> result;
-        for (unsigned int col = 0; col < o; ++col)
+        for (std::size_t col = 0; col < o; ++col)
         {
-            for (unsigned int row = 0; row < m; ++row)
+            for (std::size_t row = 0; row < m; ++row)
             {
                 T value = {};
-                for (unsigned int j = 0; j < n; ++j) // NOTE(Joey): j equals col in math notation (i = row)
+                for (std::size_t j = 0; j < n; ++j) // NOTE(Joey): j equals col in math notation (i = row)
                 {
                     value += lhs[j][row] * rhs[col][j];
                 }
@@ -160,15 +161,15 @@ namespace math
     }
 
     // NOTE(Joey): multiplication with reference matrix (store directly inside provided matrix)
-    template <unsigned int m, unsigned int n, unsigned int o, typename T>
-    matrix<m, o, T>& mul(matrix <m, n, T> &result, matrix<m, n, T> lhs, matrix<n, o, T> rhs)
+    template <std::size_t m, std::size_t n, std::size_t o, typename T>
+    matrix<m, o, T>& mul(matrix <m, n, T> &result, const matrix<m, n, T>& lhs, const matrix<n, o, T>& rhs)
     {
-        for (unsigned int col = 0; col < o; ++col)
+        for (std::size_t col = 0; col < o; ++col)
         {
-            for (unsigned int row = 0; row < m; ++row)
+            for (std::size_t row = 0; row < m; ++row)
             {
                 T value = {};
-                for (unsigned int j = 0; j < n; ++j) // NOTE(Joey): j equals col in math notation (i = row)
+                for (std::size_t j = 0; j < n; ++j) // NOTE(Joey): j equals col in math notation (i = row)
                 {
                     value += lhs[j][row] * rhs[col][j];
                 }
@@ -183,14 +184,14 @@ namespace math
     // NOTE(Joey): rhs vector multiplication. We only define vector-matrix
     // multiplication with the vector on the right-side of the equation due
     // to the column-major convention.
-    template <unsigned int m, unsigned int n, typename T>
-    vector<m, T> operator*(matrix<m, n, T> lhs, vector<n, T> rhs)
+    template <std::size_t m, std::size_t n, typename T>
+    vector<m, T> operator*(matrix<m, n, T>& lhs, vector<n, T>& rhs)
     {
         vector<m, T> result;
-        for (unsigned int row = 0; row < m; ++row)
+        for (std::size_t row = 0; row < m; ++row)
         {
             T value = {};
-            for (unsigned int j = 0; j < n; ++j) // NOTE(Joey): j equals col in math notation (i = row)
+            for (std::size_t j = 0; j < n; ++j) // NOTE(Joey): j equals col in math notation (i = row)
             {
                 value += lhs[j][row] * rhs[j];
             }
@@ -198,5 +199,5 @@ namespace math
         }
         return result;
     }
-}
+} // namespace math
 #endif

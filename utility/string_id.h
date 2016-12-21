@@ -26,21 +26,20 @@
 
 #define SID(string) custom_simple_hash(string)
 
-inline unsigned int custom_simple_hash(std::string &str)
+inline unsigned int custom_simple_hash(const std::string &str)
 {
     unsigned int hash = 0;
 
-    for (int i = 0; i < str.size(); ++i)
-    {
-        // NOTE(Joey): be sure to use prime numbers
-        hash = 37 * hash + 17 * (char)str[i];
-    }
+	for (auto& it : str) {
+		// NOTE(Joey): be sure to use prime numbers
+		hash = 37 * hash + 17 * static_cast<char>(it);
+	}
 
     // NOTE(Joey): hash value will automatically wrap around 
     return hash;
 }
 // NOTE(Joey): supports c string literals
-inline unsigned int custom_simple_hash(const char * cStr)
+inline unsigned int custom_simple_hash(const char* cStr)
 {
     std::string str(cStr);
     return custom_simple_hash(str);
