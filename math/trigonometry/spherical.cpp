@@ -6,21 +6,20 @@
 
 namespace math
 {
-    spherical::spherical(float rho, float phi, float theta)
-    {
-        this->rho = rho;
-        this->phi = phi;
-        this->theta = theta;
+	// NOTE(Nabil/htmlboss): using an initializer list is faster than doing: this->rho = Rho, etc.
+    spherical::spherical(const float Rho, const float Phi, const float Theta) : rho(Rho), phi(Phi), theta(Theta) 
+	{
+
     }
 
-    spherical::spherical(vec3 cartesian)
+    spherical::spherical(const vec3& cartesian)
     {
         rho   = length(cartesian);
         phi   = atan2(length(cartesian.xy), cartesian.z);
         theta = atan2(cartesian.y, cartesian.x);
     }
 
-    vec3 spherical::ToCartesian()
+    vec3 spherical::ToCartesian() const
     {
         return vec3(
             rho * sin(phi) * cos(theta), // NOTE(Joey); project phi onto xy plane and then polar coordinate conversion (r*cos(theta))
@@ -29,6 +28,4 @@ namespace math
         );
     }
 
-
-
-}
+} // namespace math

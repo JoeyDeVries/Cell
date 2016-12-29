@@ -4,17 +4,18 @@
 #include "vector.h"
 #include "matrix.h"
 
+// NOTE(Nabil/htmlboss): Going to try to use the built in OpenMP to speed up Matrix operations
+#include <omp.h>
+
 namespace math
 {
-
-
     // NOTE(Joey): vector geometric operations
     // ---------------------------------------
-    template <unsigned int n, typename T>
+    template <std::size_t  n, typename T>
     inline T length(vector<n, T> vec)
     {
         T result = {};
-        for(unsigned int i = 0; i < n; ++i)
+        for(std::size_t i = 0; i < n; ++i)
             result += vec[i] * vec[i];
         return sqrt(result);
     }
@@ -22,48 +23,48 @@ namespace math
     // between vectors and not their exact length values. Seeing as a square 
     // root can be costly, it's more efficient to compare these lengtsh without
     // the square root.
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     inline T lengthSquared(vector<n, T> vec)
     {
         T result = {};
-        for(unsigned int i = 0; i < n; ++i)
+        for(std::size_t  i = 0; i < n; ++i)
             result += vec[i] * vec[i];
         return result;
     }
 
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     inline float distance(vector<n, T> lhs, vector<n, T> rhs)
     {
         return length(lhs - rhs);
     }
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     inline float distanceSquared(vector<n, T> lhs, vector<n, T> rhs)
     {
         return lengthSquared(lhs - rhs);
     }
 
-    template <unsigned int n, typename T>
+    template <std::size_t n, typename T>
     inline vector<n, T> normalize(vector<n, T> vec)
     {
         vector<n, T> result;
         T len = length(vec);
-        for(unsigned int i = 0; i < n; ++i)
+        for(std::size_t  i = 0; i < n; ++i)
             result[i] = vec[i] / len;
         return result;
     }
 
-    template <unsigned int n, typename T>
+    template <std::size_t  n, typename T>
     inline T dot(vector<n, T> lhs, vector<n, T> rhs)
     {
         T result = {};
-        for(unsigned int i = 0; i < n; ++i)
+        for(std::size_t i = 0; i < n; ++i)
             result += lhs[i] * rhs[i];
         return result;
     }
 
     // NOTE(Joey): perpendicular is only defined as is for 2D vectors
     template<typename T>
-    inline vector<2, T> perpendicular(vector<2, T> vec)
+    inline vector<2, T> perpendicular(const vector<2, T>& vec)
     {
         vector<2, T> result;
         result.x = -vec.y;
@@ -73,7 +74,7 @@ namespace math
 
     // NOTE(Joey): cross product is only defined for 3D vectors
     template<typename T>
-    inline vector<3, T> cross(vector<3, T> lhs, vector<3, T> rhs)
+    inline vector<3, T> cross(const vector<3, T>& lhs, const vector<3, T>& rhs)
     {
         vector<3, T> result;
 
@@ -87,30 +88,32 @@ namespace math
     // NOTE(Joey): matrix algebraic operations
     // ---------------------------------------
     template <unsigned int m, unsigned int n, typename T>
-    inline matrix<m, n, T> transpose(matrix<m, n, T> mat)
+    inline matrix<m, n, T> transpose(matrix<m, n, T>& mat)
     {
         matrix<n, m, T> result;
 
         // NOTE(Joey): note that we take the rows and cols as nxm instead of mxn this time.
         // We switched the < m and < n around in loop condition (as result matrix has 
         // reversed dimensions).
-        for (unsigned int col = 0; col < m; ++col)
+
+		// TODO(Nabil/htmlboss): add in a test for omp parallel
+		#pragma omp parallel for
+        for (std::size_t col = 0; col < m; ++col)
         {
-            for (unsigned int row = 0; row < n; ++row)
+            for (std::size_t row = 0; row < n; ++row)
             {
                 result[col][row] = mat[row][col];
             }
         }
-
         return result;
     }
 
-    template <unsigned int m, unsigned int n, typename T>
-    inline matrix<m, n, T> inverse(matrix<m, n, T> mat)
+    template <std::size_t  m, std::size_t  n, typename T>
+    inline matrix<m, n, T> inverse(const matrix<m, n, T>& mat)
     {
         matrix<m, n, T> result;
         // TODO(Joey): calculate determinant algebraically and retrieve inverse.
         return result;
     }
-}
+} // namespace math
 #endif

@@ -78,14 +78,14 @@ public:
     // NOTE(Joey): logs a user/engine specified message with optional
     // type of log message. Note that log messages are queued and 
     // flushed/displyayed once by calling Flush.
-    static void Message(std::string message, LOG_TYPE type = LOG_DEFAULT);
+    static void Message(const std::string& message, const LOG_TYPE type = LOG_DEFAULT);
 
     // NOTE(Joey): clear all log entries
     static void Clear();
 
     // NOTE(Joey): displays all log entries to the standard output.
     // By passing a log type one can filter on specific log types.
-    static void Display(LOG_TYPE type = LOG_DEFAULT);
+    static void Display(const LOG_TYPE type = LOG_DEFAULT);
 
     // TODO(Joey): implement file IO
 };

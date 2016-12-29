@@ -45,22 +45,22 @@ namespace math
         }
 
         // NOTE(Joey): construct a quaternion explicitly
-        quaternion(float w, float x, float y, float z) : w(w), x(x), y(y), z(z)
+        quaternion(const float w, const float x, const float y, const float z) : w(w), x(x), y(y), z(z)
         {
 
         }
 
         // NOTE(Joey): convert from axis-angle format (in radians) to quaternion
-        quaternion(vec3 axis, float angle)
+        quaternion(const vec3& axis, const float radians)
         {
-            float halfAngle = 0.5f*angle;
+            const float halfAngle = 0.5f * radians;
             w = cos(halfAngle);
             x = axis.x * sin(halfAngle);
             y = axis.y * sin(halfAngle);
             z = axis.z * sin(halfAngle);
         }
         // NOTE(Joey): convert from axis-angle format (with w being 0.0f)
-        explicit quaternion(vec3 axis) 
+        explicit quaternion(const vec3& axis) 
         {
             w = 0.0f;
             x = axis.x;
@@ -81,45 +81,45 @@ namespace math
         return quaternion( -w, -x, -y, -z );
     }
 
-    inline quaternion operator+(quaternion lhs, quaternion rhs)
+    inline quaternion operator+(const quaternion& lhs, const quaternion& rhs)
     {
         return quaternion(lhs.w + rhs.w, lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
     }
 
-    inline quaternion operator*(quaternion lhs, float scalar)
+    inline quaternion operator*(const quaternion& lhs, const float scalar)
     {
         return quaternion(scalar*lhs.w, scalar*lhs.x, scalar*lhs.y, scalar*lhs.z);
     }
-    inline quaternion operator*(float scalar, quaternion rhs)
+    inline quaternion operator*(const float scalar, const quaternion& rhs)
     {
         return quaternion(scalar*rhs.w, scalar*rhs.x, scalar*rhs.y, scalar*rhs.z);
     }
 
     // NOTE(Joey): quaternion geometry
     // -------------------------------
-    inline float length(quaternion quat)
+    inline float length(const quaternion& quat)
     {
         return sqrt(quat.w*quat.w + quat.x*quat.x + quat.y*quat.y + quat.z*quat.z);
     }
     
-    inline quaternion& normalize(quaternion &quat)
+    inline quaternion& normalize(quaternion& quat)
     {
-        float l = length(quat);
+        const float l = length(quat);
         quat = quat * (1.0f / l);
         return quat;
     }
 
-    inline float dot(quaternion lhs, quaternion rhs)
+    inline float dot(const quaternion& lhs, const quaternion& rhs)
     {
         return lhs.w*rhs.w + lhs.x*rhs.x + lhs.y*rhs.y + lhs.z*rhs.z;
     }
 
-    inline quaternion operator*(quaternion lhs, quaternion rhs)
+    inline quaternion operator*(const quaternion& lhs, const quaternion& rhs)
     {
         vec3 v1(rhs.x, rhs.y, rhs.z);
         vec3 v2(lhs.x, lhs.y, lhs.z);
 
-        float w = rhs.w*lhs.w - dot(rhs, lhs);
+        const float w = rhs.w*lhs.w - dot(rhs, lhs);
         vec3  v = rhs.w*v2 + lhs.w*v1 + cross(v2, v1);
 
         return quaternion(w, v.x, v.y, v.z);
@@ -132,17 +132,17 @@ namespace math
     // multiplication which is the expanded equation: 
     // (2w^2 - 1)*p + 2*dot(v, p)*r _ 2*w*cross(v, p) 
     // TODO(Joey): this one is important; make sure to test extensively in unit tests!
-    inline vec3 operator*(quaternion quat, vec3 vec)
+    inline vec3 operator*(const quaternion& quat, const vec3& vec)
     {
-        // TODO(Joey): assert that we're dealing with a unity vector
+        // TODO(Joey): assert that we're dealing with a unit vector
 
-        float w2 = quat.w*quat.w;
+        const float w2 = quat.w * quat.w;
 
         return (w2*w2 - 1.0f)*vec + 2.0f*dot(quat.r, vec)*quat.r + w2*cross(quat.r, vec);
     }
 
     // NOTE(Joey): the quaternion is assumed to be normalized (length of 1)
-    inline quaternion inverse(quaternion quat)
+    inline quaternion inverse(const quaternion& quat)
     {
         // TODO(Joey): assert that we're dealing with a unity vector
         return quaternion(quat.w, -quat.x, -quat.y, -quat.z);
@@ -154,8 +154,8 @@ namespace math
     {
         vec4 result;
         
-        float angle  = 2.0f * acos(w);
-        float length = sqrt(1.0f - angle*angle);
+        const float angle  = 2.0f * acos(w);
+        const float length = sqrt(1.0f - angle*angle);
 
         result.xyz = vec3(x, y, z) / length;
         result.w   = angle;
@@ -188,6 +188,6 @@ namespace math
         return mat;
     }
 
-}
+} // namepace math
 
 #endif
