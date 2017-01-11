@@ -44,4 +44,4 @@ debug/
 *.out
 *.app
 
-Graphics Engines.txt
+./*.txt

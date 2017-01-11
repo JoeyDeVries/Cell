@@ -9,7 +9,9 @@ to use and read. Cell also aims to provide both flexible and properly maintainab
 The engine will be heavily commented and documented from within the source code itself, to motivate new graphics programmers
 to take a look at any of its inner workings, without feeling too overwhelming. 
 
-Cell is currently at the beginning stages of development, so expect an incomplete experience if you try to dive in.
+Cell is currently at the beginning stages of development, so expect an incomplete experience if you try to dive in. 
+Also note that as I'm writing the [PBR](https://learnopengl.com/#!PBR/Theory) tutorials I don't have much time left to work on Cell, the moment these are finished I'll
+re-visit Cell's development.
 
 Feature List (complete)
 ------
@@ -52,7 +54,7 @@ Feature List (work-in-progress)
     1. Logging.
 * Flexible OpenGL initialization.
 
-4. Add Camera functionality; add multiple camera variations: FPS, FlightSim, ArcBall.
+1. Add Camera functionality; add multiple camera variations: FPS, FlightSim, ArcBall.
 		
 Feature List (todo)
 ------
@@ -72,10 +74,14 @@ Feature List (todo)
 9. Functioning PBR render pipeline.
 	1. Reflection probes: pre-calculate environment lighting from cubemap and scene at any world location.
 	2. Interpolate between world-space reflection probes.
+    3. Neatly integrate PBR into Cell's different render paths.
 10. Optimization:
 	1. Per-object Frustum culling.
 	2. Spatial partitioning.
 	3. Portal rendering (overkill perhaps)?
     4. Cache GL state.
     5. Store material-independent uniforms in UBO; together with barely changing shader parameters.
-	
+11. Skeletal animation:
+	1. Define Bone structure on top of current scene hierarchy system.
+	2. Load skeletal mesh from Assimp as skeletal hierarchy as well? Think of different design solutions that would work well in current environment.
+	3. Animation blending.
