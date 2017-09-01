@@ -41,10 +41,12 @@ namespace Cell
             delete it->second;
         }
 
+        delete m_GBuffer;
         delete m_CustomTarget;
 
         // post-processing
         delete m_PostProcessTarget1;
+        delete m_DefaultBlitMaterial;
         delete m_PostProcessingMaterial;
 
         // pbr
@@ -79,7 +81,7 @@ namespace Cell
         Shader *shader = Resources::LoadShader("light", "shaders/light.vs", "shaders/light.fs");
         m_LightMesh = new Sphere(8, 8);
         m_LightMaterial = new Material(shader);
-        Shader *defaultShader = Resources::LoadShader("default", "shaders/pbr.vs", "shaders/pbr.fs");
+        Shader *defaultShader = Resources::LoadShader("default", "shaders/deferred/g_buffer.vs", "shaders/deferred/g_buffer.fs");
         // NOTE(Joey): and materials
         Material *defaultMat = new Material(defaultShader);
         defaultMat->Type = MATERIAL_DEFAULT;
@@ -93,7 +95,7 @@ namespace Cell
         Shader *glassShader = Resources::LoadShader("glass", "shaders/pbr.vs", "shaders/pbr.fs", { "ALPHA" });
         Material *glassMat = new Material(glassShader);
         glassMat->Type = MATERIAL_CUSTOM; // this material can't fit in the deferred rendering pipeline (due to transparency sorting).
-        glassMat->SetTexture("TexAlbedo",    Cell::Resources::LoadTexture("glass albedo",      "textures/glass.png"), 3);
+        glassMat->SetTexture("TexAlbedo",    Cell::Resources::LoadTexture("glass albedo",    "textures/glass.png"), 3);
         glassMat->SetTexture("TexNormal",    Cell::Resources::LoadTexture("glass normal",    "textures/pbr/plastic/normal.png"), 4);
         glassMat->SetTexture("TexMetallic",  Cell::Resources::LoadTexture("glass metallic",  "textures/pbr/plastic/metallic.png"), 5);
         glassMat->SetTexture("TexRoughness", Cell::Resources::LoadTexture("glass roughness", "textures/pbr/plastic/roughness.png"), 6);
@@ -111,17 +113,49 @@ namespace Cell
         m_CustomTarget = new RenderTarget(1, 1, GL_FLOAT, 1, true);
         m_PostProcessTarget1 = new RenderTarget(1, 1, GL_UNSIGNED_BYTE, 1, false);
 
-        Shader *postProcessing = Cell::Resources::LoadShader("post processing", 
-                                                             "shaders/screen_quad.vs", 
-                                                             "shaders/post_processing.fs");
+        Shader *defaultBlit = Cell::Resources::LoadShader("blit", "shaders/screen_quad.vs", "shaders/default_blit.fs");
+        m_DefaultBlitMaterial = new Material(defaultBlit);
+
+        // deferred renderer
+        m_GBuffer = new RenderTarget(1, 1, GL_HALF_FLOAT, 3, true);
+        Cell::Resources::LoadShader("deferred ambient", "shaders/screen_quad.vs", "shaders/deferred/ambient.fs");
+        m_DeferredAmbient = new Material(Cell::Resources::GetShader("deferred ambient"));
+        Cell::Resources::LoadShader("deferred directional", "shaders/screen_quad.vs", "shaders/deferred/directional.fs");
+        m_DeferredDirectional = new Material(Cell::Resources::GetShader("deferred directional"));
+        Cell::Resources::LoadShader("deferred point", "shaders/screen_quad.vs", "shaders/deferred/point.fs");
+        m_DeferredPoint = new Material(Cell::Resources::GetShader("deferred point"));
+
+        m_DeferredAmbient->Blend = true;
+        m_DeferredAmbient->BlendSrc = GL_SRC_ALPHA;
+        m_DeferredAmbient->BlendDst = GL_ONE;
+        m_DeferredAmbient->DepthTest = false;
+        m_DeferredAmbient->SetTexture("gPositionMetallic", m_GBuffer->GetColorTexture(0), 0);
+        m_DeferredAmbient->SetTexture("gNormalRoughness", m_GBuffer->GetColorTexture(1), 1);
+        m_DeferredAmbient->SetTexture("gAlbedoAO", m_GBuffer->GetColorTexture(2), 2);
+        m_DeferredDirectional->Blend = true;
+        m_DeferredDirectional->BlendSrc = GL_SRC_ALPHA;
+        m_DeferredDirectional->BlendDst = GL_ONE;
+        m_DeferredDirectional->DepthTest = false;
+        m_DeferredDirectional->SetTexture("gPositionMetallic", m_GBuffer->GetColorTexture(0), 0);
+        m_DeferredDirectional->SetTexture("gNormalRoughness", m_GBuffer->GetColorTexture(1), 1);
+        m_DeferredDirectional->SetTexture("gAlbedoAO", m_GBuffer->GetColorTexture(2), 2);
+        m_DeferredPoint->Blend = true;
+        m_DeferredPoint->BlendSrc = GL_SRC_ALPHA;
+        m_DeferredPoint->BlendDst = GL_ONE;
+        m_DeferredPoint->DepthTest = false;
+        m_DeferredPoint->SetTexture("gPositionMetallic", m_GBuffer->GetColorTexture(0), 0);
+        m_DeferredPoint->SetTexture("gNormalRoughness", m_GBuffer->GetColorTexture(1), 1);
+        m_DeferredPoint->SetTexture("gAlbedoAO", m_GBuffer->GetColorTexture(2), 2);
+
+        Shader *postProcessing = Cell::Resources::LoadShader("post processing", "shaders/screen_quad.vs", "shaders/post_processing.fs");
         m_PostProcessingMaterial = new Material(postProcessing);
 
         m_PBRCaptureCube = new Cube();
         m_TargetBRDFLUT = new RenderTarget(128, 128, GL_HALF_FLOAT, 1, true);
-        Cell::Shader *hdrToCubemap      = Cell::Resources::LoadShader("pbr:hdr to cubemap", "shaders/cube_sample.vs", "shaders/spherical_to_cube.fs");
-        Cell::Shader *irradianceCapture = Cell::Resources::LoadShader("pbr:irradiance", "shaders/cube_sample.vs", "shaders/irradiance_capture.fs");
-        Cell::Shader *prefilterCapture  = Cell::Resources::LoadShader("pbr:prefilter", "shaders/cube_sample.vs", "shaders/prefilter_capture.fs");
-        Cell::Shader *integrateBrdf     = Cell::Resources::LoadShader("pbr:integrate_brdf", "shaders/screen_quad.vs", "shaders/integrate_brdf.fs");
+        Cell::Shader *hdrToCubemap      = Cell::Resources::LoadShader("pbr:hdr to cubemap", "shaders/pbr/cube_sample.vs", "shaders/pbr/spherical_to_cube.fs");
+        Cell::Shader *irradianceCapture = Cell::Resources::LoadShader("pbr:irradiance",     "shaders/pbr/cube_sample.vs", "shaders/pbr/irradiance_capture.fs");
+        Cell::Shader *prefilterCapture  = Cell::Resources::LoadShader("pbr:prefilter",      "shaders/pbr/cube_sample.vs", "shaders/pbr/prefilter_capture.fs");
+        Cell::Shader *integrateBrdf     = Cell::Resources::LoadShader("pbr:integrate_brdf", "shaders/screen_quad.vs",     "shaders/pbr/integrate_brdf.fs");
         m_PBRHdrToCubemap      = new Material(hdrToCubemap);
         m_PBRIrradianceCapture = new Material(irradianceCapture);
         m_PBRPrefilterCapture  = new Material(prefilterCapture);
@@ -309,12 +343,51 @@ namespace Cell
         m_CommandBuffer.Sort();
 
         // NOTE(Joey); deferred here:
-        // --
         std::vector<RenderCommand> deferredRenderCommands = m_CommandBuffer.GetDeferredRenderCommands();
         // 1. Geometry buffer
-        // 2. Render deferred shader for each light (full quad for directional, spheres for point lights)
-        // 3. blit buffers to default (or other buffer) for forward rendering
+        glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
+        glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer->m_ID);
+        unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+        glDrawBuffers(3, attachments);
+        if (m_GBuffer->Width != m_RenderSize.x || m_GBuffer->Height != m_RenderSize.y)
+        {
+            m_GBuffer->Resize(m_RenderSize.x, m_RenderSize.y);
+        }
+        m_Camera->SetPerspective(m_Camera->FOV, m_RenderSize.x / m_RenderSize.y, 0.1, 100.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        for (unsigned int i = 0; i < deferredRenderCommands.size(); ++i)
+        {
+            renderDeferredCommand(&deferredRenderCommands[i], m_Camera);
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER, m_CustomTarget->m_ID);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+        // 2. Render deferred shader for each light (full quad for directional, spheres for point lights)
+        // ambient lighting
+        renderDeferredAmbient();
+
+        // directional lights
+        for (auto it = m_DirectionalLights.begin(); it != m_DirectionalLights.end(); ++it)
+        {
+            renderDeferredDirLight(*it);
+        }
+        // point lights
+        // TODO(Joey): stencil state
+        for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
+        {
+            //renderDeferredPointLight(*it);
+        }
+
+        attachments[1] = GL_NONE;
+        attachments[2] = GL_NONE;
+        glDrawBuffers(3, attachments);
+
+        // 3. blit depth buffer to default for forward rendering
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, m_GBuffer->m_ID);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_CustomTarget->m_ID); // write to default framebuffer
+        glBlitFramebuffer(
+            0, 0, m_GBuffer->Width, m_GBuffer->Height, 0, 0, m_RenderSize.x, m_RenderSize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST
+        );
 
         // NOTE(Joey): push default render target to the end of the render
         // target buffer s.t. we always render the default buffer last.
@@ -352,7 +425,6 @@ namespace Cell
                 glBindFramebuffer(GL_FRAMEBUFFER, m_CustomTarget->m_ID);
                 m_Camera->SetPerspective(m_Camera->FOV, m_RenderSize.x / m_RenderSize.y, 0.1, 
                                          100.0f);
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             }
 
             // NOTE(Joey): sort all render commands and retrieve the sorted array
@@ -374,15 +446,17 @@ namespace Cell
         {
             // NOTE(Joey): ping-pong between render textures
             bool even = i % 2 == 0;
-            Blit(even ? m_CustomTarget : m_PostProcessTarget1,
+            Blit(even ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0),
                  even ? m_PostProcessTarget1 : m_CustomTarget, 
                  postProcessingCommands[i].Material);
         }
 
         // NOTE(Joey): then do a final blit to the default framebuffer, with gamma correction and 
         // tone mapping post-processing step.
-        Blit(postProcessingCommands.size() % 2 == 0 ? m_CustomTarget : m_PostProcessTarget1,
+        Blit(postProcessingCommands.size() % 2 == 0 ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0),
              nullptr, m_PostProcessingMaterial);
+
+        //Blit(m_GBuffer->GetColorTexture(0));
 
         // NOTE(Joey): clear the command buffer s.t. the next frame/call can
         // start from an empty slate again.
@@ -399,7 +473,7 @@ namespace Cell
 
     }
     // ------------------------------------------------------------------------
-    void Renderer::Blit(RenderTarget *src, 
+    void Renderer::Blit(Texture *src,
                         RenderTarget *dst, 
                         Material     *material, 
                         std::string   textureUniformName)
@@ -420,11 +494,16 @@ namespace Cell
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         }
+        // if no material is given, use default blit material
+        if (!material)
+        {
+            material = m_DefaultBlitMaterial;
+        }
         // NOTE(Joey): if a source render target is given, use its color buffer
         // as input to the material shader.
         if (src)
         {
-            material->SetTexture(textureUniformName, src->GetColorTexture(0), 0);
+            material->SetTexture(textureUniformName, src, 0);
         }
         // NOTE(Joey): render screen-space material to quad which will be 
         // stored/displayer inside dst's buffers.
@@ -572,6 +651,93 @@ namespace Cell
         return m_PBREnvironments[m_PBREnvironmentIndex];
     }
     // ------------------------------------------------------------------------
+    void Renderer::renderDeferredCommand(RenderCommand *command, Camera *camera)
+    {
+        Material *material = command->Material;
+        Mesh     *mesh     = command->Mesh;        
+
+        // TODO(Joey): only use shader and set per-shader specific uniforms
+        // (ViewProjection) if state requires change; otherwise ignore.
+        // TODO(Joey): replace w/ uniform buffer objects for 'known' 
+        // uniforms that are shared among material runs (like projection/
+        // view); do a similar setup for lighting.
+        // TODO(Joey): I've decided that the only lighting pass that is default
+        // supported will be the deferred pass, if other shaders want lighting
+        // information as well they'll have to add it themselves.
+        // NOTE(Joey): set default uniforms that are always configured 
+        // regardless of shader configuration (see them as a default set of
+        // shader uniform variables always there).
+        material->GetShader()->Use();
+        if (camera)
+        {
+            material->GetShader()->SetMatrix("projection", camera->Projection);
+            material->GetShader()->SetMatrix("view", camera->View);
+            material->GetShader()->SetMatrix("model", command->Transform);
+            material->GetShader()->SetVector("CamPos", camera->Position);
+        }      
+
+        // NOTE(Joey): bind/active uniform sampler/texture objects
+        auto *samplers = material->GetSamplerUniforms();
+        for (auto it = samplers->begin(); it != samplers->end(); ++it)
+        {
+            if (it->second.Type == SHADER_TYPE_SAMPLERCUBE)
+                it->second.TextureCube->Bind(it->second.Unit);
+            else
+                it->second.Texture->Bind(it->second.Unit);
+        }
+
+        // NOTE(Joey): set uniform state of material
+        auto *uniforms = material->GetUniforms();
+        for (auto it = uniforms->begin(); it != uniforms->end(); ++it)
+        {
+            switch (it->second.Type)
+            {
+            case SHADER_TYPE_BOOL:
+                material->GetShader()->SetBool(it->first, it->second.Bool);
+                break;
+            case SHADER_TYPE_INT:
+                material->GetShader()->SetInt(it->first, it->second.Int);
+                break;
+            case SHADER_TYPE_FLOAT:
+                material->GetShader()->SetFloat(it->first, it->second.Float);
+                break;
+            case SHADER_TYPE_VEC2:
+                material->GetShader()->SetVector(it->first, it->second.Vec2);
+                break;
+            case SHADER_TYPE_VEC3:
+                material->GetShader()->SetVector(it->first, it->second.Vec3);
+                break;
+            case SHADER_TYPE_VEC4:
+                material->GetShader()->SetVector(it->first, it->second.Vec4);
+                break;
+            case SHADER_TYPE_MAT2:
+                material->GetShader()->SetMatrix(it->first, it->second.Mat2);
+                break;
+            case SHADER_TYPE_MAT3:
+                material->GetShader()->SetMatrix(it->first, it->second.Mat3);
+                break;
+            case SHADER_TYPE_MAT4:
+                material->GetShader()->SetMatrix(it->first, it->second.Mat4);
+                break;
+            default:
+                Log::Message("Unrecognized Uniform type set.", LOG_ERROR);
+                break;
+            }
+        }
+
+        // NOTE(Joey): bind OpenGL render state
+        glBindVertexArray(mesh->m_VAO);
+        if (mesh->Indices.size() > 0)
+        {
+            glDrawElements(mesh->Topology == TRIANGLE_STRIP ? GL_TRIANGLE_STRIP : GL_TRIANGLES, mesh->Indices.size(), GL_UNSIGNED_INT, 0);
+        }
+        else
+        {
+            glDrawArrays(mesh->Topology == TRIANGLE_STRIP ? GL_TRIANGLE_STRIP : GL_TRIANGLES, 0, mesh->Positions.size());
+        }
+        glBindVertexArray(0); // NOTE(Joey): consider skipping this call without damaging the render pipeline
+    }
+    // ------------------------------------------------------------------------
     void Renderer::renderCustomCommand(RenderCommand *command, Camera *camera)
     {
         Material *material = command->Material;
@@ -581,6 +747,14 @@ namespace Cell
         // TODO(Joey): only change these if different value, and sort by major state changes
         //             write a state cache.
         glDepthFunc(material->DepthCompare);
+        if (material->DepthTest)
+        {
+            glEnable(GL_DEPTH_TEST);
+        }
+        else
+        {
+            glDisable(GL_DEPTH_TEST);
+        }
         if (material->Blend)
         {
             glEnable(GL_BLEND);
@@ -696,7 +870,12 @@ namespace Cell
         }
         glBindVertexArray(0); // NOTE(Joey): consider skipping this call without damaging the render pipeline
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
+    void Renderer::updateGlobalUBOs()
+    {
+        // TODO(Joey): decide on std140 layout for global variables (do we split this on the deferred/forward/post pass?)
+    }
+    // --------------------------------------------------------------------------------------------
     RenderTarget* Renderer::getCurrentRenderTarget()
     {
         return m_CurrentRenderTargetCustom;
@@ -704,5 +883,29 @@ namespace Cell
             //return m_RenderTargetsCustom[m_RenderTargetsCustom.size() - 1];
         //else
             //return nullptr;
+    }
+    // --------------------------------------------------------------------------------------------
+    void Renderer::renderDeferredAmbient()
+    {
+        RenderCommand command;
+        command.Material = m_DeferredAmbient;
+        command.Mesh = m_NDCPlane;
+        renderCustomCommand(&command, nullptr);
+    }
+    // --------------------------------------------------------------------------------------------
+    void Renderer::renderDeferredDirLight(DirectionalLight *light)
+    {
+        m_DeferredDirectional->SetVector("lightDir", light->Direction);
+        m_DeferredDirectional->SetVector("lightColor", light->Color);
+
+        RenderCommand command;
+        command.Material = m_DeferredDirectional;
+        command.Mesh = m_NDCPlane;
+        renderCustomCommand(&command, nullptr);
+    }
+    // --------------------------------------------------------------------------------------------
+    void Renderer::renderDeferredPointLight(PointLight *light)
+    {
+
     }
 }

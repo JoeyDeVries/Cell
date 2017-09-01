@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
         glEnable(GL_MULTISAMPLE);
 
         glViewport(0, 0, width, height);
-        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     Log::Message("OpenGL configured", LOG_INIT);
 
 
@@ -104,22 +104,22 @@ int main(int argc, char *argv[])
 
     // NOTE(Joey): material setup
     Cell::Material *matPbr = renderer->CreateMaterial();
-    matPbr->SetTexture("TexAlbedo", Cell::Resources::LoadTexture("rusted metal albedo", "textures/pbr/rusted metal/albedo.png"), 3);
-    matPbr->SetTexture("TexNormal", Cell::Resources::LoadTexture("rusted metal normal", "textures/pbr/rusted metal/normal.png"), 4);
-    matPbr->SetTexture("TexMetallic", Cell::Resources::LoadTexture("rusted metal metallic", "textures/pbr/rusted metal/metallic.png"), 5);
-    matPbr->SetTexture("TexRoughness", Cell::Resources::LoadTexture("rusted metal roughness", "textures/pbr/rusted metal/roughness.png"), 6);
-    matPbr->SetTexture("TexAO", Cell::Resources::LoadTexture("rusted metal ao", "textures/pbr/rusted metal/ao.png"), 7);
+    //matPbr->SetTexture("TexAlbedo", Cell::Resources::LoadTexture("rusted metal albedo", "textures/pbr/rusted metal/albedo.png"), 3);
+    //matPbr->SetTexture("TexNormal", Cell::Resources::LoadTexture("rusted metal normal", "textures/pbr/rusted metal/normal.png"), 4);
+    //matPbr->SetTexture("TexMetallic", Cell::Resources::LoadTexture("rusted metal metallic", "textures/pbr/rusted metal/metallic.png"), 5);
+    //matPbr->SetTexture("TexRoughness", Cell::Resources::LoadTexture("rusted metal roughness", "textures/pbr/rusted metal/roughness.png"), 6);
+    //matPbr->SetTexture("TexAO", Cell::Resources::LoadTexture("rusted metal ao", "textures/pbr/rusted metal/ao.png"), 7);
     Cell::Material *matPbrPink = renderer->CreateMaterial();
     /*matPbrPink->SetTexture("TexAlbedo",    Cell::Resources::LoadTexture("plastic albedo",    "textures/pbr/plastic/albedo.png"),    3);
     matPbrPink->SetTexture("TexNormal",    Cell::Resources::LoadTexture("plastic normal",    "textures/pbr/plastic/normal.png"),    4);
     matPbrPink->SetTexture("TexMetallic",  Cell::Resources::LoadTexture("plastic metallic",  "textures/pbr/plastic/metallic.png"),  5);
     matPbrPink->SetTexture("TexRoughness", Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/plastic/roughness.png"), 6);
     matPbrPink->SetTexture("TexAO",        Cell::Resources::LoadTexture("plastic ao",        "textures/pbr/plastic/ao.png"),        7);*/
-    matPbrPink->SetTexture("TexAlbedo", Cell::Resources::LoadTexture("plastic albedo", "textures/pbr/tiles/albedo.png"), 3);
-    matPbrPink->SetTexture("TexNormal", Cell::Resources::LoadTexture("plastic normal", "textures/pbr/tiles/normal.png"), 4);
-    matPbrPink->SetTexture("TexMetallic", Cell::Resources::LoadTexture("plastic metallic", "textures/pbr/tiles/metallic.png"), 5);
-    matPbrPink->SetTexture("TexRoughness", Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/tiles/roughness.png"), 6);
-    matPbrPink->SetTexture("TexAO", Cell::Resources::LoadTexture("plastic ao", "textures/pbr/tiles/ao.png"), 7);
+    //matPbrPink->SetTexture("TexAlbedo", Cell::Resources::LoadTexture("plastic albedo", "textures/pbr/tiles/albedo.png"), 3);
+    //matPbrPink->SetTexture("TexNormal", Cell::Resources::LoadTexture("plastic normal", "textures/pbr/tiles/normal.png"), 4);
+    //matPbrPink->SetTexture("TexMetallic", Cell::Resources::LoadTexture("plastic metallic", "textures/pbr/tiles/metallic.png"), 5);
+    //matPbrPink->SetTexture("TexRoughness", Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/tiles/roughness.png"), 6);
+    //matPbrPink->SetTexture("TexAO", Cell::Resources::LoadTexture("plastic ao", "textures/pbr/tiles/ao.png"), 7);
     Cell::Material *matPbrGlass = renderer->CreateMaterial("glass");
  
     // NOTE(Joey): configure camera
@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
     matPbr->GetShader()->Use();
     matPbr->GetShader()->SetFloat("Exposure", exposure);
     matPbrPink->SetFloat("Exposure", exposure);
-    matPbrGlass->SetFloat("Exposure", exposure);
+    //matPbrGlass->SetFloat("Exposure", exposure);
 
     // NOTE(Joey): post processing
     Cell::Shader *postProcessing1 = Cell::Resources::LoadShader("postprocessing1", "shaders/screen_quad.vs", "shaders/custom_post_1.fs");
@@ -253,6 +253,11 @@ int main(int argc, char *argv[])
             //renderer->PushRender(test);
 
             renderer->PushRender(&background);
+
+            Cell::DirectionalLight dirLight;
+            dirLight.Direction = math::vec3(-0.5f, -0.5f, 0.0f);
+            dirLight.Color = math::vec3(0.5f, 0.5f, 0.4f);
+            renderer->PushLight(&dirLight);
 
   /*          Cell::PointLight light;
             light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);

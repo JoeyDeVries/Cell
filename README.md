@@ -39,6 +39,8 @@ Feature List (complete:base-functionality)
 	1. Define list of render push commands (material, mesh)
     2. Collect all render commands and seperate by pass.
     3. Sort render commands per pass; execute (batch where necessary) to minimize state changes.
+7. Configure Deferred rendering pipeline:
+    1. Configure render buffer w/ geometry pass.
 8. Functioning PBR render pipeline.
 	1. Calculate diffuse integral and store into cubemap.
 	2. Prefilter environment map w/ integral and store into cubemap as diffuse integral.
@@ -51,20 +53,20 @@ Feature List (work-in-progress)
 * Flexible OpenGL initialization.
 
 1. Add Camera functionality; add multiple camera variations: FPS, FlightSim, ArcBall.
+2. Configure Deferred rendering pipeline:
+	1. Set up light architecture; types of light, material interaction, volume calculation.
+	2. Build fully functional shaders w/ Blinn-Phong lighting.
+	3. Normal mapping.
+	4. Fog.
+	5. Shadow Mapping (default, omni, CSM).
+	6. Environment lighting.
+	7. Environment reflection support.
+	8. Per-object motion blur.
+	9. Number of lights optimization.
 		
 Feature List (todo)
 ------
-7. Configure Deferred rendering pipeline:
-	1. Set up light architecture; types of light, material interaction, volume calculation.
-	2. Configure render buffer w/ geometry pass.
-	3. Build fully functional shaders w/ Blinn-Phong lighting.
-	4. Normal mapping.
-	5. Fog.
-	6. Shadow Mapping (default, omni, CSM).
-	7. Environment lighting.
-	8. Environment reflection support.
-	9. Per-object motion blur.
-	10. Number of lights optimization.
+
 8. GUI
     1. IMGUI
 9. Functioning PBR render pipeline.

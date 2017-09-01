@@ -51,10 +51,17 @@ namespace Cell
         std::vector<DirectionalLight*> m_DirectionalLights;
         std::vector<PointLight*>       m_PointLights;
         Mesh     *m_LightMesh;
-        Material *m_LightMaterial;
         std::vector<RenderTarget*>  m_RenderTargetsCustom;
+        RenderTarget               *m_GBuffer = nullptr;
         RenderTarget               *m_CurrentRenderTargetCustom = nullptr;
         Quad                       *m_NDCPlane; 
+
+
+        Material *m_DefaultBlitMaterial;
+        Material *m_DeferredAmbient;
+        Material *m_DeferredDirectional;
+        Material *m_DeferredPoint;
+        Material *m_LightMaterial;
 
         RenderTarget               *m_CustomTarget;
 
@@ -80,6 +87,9 @@ namespace Cell
         Material *m_PBRIrradianceCapture;
         Material *m_PBRPrefilterCapture;
         Material *m_PBRIntegrateBRDF;
+
+        // deferred
+
     public:
         Renderer();
         ~Renderer();
@@ -108,14 +118,31 @@ namespace Cell
 
         void RenderPushedCommands();
 
-        void Blit(RenderTarget *src, RenderTarget *dst, Material *material, std::string textureUniformName = "TexSrc");
+        void Blit(Texture *src, RenderTarget *dst = nullptr, Material *material = nullptr, std::string textureUniformName = "TexSrc");
         void RenderToCubemap(SceneNode *scene, TextureCube *target, math::vec3 position = math::vec3(0.0f), unsigned int mipLevel = 0);
         PBREnvironment* PBREnvMapPrecompute(Texture *hdriEnvironment, math::vec3 location = math::vec3(0.0f));
         void SetPBREnvironment(PBREnvironment *pbrEnvironment);
         PBREnvironment* GetPBREnvironment();
     private:
+        // renderer-specific logic for rendering a 'default' deferred command.
+        void renderDeferredCommand(RenderCommand *command, Camera *camera);
+        // renderer-specific logic for rendering a custom (forward-pass) command
         void renderCustomCommand(RenderCommand *command, Camera *camera);
+        // updates the global uniform buffer objects
+        void updateGlobalUBOs();
+        // returns the currently active render target
         RenderTarget *getCurrentRenderTarget();
+
+
+        // deferred logic:
+        // renders all ambient lighting (including indirect IBL)
+        void renderDeferredAmbient();
+        // render directional light
+        void renderDeferredDirLight(DirectionalLight *light);
+        // render point light
+        void renderDeferredPointLight(PointLight *light);
+        // render spot light
+
     };
 }
 

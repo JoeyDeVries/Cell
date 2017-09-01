@@ -29,6 +29,8 @@ namespace Cell
     {
         Material copy(m_Shader);
 
+        copy.Type = Type;
+
         copy.Color = Color;
         
         copy.DepthTest = DepthTest;

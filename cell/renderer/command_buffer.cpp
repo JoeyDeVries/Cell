@@ -26,13 +26,12 @@ namespace Cell
         command.Material  = material;
         command.Transform = transform;
 
-        // NOTE(Joey): check the type of the material and process differently
-        // if necessary
-        //if (material->Type == MATERIAL_DEFAULT)
-        //{
-            //m_DeferredRenderCommands.push_back(command);
-        //}
-        /*else*/ if (material->Type == MATERIAL_CUSTOM || material->Type == MATERIAL_DEFAULT) // NOTE(Joey): we include default here for now as we don't have the deferred pipeline yet
+        // NOTE(Joey): check the type of the material and process differently where necessary
+        if (material->Type == MATERIAL_DEFAULT)
+        {
+            m_DeferredRenderCommands.push_back(command);
+        }
+        else if (material->Type == MATERIAL_CUSTOM)
         {
             // NOTE(Joey): check if this render target has been pushed before, if
             // so add to vector, otherwise create new vector with this render
@@ -64,7 +63,7 @@ namespace Cell
     // CommandBuffer::Sort() function.
     bool renderSortDeferred(const RenderCommand &a, const RenderCommand &b)
     {
-        return false;
+        return a.Material->GetShader()->ID < b.Material->GetShader()->ID;
     }
     // NOTE(Joey): first sort on alpha state
     bool renderSortCustom(const RenderCommand &a, const RenderCommand &b)
