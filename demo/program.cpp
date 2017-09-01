@@ -109,17 +109,6 @@ int main(int argc, char *argv[])
     //matPbr->SetTexture("TexMetallic", Cell::Resources::LoadTexture("rusted metal metallic", "textures/pbr/rusted metal/metallic.png"), 5);
     //matPbr->SetTexture("TexRoughness", Cell::Resources::LoadTexture("rusted metal roughness", "textures/pbr/rusted metal/roughness.png"), 6);
     //matPbr->SetTexture("TexAO", Cell::Resources::LoadTexture("rusted metal ao", "textures/pbr/rusted metal/ao.png"), 7);
-    Cell::Material *matPbrPink = renderer->CreateMaterial();
-    /*matPbrPink->SetTexture("TexAlbedo",    Cell::Resources::LoadTexture("plastic albedo",    "textures/pbr/plastic/albedo.png"),    3);
-    matPbrPink->SetTexture("TexNormal",    Cell::Resources::LoadTexture("plastic normal",    "textures/pbr/plastic/normal.png"),    4);
-    matPbrPink->SetTexture("TexMetallic",  Cell::Resources::LoadTexture("plastic metallic",  "textures/pbr/plastic/metallic.png"),  5);
-    matPbrPink->SetTexture("TexRoughness", Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/plastic/roughness.png"), 6);
-    matPbrPink->SetTexture("TexAO",        Cell::Resources::LoadTexture("plastic ao",        "textures/pbr/plastic/ao.png"),        7);*/
-    //matPbrPink->SetTexture("TexAlbedo", Cell::Resources::LoadTexture("plastic albedo", "textures/pbr/tiles/albedo.png"), 3);
-    //matPbrPink->SetTexture("TexNormal", Cell::Resources::LoadTexture("plastic normal", "textures/pbr/tiles/normal.png"), 4);
-    //matPbrPink->SetTexture("TexMetallic", Cell::Resources::LoadTexture("plastic metallic", "textures/pbr/tiles/metallic.png"), 5);
-    //matPbrPink->SetTexture("TexRoughness", Cell::Resources::LoadTexture("plastic roughness", "textures/pbr/tiles/roughness.png"), 6);
-    //matPbrPink->SetTexture("TexAO", Cell::Resources::LoadTexture("plastic ao", "textures/pbr/tiles/ao.png"), 7);
     Cell::Material *matPbrGlass = renderer->CreateMaterial("glass");
  
     // NOTE(Joey): configure camera
@@ -141,9 +130,6 @@ int main(int argc, char *argv[])
     thirdTorus->Scale   = math::vec3(0.65f);
     sphereNode->Scale   = math::vec3(1.35f);
 
-    Cell::SceneNode *pbrBall = Cell::Scene::MakeSceneNode(&sphere, matPbrPink);
-    //pbrBall->Position = math::vec3(5.0f, 5.0f, 4.0f);
-
     Cell::Background background;
     Cell::TextureCube cubemap;
     cubemap.DefaultInitialize(1024, 1024, GL_RGB, GL_UNSIGNED_BYTE);
@@ -157,8 +143,6 @@ int main(int argc, char *argv[])
 	background.Material->SetFloat("Exposure", exposure);
     matPbr->GetShader()->Use();
     matPbr->GetShader()->SetFloat("Exposure", exposure);
-    matPbrPink->SetFloat("Exposure", exposure);
-    //matPbrGlass->SetFloat("Exposure", exposure);
 
     // NOTE(Joey): post processing
     Cell::Shader *postProcessing1 = Cell::Resources::LoadShader("postprocessing1", "shaders/screen_quad.vs", "shaders/custom_post_1.fs");
@@ -215,7 +199,6 @@ int main(int argc, char *argv[])
 				exposure += 1.0 * deltaTime;
 				background.Material->SetFloat("Exposure", exposure);
                 matPbr->SetFloat("Exposure", exposure);
-                matPbrPink->SetFloat("Exposure", exposure);
 
 				Log::Message("EXPOSURE:" + std::to_string(exposure), LOG_DEBUG);
 			}
@@ -224,7 +207,6 @@ int main(int argc, char *argv[])
 				exposure -= 1.0 * deltaTime;
 				background.Material->SetFloat("Exposure", exposure);
 				matPbr->SetFloat("Exposure", exposure);
-                matPbrPink->SetFloat("Exposure", exposure);
 
                 Log::Message("EXPOSURE:" + std::to_string(exposure), LOG_DEBUG);
 			}

@@ -2,8 +2,8 @@
 out vec4 FragColor;
 in vec3 WorldPos;
 
-#include common/constants.glsl
-#include common/sampling.glsl
+#include ../common/constants.glsl
+#include ../common/sampling.glsl
 
 uniform samplerCube environment;
 uniform float roughness;

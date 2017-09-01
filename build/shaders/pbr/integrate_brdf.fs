@@ -2,9 +2,9 @@
 out vec4 FragColor;
 in vec2 TexCoords;
 
-#include common/constants.glsl
-#include common/sampling.glsl
-#include common/brdf.glsl
+#include ../common/constants.glsl
+#include ../common/sampling.glsl
+#include ../common/brdf.glsl
 
 vec2 IntegrateBRDF(float roughness, float NdotV)
 {

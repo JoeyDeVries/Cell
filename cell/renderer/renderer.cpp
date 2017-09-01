@@ -92,7 +92,7 @@ namespace Cell
         defaultMat->SetTexture("TexAO",        Resources::LoadTexture("default ao",        "textures/white.png"),        7);
         m_DefaultMaterials[SID("default")] = defaultMat;
         // - glass
-        Shader *glassShader = Resources::LoadShader("glass", "shaders/pbr.vs", "shaders/pbr.fs", { "ALPHA" });
+        Shader *glassShader = Resources::LoadShader("glass", "shaders/pbr/pbr.vs", "shaders/pbr/pbr.fs", { "ALPHA" });
         Material *glassMat = new Material(glassShader);
         glassMat->Type = MATERIAL_CUSTOM; // this material can't fit in the deferred rendering pipeline (due to transparency sorting).
         glassMat->SetTexture("TexAlbedo",    Cell::Resources::LoadTexture("glass albedo",    "textures/glass.png"), 3);
@@ -175,7 +175,6 @@ namespace Cell
         Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/hamarikyu bridge.hdr");
         Cell::PBREnvironment *envBridge = PBREnvMapPrecompute(hdrMap);
         SetPBREnvironment(envBridge);
-
     }
     // ------------------------------------------------------------------------
     void Renderer::SetRenderSize(unsigned int width, unsigned int height)
