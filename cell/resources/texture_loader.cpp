@@ -65,17 +65,6 @@ namespace Cell
             float *data = stbi_loadf(path.c_str(), &width, &height, &nrComponents, 0);
             if (data)
             {
-				// NOTE(Joey): check if HDRI is properly loaded; thus if a float value 
-				// exceeds 1.0.
-				float max = 0.0;
-				int counter = 0;
-				for (float *p = data; counter < width * height; counter++, p++)
-				{
-					if (*p > max)
-						max = *p;
-				}
-				Log::Message("STBI MAX VALUE: " + std::to_string(max), LOG_DEBUG);
-
                 GLenum internalFormat, format;
                 if (nrComponents == 3)
                 {

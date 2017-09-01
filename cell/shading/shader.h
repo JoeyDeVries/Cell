@@ -23,6 +23,7 @@ namespace Cell
     {
     public:
         unsigned int ID;
+        std::string  Name;
 
         std::vector<Uniform>         Uniforms;
         std::vector<VertexAttribute> Attributes;
@@ -54,6 +55,8 @@ namespace Cell
         // NOTE(Joey): retrieves uniform location from pre-stored uniform locations and
         // reports an error if a non-uniform is set.
         int getUniformLocation(std::string name);
+
+        void logUniformNotFound(std::string uniform);
     };
 }
 #endif

@@ -6,6 +6,7 @@
 #include "test/test_common.h"
 #include "test/test_transformations.h"
 
+// todo: check googletest for testing.
 
 bool TEST_SUCCESS = true;
 #define TEST(name) \

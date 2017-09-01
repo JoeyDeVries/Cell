@@ -346,7 +346,7 @@ namespace Cell
             }
             else
             {
-                // NOTE(Joey): don't render to default framebuffer, but to ustom target framebuffer
+                // NOTE(Joey): don't render to default framebuffer, but to custom target framebuffer
                 // which we'll use for post-processing.
                 glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
                 glBindFramebuffer(GL_FRAMEBUFFER, m_CustomTarget->m_ID);
@@ -579,6 +579,7 @@ namespace Cell
 
         // NOTE(Joey): set global GL state based on material
         // TODO(Joey): only change these if different value, and sort by major state changes
+        //             write a state cache.
         glDepthFunc(material->DepthCompare);
         if (material->Blend)
         {
@@ -610,8 +611,7 @@ namespace Cell
             material->GetShader()->SetMatrix("model", command->Transform);
             material->GetShader()->SetVector("CamPos", camera->Position);
         }
-        // NOTE(Joey): lighting setup: also move to uniform buffer object 
-        // in future
+        // NOTE(Joey): lighting setup: also move to uniform buffer object in future
         for (unsigned int i = 0; i < m_DirectionalLights.size() && i < 4; ++i) // NOTE(Joey): no more than 4 directional lights
         {
             std::string uniformName = "DirLight" + std::to_string(i) + "_Dir";
@@ -621,7 +621,7 @@ namespace Cell
                 material->GetShader()->SetVector("DirLight" + std::to_string(i) + "_Col", m_DirectionalLights[i]->Color);
             }
             else
-                break; // NOTE(Joey): if DirLight2 doesn't exist we assume that DirLight3 and 4,5,6 should also exist; stop searching
+                break; // NOTE(Joey): if DirLight2 doesn't exist we assume that DirLight3 and 4,5,6 also do not exist; stop searching
         }
         for (unsigned int i = 0; i < m_PointLights.size() && i < 8; ++i) // NOTE(Joey): constrained to max 8 point lights for now in forward context
         {
@@ -688,7 +688,6 @@ namespace Cell
         glBindVertexArray(mesh->m_VAO);
         if (mesh->Indices.size() > 0)
         {
-            // TODO(Joey): parse the proper OpenGL type from the mesh->Toplogy property
             glDrawElements(mesh->Topology == TRIANGLE_STRIP ? GL_TRIANGLE_STRIP : GL_TRIANGLES, mesh->Indices.size(), GL_UNSIGNED_INT, 0);
         }
         else

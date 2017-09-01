@@ -90,7 +90,8 @@ void main()
     // no diffuse light).
 	kD *= 1.0 - metallic;	
 	// NOTE(Joey): directly obtain irradiance from irradiance environment map
-	vec3 irradiance = pow(texture(EnvIrradiance, N).rgb, vec3(2.2));
+	// vec3 irradiance = pow(texture(EnvIrradiance, N).rgb, vec3(2.2));
+	vec3 irradiance = texture(EnvIrradiance, N).rgb;
 	vec3 diffuse = albedo * irradiance;
 	
 	 // NOTE(Joey): combine contributions, note that we don't multiply by kS as kS equals
@@ -125,6 +126,6 @@ void main()
 #else
     FragColor = vec4(color, alpha);
 #endif
-    // FragColor = vec4(albedo, 1.0);
+    // FragColor = vec4(vec3(metallic), 1.0);
     // FragColor = vec4(TexCoords, 0.0, 1.0);
 }

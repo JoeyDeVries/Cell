@@ -58,7 +58,7 @@ namespace Cell
         it's interesting to figure out why!
 
         */
-        Log::Message("Initializing debug Output.");
+        Log::Message("Initializing debug Output.", LOG_INIT);
         int flags;
         glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
         if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
@@ -73,7 +73,7 @@ namespace Cell
         {
             Log::Message("Debug output not supported.", LOG_INIT);
         }
-        Log::Message("Debug output initialized.");
+        Log::Message("Debug output initialized.", LOG_INIT);
 
         // NOTE(Joey): then initialize Cell's core component
         Resources::Init();
@@ -138,6 +138,12 @@ namespace Cell
         } logMessage += "\n";
         logMessage += "\n";
 
-        Log::Message(logMessage, type == GL_DEBUG_TYPE_ERROR ? LOG_ERROR : LOG_WARNING);
+        // only log a message a maximum of 3 times (as it'll keep spamming the message queue with
+        // the same error message)
+        static unsigned int msgCount = 0;
+        if(msgCount++ < 3)
+        {
+            Log::Message(logMessage, type == GL_DEBUG_TYPE_ERROR ? LOG_ERROR : LOG_WARNING);
+        }
     }
 }

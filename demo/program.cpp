@@ -12,9 +12,6 @@
 
 #include <GLFW/glfw3.h>
 
-
-
-
 void framebufferSizeFunc(GLFWwindow *window, int width, int height);
 void keyFunc(GLFWwindow *window, int key, int scancode, int action, int mods);
 void mousePosFunc(GLFWwindow *window, double xpos, double ypos);
@@ -53,7 +50,7 @@ int main(int argc, char *argv[])
       something we want Cell to manage in the future as well.
 
     */
-    Log::Message("Initializing GLFW");
+    Log::Message("Initializing GLFW", LOG_INIT);
         glfwInit();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -79,16 +76,16 @@ int main(int argc, char *argv[])
 
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
-    Log::Message("GLFW initialized");
+    Log::Message("GLFW initialized", LOG_INIT);
 
-    Log::Message("Initializing render system");
+    Log::Message("Initializing render system", LOG_INIT);
         renderer = Cell::Init((GLADloadproc)glfwGetProcAddress);
         renderer->SetRenderSize(width, height);
         renderer->SetCamera(&camera);
-    Log::Message("Render system initialized");
+    Log::Message("Render system initialized", LOG_INIT);
 
     // NOTE(Joey): configure default OpenGL state
-    Log::Message("Configuring OpenGL");
+    Log::Message("Configuring OpenGL", LOG_INIT);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
@@ -96,10 +93,7 @@ int main(int argc, char *argv[])
 
         glViewport(0, 0, width, height);
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-    Log::Message("OpenGL configured");
-
-    Log::Display();
-    Log::Clear();
+    Log::Message("OpenGL configured", LOG_INIT);
 
 
     // NOTE(Joey): shapes
@@ -173,9 +167,9 @@ int main(int argc, char *argv[])
     Cell::Material *customPostProcessing2 = renderer->CreatePostProcessingMaterial(postProcessing2);
 
     // NOTE(Joey): test mesh loading
-    Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
+  /*  Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
     Cell::SceneNode *test2 = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
-
+*/
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -208,13 +202,13 @@ int main(int argc, char *argv[])
             {
                 lodLevel += 1.0 * deltaTime;
 				background.Material->SetFloat("lodLevel", lodLevel);
-                Log::Message("LOD:" + std::to_string(lodLevel));
+                Log::Message("LOD:" + std::to_string(lodLevel), LOG_DEBUG);
             }
             if (keysPressed[GLFW_KEY_G])
             {
                 lodLevel -= 1.0 * deltaTime;
 				background.Material->SetFloat("lodLevel", lodLevel);
-                Log::Message("LOD:" + std::to_string(lodLevel));
+                Log::Message("LOD:" + std::to_string(lodLevel), LOG_DEBUG);
             }
 			if (keysPressed[GLFW_KEY_Y])
 			{
@@ -223,7 +217,7 @@ int main(int argc, char *argv[])
                 matPbr->SetFloat("Exposure", exposure);
                 matPbrPink->SetFloat("Exposure", exposure);
 
-				Log::Message("EXPOSURE:" + std::to_string(exposure));
+				Log::Message("EXPOSURE:" + std::to_string(exposure), LOG_DEBUG);
 			}
 			if (keysPressed[GLFW_KEY_H])
 			{
@@ -232,7 +226,7 @@ int main(int argc, char *argv[])
 				matPbr->SetFloat("Exposure", exposure);
                 matPbrPink->SetFloat("Exposure", exposure);
 
-                Log::Message("EXPOSURE:" + std::to_string(exposure));
+                Log::Message("EXPOSURE:" + std::to_string(exposure), LOG_DEBUG);
 			}
             if (keysPressed[GLFW_KEY_Z]) {
                 wireframe = !wireframe;
@@ -248,8 +242,8 @@ int main(int argc, char *argv[])
             thirdTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
             sphereNode->Rotation = math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime());
 
-            test->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 0.1f);
-            test->Position = math::vec3(7.0f, -2.0f,  0.0f);
+            /*test->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 0.1f);
+            test->Position = math::vec3(7.0f, -2.0f,  0.0f);*/
         }
 
         {
@@ -287,10 +281,6 @@ int main(int argc, char *argv[])
             // NOTE(Joey): request Cell to render all currently pushed commands
             renderer->RenderPushedCommands();
         }
-
-        // NOTE(Joey): display log messages / diagnostics
-        Log::Display();
-        Log::Clear();
 
         glfwSwapBuffers(window);
     }

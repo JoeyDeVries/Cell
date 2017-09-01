@@ -9,11 +9,7 @@ to use and read. Cell also aims to provide both flexible and properly maintainab
 The engine will be heavily commented and documented from within the source code itself, to motivate new graphics programmers
 to take a look at any of its inner workings, without feeling too overwhelming. 
 
-Cell is currently at the beginning stages of development, so expect an incomplete experience if you try to dive in. 
-Also note that as I'm writing the [PBR](https://learnopengl.com/#!PBR/Theory) tutorials I don't have much time left to work on Cell, the moment these are finished I'll
-re-visit Cell's development.
-
-Feature List (complete)
+Feature List (complete:base-functionality)
 ------
 * Fully functioning (custom) math library (vectors, matrices, transformations, utility functions):
 	1. Linear algebra: n-dimensional vectors, nxn-dimensional matrices, transformations, utility. 
