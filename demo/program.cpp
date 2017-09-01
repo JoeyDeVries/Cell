@@ -151,9 +151,10 @@ int main(int argc, char *argv[])
     Cell::Material *customPostProcessing2 = renderer->CreatePostProcessingMaterial(postProcessing2);
 
     // NOTE(Joey): test mesh loading
-  /*  Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
-    Cell::SceneNode *test2 = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
-*/
+    //Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/sponza/sponza.obj");
+    //test->Scale = math::vec3(0.01f);
+    //Cell::SceneNode *test2 = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();

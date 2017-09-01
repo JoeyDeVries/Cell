@@ -2,7 +2,7 @@
 build/*
 !build/shaders
 !build/textures
-!build/meshes
+#!build/meshes
 
 debug/
 .vs/

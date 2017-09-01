@@ -28,6 +28,8 @@ namespace Cell
     // ------------------------------------------------------------------------
     SceneNode* MeshLoader::LoadMesh(Renderer *renderer, std::string path, bool setDefaultMaterial)
     {
+        Log::Message("Loading mesh file at: " + path + ".", LOG_INIT);
+
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
 
@@ -38,6 +40,8 @@ namespace Cell
         }
 
         std::string directory = path.substr(0, path.find_last_of("/"));
+
+        Log::Message("Succesfully loaded: " + path + ".", LOG_INIT);
 
         return MeshLoader::processNode(renderer, scene->mRootNode, scene, directory, setDefaultMaterial);
     }

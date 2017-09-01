@@ -74,6 +74,8 @@ namespace Cell
     // ------------------------------------------------------------------------
     Texture* Resources::LoadTexture(std::string name, std::string path, GLenum target, GLenum format)
     {
+        Log::Message("Loading texture file at: " + path + ".", LOG_INIT);
+
         unsigned int id = SID(name);
 
         // NOTE(Joey): if texture already exists, return that handle
@@ -81,6 +83,8 @@ namespace Cell
             return &Resources::m_Textures[id];
 
         Texture texture = TextureLoader::LoadTexture(path, target, format);
+        Log::Message("Succesfully loaded: " + path + ".", LOG_INIT);
+
         // NOTE(Joey): make sure texture got properly loaded
         if (texture.Width > 0)
         {
