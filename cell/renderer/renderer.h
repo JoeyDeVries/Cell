@@ -48,24 +48,26 @@ namespace Cell
         // render state
         math::vec2 m_RenderSize;
 
-        std::vector<DirectionalLight*> m_DirectionalLights;
-        std::vector<PointLight*>       m_PointLights;
         std::vector<RenderTarget*>  m_RenderTargetsCustom;
-        RenderTarget               *m_GBuffer = nullptr;
         RenderTarget               *m_CurrentRenderTargetCustom = nullptr;
-        Quad                       *m_NDCPlane; 
+        RenderTarget               *m_CustomTarget;
+        Quad                       *m_NDCPlane;
 
+        // deferred
+        RenderTarget               *m_GBuffer = nullptr;
 
         Material *m_DefaultBlitMaterial;
         Material *m_DeferredAmbientMaterial;
         Material *m_DeferredDirectionalMaterial;
         Material *m_DeferredPointMaterial;
-        Material *m_LightMaterial;
+        Material *m_DebugLightMaterial;
 
-        Mesh *m_LightMesh;
         Mesh *m_DeferredPointMesh;
 
-        RenderTarget               *m_CustomTarget;
+        // lights
+        Mesh *m_DebugLightMesh;
+        std::vector<DirectionalLight*> m_DirectionalLights;
+        std::vector<PointLight*>       m_PointLights;
 
         // final post-processing
         RenderTarget *m_PostProcessTarget1;
@@ -115,8 +117,8 @@ namespace Cell
         void PushRender(SceneNode *node);
         void PushPostProcessor(Material *postProcessor);
 
-        void PushLight(DirectionalLight *light);
-        void PushLight(PointLight       *light, bool render = false);        
+        void AddLight(DirectionalLight *light);
+        void AddLight(PointLight       *light);        
 
         void RenderPushedCommands();
 
@@ -135,7 +137,6 @@ namespace Cell
         // returns the currently active render target
         RenderTarget *getCurrentRenderTarget();
 
-
         // deferred logic:
         // renders all ambient lighting (including indirect IBL)
         void renderDeferredAmbient();
@@ -144,6 +145,8 @@ namespace Cell
         // render point light
         void renderDeferredPointLight(PointLight *light);
         // render spot light
+
+        // render (debug) mesh at light position
 
     };
 }

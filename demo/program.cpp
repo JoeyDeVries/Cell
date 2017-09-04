@@ -156,6 +156,27 @@ int main(int argc, char *argv[])
     test->Scale = math::vec3(0.01f);
     //Cell::SceneNode *test2 = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
 
+
+    Cell::DirectionalLight dirLight;
+    dirLight.Direction = math::vec3(-0.3f, -1.0f, 0.7f);
+    dirLight.Color = math::vec3(0.3f, 0.3f, 0.25f);
+    renderer->AddLight(&dirLight);
+
+    Cell::PointLight light;
+    light.Radius = 4.0;
+    light.Position = math::vec3(0.0f, 1.0f, 0.0f);
+    light.Color = math::vec3(1.0f, 1.0, 1.0f);
+    light.RenderMesh = true;
+    renderer->AddLight(&light);
+
+    Cell::PointLight light2;
+    light2.Radius = 3.0;
+    light2.Color = math::vec3(0.5f, 0.5f, 2.0f);
+    light2.Intensity = 10.0f;
+    light2.RenderMesh = true;
+    renderer->AddLight(&light2);
+
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -225,32 +246,19 @@ int main(int argc, char *argv[])
             secondTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
             thirdTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
             sphereNode->Rotation = math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime());
+
+            //light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 1.0f, 0.0f);
+            light2.Position = math::vec3(sin(glfwGetTime() * 0.3f) * 1.5 + 3.0, 2.0f, cos(glfwGetTime() * 0.1f) * 5.0f);
         }
 
         {
             //CLOCK(PUSH);
-            //renderer->PushRender(mainTorus);
+            renderer->PushRender(mainTorus);
             renderer->PushRender(test);
 
             renderer->PushRender(&background);
 
-            Cell::DirectionalLight dirLight;
-            dirLight.Direction = math::vec3(-0.3f, -1.0f, 0.7f);
-            dirLight.Color = math::vec3(0.3f, 0.3f, 0.25f);
-            renderer->PushLight(&dirLight);
-
-            Cell::PointLight light;
-            light.Radius = 4.0;
-            //light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 1.0f, 0.0f);
-            light.Position = math::vec3(0.0f, 1.0f, 0.0f);
-            light.Color = math::vec3(1.0f, 1.0, 1.0f);
-            renderer->PushLight(&light, false);
-
-            Cell::PointLight light2;
-            light.Radius = 3.0;
-            light2.Position = math::vec3(sin(glfwGetTime() * 0.3f) * 5.5, 3.0f, cos(glfwGetTime() * 0.1f) * 2.0f);
-            light2.Color = math::vec3(0.5f, 0.5f, 1.0f);
-            renderer->PushLight(&light2, false);
+         
         }
         {
             //CLOCK(CUBEMAP);

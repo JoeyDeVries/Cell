@@ -43,8 +43,8 @@ namespace Cell
         delete m_CustomTarget;
 
         // lighting
-        delete m_LightMesh;
-        delete m_LightMaterial;
+        delete m_DebugLightMesh;
+        delete m_DebugLightMaterial;
 
         // post-processing
         delete m_PostProcessTarget1;
@@ -118,8 +118,8 @@ namespace Cell
         m_DefaultBlitMaterial = new Material(defaultBlit);
 
         // lights
-        m_LightMesh = new Sphere(8, 8);
-        m_LightMaterial = new Material(shader);
+        m_DebugLightMesh = new Sphere(8, 8);
+        m_DebugLightMaterial = new Material(shader);
         m_DeferredPointMesh = new Sphere(8, 8);
 
 
@@ -309,19 +309,14 @@ namespace Cell
         m_CommandBuffer.Push(nullptr, postProcessor, math::mat4());
     }
     // ------------------------------------------------------------------------
-    void Renderer::PushLight(DirectionalLight *light)
+    void Renderer::AddLight(DirectionalLight *light)
     {
         m_DirectionalLights.push_back(light);
     }
     // ------------------------------------------------------------------------
-    void Renderer::PushLight(PointLight *light, bool render)
+    void Renderer::AddLight(PointLight *light)
     {
         m_PointLights.push_back(light);
-        if (render)
-        {
-            math::mat4 model = math::translate(light->Position);
-            PushRender(m_LightMesh, m_LightMaterial, model);
-        }
     }
     // ------------------------------------------------------------------------
     // TODO(Joey): pass camera to RenderPushedCommands? Think it makes sense.
@@ -444,6 +439,27 @@ namespace Cell
             }
         }
 
+        // render (debug) visuals
+        for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
+        {
+            if ((*it)->RenderMesh)
+            {
+                m_DebugLightMaterial->SetVector("lightColor", (*it)->Color);
+
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                RenderCommand command;
+                command.Material = m_DebugLightMaterial;
+                command.Mesh = m_DebugLightMesh;
+                math::mat4 model;
+                math::translate(model, (*it)->Position);
+                math::scale(model, math::vec3((*it)->Radius));
+                command.Transform = model;
+
+                renderCustomCommand(&command, m_Camera);
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            }
+        }
+
         // NOTE(Joey): get combined color/depth texture of deferred/custom pass
 
 
@@ -470,8 +486,6 @@ namespace Cell
         m_CommandBuffer.Clear();
 
         // NOTE(Joey): clear render state
-        m_DirectionalLights.clear();
-        m_PointLights.clear();
         m_RenderTargetsCustom.clear();
         // TODO(Joey): this can probably be done in a cleaner fashion:
         //m_RenderTargetsCustom.push_back(nullptr); // NOTE(Joey): always add the default render 
@@ -903,7 +917,7 @@ namespace Cell
     void Renderer::renderDeferredDirLight(DirectionalLight *light)
     {
         m_DeferredDirectionalMaterial->SetVector("lightDir", light->Direction);
-        m_DeferredDirectionalMaterial->SetVector("lightColor", light->Color);
+        m_DeferredDirectionalMaterial->SetVector("lightColor", math::normalize(light->Color) * light->Intensity); // TODO(Joey): enforce light normalization with light setter?
 
         RenderCommand command;
         command.Material = m_DeferredDirectionalMaterial;
@@ -914,7 +928,7 @@ namespace Cell
     void Renderer::renderDeferredPointLight(PointLight *light)
     {
         m_DeferredPointMaterial->SetVector("lightPos", light->Position);
-        m_DeferredPointMaterial->SetVector("lightColor", light->Color);
+        m_DeferredPointMaterial->SetVector("lightColor", math::normalize(light->Color) * light->Intensity);
         m_DeferredPointMaterial->SetFloat("lightRadius", light->Radius);
 
         RenderCommand command;

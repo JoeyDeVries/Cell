@@ -13,10 +13,12 @@ namespace Cell
     private:
 
     public:
-        math::vec3 Position;
-        math::vec3 Color;
-
-        float Radius;
+        math::vec3 Position   = math::vec3(0.0f);
+        math::vec3 Color      = math::vec3(1.0f);
+        float      Intensity  = 1.0f;
+        float      Radius     = 1.0f;
+        bool       Visible    = true;
+        bool       RenderMesh = false;
     private:
 
     public:
