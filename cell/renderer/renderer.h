@@ -50,7 +50,6 @@ namespace Cell
 
         std::vector<DirectionalLight*> m_DirectionalLights;
         std::vector<PointLight*>       m_PointLights;
-        Mesh     *m_LightMesh;
         std::vector<RenderTarget*>  m_RenderTargetsCustom;
         RenderTarget               *m_GBuffer = nullptr;
         RenderTarget               *m_CurrentRenderTargetCustom = nullptr;
@@ -58,10 +57,13 @@ namespace Cell
 
 
         Material *m_DefaultBlitMaterial;
-        Material *m_DeferredAmbient;
-        Material *m_DeferredDirectional;
-        Material *m_DeferredPoint;
+        Material *m_DeferredAmbientMaterial;
+        Material *m_DeferredDirectionalMaterial;
+        Material *m_DeferredPointMaterial;
         Material *m_LightMaterial;
+
+        Mesh *m_LightMesh;
+        Mesh *m_DeferredPointMesh;
 
         RenderTarget               *m_CustomTarget;
 

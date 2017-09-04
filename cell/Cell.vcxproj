@@ -100,7 +100,7 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Lib>
-      <AdditionalDependencies>assimpd.lib;zlibstatic.lib;</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;zlibstatic.lib;</AdditionalDependencies>
     </Lib>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -135,7 +135,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>assimpd.lib;zlibstatic.lib;</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;zlibstatic.lib;</AdditionalDependencies>
     </Lib>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>

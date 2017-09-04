@@ -119,33 +119,33 @@ namespace Cell
         // deferred renderer
         m_GBuffer = new RenderTarget(1, 1, GL_HALF_FLOAT, 3, true);
         Cell::Resources::LoadShader("deferred ambient", "shaders/screen_quad.vs", "shaders/deferred/ambient.fs");
-        m_DeferredAmbient = new Material(Cell::Resources::GetShader("deferred ambient"));
+        m_DeferredAmbientMaterial = new Material(Cell::Resources::GetShader("deferred ambient"));
         Cell::Resources::LoadShader("deferred directional", "shaders/screen_quad.vs", "shaders/deferred/directional.fs");
-        m_DeferredDirectional = new Material(Cell::Resources::GetShader("deferred directional"));
+        m_DeferredDirectionalMaterial = new Material(Cell::Resources::GetShader("deferred directional"));
         Cell::Resources::LoadShader("deferred point", "shaders/screen_quad.vs", "shaders/deferred/point.fs");
-        m_DeferredPoint = new Material(Cell::Resources::GetShader("deferred point"));
+        m_DeferredPointMaterial = new Material(Cell::Resources::GetShader("deferred point"));
 
-        m_DeferredAmbient->Blend = true;
-        m_DeferredAmbient->BlendSrc = GL_SRC_ALPHA;
-        m_DeferredAmbient->BlendDst = GL_ONE;
-        m_DeferredAmbient->DepthTest = false;
-        m_DeferredAmbient->SetTexture("gPositionMetallic", m_GBuffer->GetColorTexture(0), 0);
-        m_DeferredAmbient->SetTexture("gNormalRoughness", m_GBuffer->GetColorTexture(1), 1);
-        m_DeferredAmbient->SetTexture("gAlbedoAO", m_GBuffer->GetColorTexture(2), 2);
-        m_DeferredDirectional->Blend = true;
-        m_DeferredDirectional->BlendSrc = GL_SRC_ALPHA;
-        m_DeferredDirectional->BlendDst = GL_ONE;
-        m_DeferredDirectional->DepthTest = false;
-        m_DeferredDirectional->SetTexture("gPositionMetallic", m_GBuffer->GetColorTexture(0), 0);
-        m_DeferredDirectional->SetTexture("gNormalRoughness", m_GBuffer->GetColorTexture(1), 1);
-        m_DeferredDirectional->SetTexture("gAlbedoAO", m_GBuffer->GetColorTexture(2), 2);
-        m_DeferredPoint->Blend = true;
-        m_DeferredPoint->BlendSrc = GL_SRC_ALPHA;
-        m_DeferredPoint->BlendDst = GL_ONE;
-        m_DeferredPoint->DepthTest = false;
-        m_DeferredPoint->SetTexture("gPositionMetallic", m_GBuffer->GetColorTexture(0), 0);
-        m_DeferredPoint->SetTexture("gNormalRoughness", m_GBuffer->GetColorTexture(1), 1);
-        m_DeferredPoint->SetTexture("gAlbedoAO", m_GBuffer->GetColorTexture(2), 2);
+        m_DeferredAmbientMaterial->Blend = true;
+        m_DeferredAmbientMaterial->BlendSrc = GL_SRC_ALPHA;
+        m_DeferredAmbientMaterial->BlendDst = GL_ONE;
+        m_DeferredAmbientMaterial->DepthTest = false;
+        m_DeferredAmbientMaterial->SetTexture("gPositionMetallic", m_GBuffer->GetColorTexture(0), 0);
+        m_DeferredAmbientMaterial->SetTexture("gNormalRoughness", m_GBuffer->GetColorTexture(1), 1);
+        m_DeferredAmbientMaterial->SetTexture("gAlbedoAO", m_GBuffer->GetColorTexture(2), 2);
+        m_DeferredDirectionalMaterial->Blend = true;
+        m_DeferredDirectionalMaterial->BlendSrc = GL_SRC_ALPHA;
+        m_DeferredDirectionalMaterial->BlendDst = GL_ONE;
+        m_DeferredDirectionalMaterial->DepthTest = false;
+        m_DeferredDirectionalMaterial->SetTexture("gPositionMetallic", m_GBuffer->GetColorTexture(0), 0);
+        m_DeferredDirectionalMaterial->SetTexture("gNormalRoughness", m_GBuffer->GetColorTexture(1), 1);
+        m_DeferredDirectionalMaterial->SetTexture("gAlbedoAO", m_GBuffer->GetColorTexture(2), 2);
+        m_DeferredPointMaterial->Blend = true;
+        m_DeferredPointMaterial->BlendSrc = GL_SRC_ALPHA;
+        m_DeferredPointMaterial->BlendDst = GL_ONE;
+        m_DeferredPointMaterial->DepthTest = false;
+        m_DeferredPointMaterial->SetTexture("gPositionMetallic", m_GBuffer->GetColorTexture(0), 0);
+        m_DeferredPointMaterial->SetTexture("gNormalRoughness", m_GBuffer->GetColorTexture(1), 1);
+        m_DeferredPointMaterial->SetTexture("gAlbedoAO", m_GBuffer->GetColorTexture(2), 2);
 
         Shader *postProcessing = Cell::Resources::LoadShader("post processing", "shaders/screen_quad.vs", "shaders/post_processing.fs");
         m_PostProcessingMaterial = new Material(postProcessing);
@@ -887,24 +887,33 @@ namespace Cell
     void Renderer::renderDeferredAmbient()
     {
         RenderCommand command;
-        command.Material = m_DeferredAmbient;
+        command.Material = m_DeferredAmbientMaterial;
         command.Mesh = m_NDCPlane;
         renderCustomCommand(&command, nullptr);
     }
     // --------------------------------------------------------------------------------------------
     void Renderer::renderDeferredDirLight(DirectionalLight *light)
     {
-        m_DeferredDirectional->SetVector("lightDir", light->Direction);
-        m_DeferredDirectional->SetVector("lightColor", light->Color);
+        m_DeferredDirectionalMaterial->SetVector("lightDir", light->Direction);
+        m_DeferredDirectionalMaterial->SetVector("lightColor", light->Color);
+        m_DeferredDirectionalMaterial->SetVector("CamPos", m_Camera->Position);
 
         RenderCommand command;
-        command.Material = m_DeferredDirectional;
+        command.Material = m_DeferredDirectionalMaterial;
         command.Mesh = m_NDCPlane;
         renderCustomCommand(&command, nullptr);
     }
     // --------------------------------------------------------------------------------------------
     void Renderer::renderDeferredPointLight(PointLight *light)
     {
+        m_DeferredPointMaterial->SetVector("lightPos", light->Position);
+        m_DeferredPointMaterial->SetVector("lightColor", light->Color);
+        m_DeferredPointMaterial->SetFloat("lightRadius", light->Radius);
+        m_DeferredPointMaterial->SetVector("CamPos", m_Camera->Position);
 
+        RenderCommand command;
+        command.Material = m_DeferredPointMaterial;
+        command.Mesh = m_DeferredPointMesh;
+        renderCustomCommand(&command, nullptr);
     }
 }

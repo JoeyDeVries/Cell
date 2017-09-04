@@ -17,7 +17,7 @@ void keyFunc(GLFWwindow *window, int key, int scancode, int action, int mods);
 void mousePosFunc(GLFWwindow *window, double xpos, double ypos);
 
 Cell::Renderer *renderer;
-Cell::FlyCamera camera(math::vec3(0.0f, 0.0f, 5.0f), math::vec3(0.0f, 0.0f, -1.0f));
+Cell::FlyCamera camera(math::vec3(0.0f, 0.0f, 0.0f), math::vec3(1.0f, 0.0f, 0.0f));
 float deltaTime     = 0.0f;
 float lastFrameTime = 0.0f;
 bool keysPressed[1024];
@@ -151,8 +151,8 @@ int main(int argc, char *argv[])
     Cell::Material *customPostProcessing2 = renderer->CreatePostProcessingMaterial(postProcessing2);
 
     // NOTE(Joey): test mesh loading
-    //Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/sponza/sponza.obj");
-    //test->Scale = math::vec3(0.01f);
+    Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/sponza/sponza.obj");
+    test->Scale = math::vec3(0.01f);
     //Cell::SceneNode *test2 = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
 
     while (!glfwWindowShouldClose(window))
@@ -224,22 +224,18 @@ int main(int argc, char *argv[])
             secondTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
             thirdTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
             sphereNode->Rotation = math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime());
-
-            /*test->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 0.1f);
-            test->Position = math::vec3(7.0f, -2.0f,  0.0f);*/
         }
 
         {
             //CLOCK(PUSH);
-            renderer->PushRender(mainTorus);
-            //renderer->PushRender(pbrBall);
-            //renderer->PushRender(test);
+            //renderer->PushRender(mainTorus);
+            renderer->PushRender(test);
 
             renderer->PushRender(&background);
 
             Cell::DirectionalLight dirLight;
-            dirLight.Direction = math::vec3(-0.5f, -0.5f, 0.0f);
-            dirLight.Color = math::vec3(0.5f, 0.5f, 0.4f);
+            dirLight.Direction = math::vec3(-0.3f, -1.0f, 0.7f);
+            dirLight.Color = math::vec3(0.3f, 0.3f, 0.25f);
             renderer->PushLight(&dirLight);
 
   /*          Cell::PointLight light;
