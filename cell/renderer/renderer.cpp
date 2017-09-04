@@ -31,9 +31,7 @@ namespace Cell
     }
     // ------------------------------------------------------------------------
     Renderer::~Renderer()
-    {
-        delete m_LightMesh;
-        delete m_LightMaterial;
+    {       
         delete m_NDCPlane;
 
         for (auto it = m_DefaultMaterials.begin(); it != m_DefaultMaterials.end(); ++it)
@@ -43,6 +41,10 @@ namespace Cell
 
         delete m_GBuffer;
         delete m_CustomTarget;
+
+        // lighting
+        delete m_LightMesh;
+        delete m_LightMaterial;
 
         // post-processing
         delete m_PostProcessTarget1;
@@ -79,8 +81,7 @@ namespace Cell
 
         // TODO(Joey): load default set of shaders (do this in Init function!; here or in resources)
         Shader *shader = Resources::LoadShader("light", "shaders/light.vs", "shaders/light.fs");
-        m_LightMesh = new Sphere(8, 8);
-        m_LightMaterial = new Material(shader);
+     
         Shader *defaultShader = Resources::LoadShader("default", "shaders/deferred/g_buffer.vs", "shaders/deferred/g_buffer.fs");
         // NOTE(Joey): and materials
         Material *defaultMat = new Material(defaultShader);
@@ -116,31 +117,37 @@ namespace Cell
         Shader *defaultBlit = Cell::Resources::LoadShader("blit", "shaders/screen_quad.vs", "shaders/default_blit.fs");
         m_DefaultBlitMaterial = new Material(defaultBlit);
 
+        // lights
+        m_LightMesh = new Sphere(8, 8);
+        m_LightMaterial = new Material(shader);
+        m_DeferredPointMesh = new Sphere(8, 8);
+
+
         // deferred renderer
         m_GBuffer = new RenderTarget(1, 1, GL_HALF_FLOAT, 3, true);
         Cell::Resources::LoadShader("deferred ambient", "shaders/screen_quad.vs", "shaders/deferred/ambient.fs");
         m_DeferredAmbientMaterial = new Material(Cell::Resources::GetShader("deferred ambient"));
         Cell::Resources::LoadShader("deferred directional", "shaders/screen_quad.vs", "shaders/deferred/directional.fs");
         m_DeferredDirectionalMaterial = new Material(Cell::Resources::GetShader("deferred directional"));
-        Cell::Resources::LoadShader("deferred point", "shaders/screen_quad.vs", "shaders/deferred/point.fs");
+        Cell::Resources::LoadShader("deferred point", "shaders/deferred/point.vs", "shaders/deferred/point.fs");
         m_DeferredPointMaterial = new Material(Cell::Resources::GetShader("deferred point"));
 
         m_DeferredAmbientMaterial->Blend = true;
-        m_DeferredAmbientMaterial->BlendSrc = GL_SRC_ALPHA;
+        m_DeferredAmbientMaterial->BlendSrc = GL_ONE;
         m_DeferredAmbientMaterial->BlendDst = GL_ONE;
         m_DeferredAmbientMaterial->DepthTest = false;
         m_DeferredAmbientMaterial->SetTexture("gPositionMetallic", m_GBuffer->GetColorTexture(0), 0);
         m_DeferredAmbientMaterial->SetTexture("gNormalRoughness", m_GBuffer->GetColorTexture(1), 1);
         m_DeferredAmbientMaterial->SetTexture("gAlbedoAO", m_GBuffer->GetColorTexture(2), 2);
         m_DeferredDirectionalMaterial->Blend = true;
-        m_DeferredDirectionalMaterial->BlendSrc = GL_SRC_ALPHA;
+        m_DeferredDirectionalMaterial->BlendSrc = GL_ONE;
         m_DeferredDirectionalMaterial->BlendDst = GL_ONE;
         m_DeferredDirectionalMaterial->DepthTest = false;
         m_DeferredDirectionalMaterial->SetTexture("gPositionMetallic", m_GBuffer->GetColorTexture(0), 0);
         m_DeferredDirectionalMaterial->SetTexture("gNormalRoughness", m_GBuffer->GetColorTexture(1), 1);
         m_DeferredDirectionalMaterial->SetTexture("gAlbedoAO", m_GBuffer->GetColorTexture(2), 2);
         m_DeferredPointMaterial->Blend = true;
-        m_DeferredPointMaterial->BlendSrc = GL_SRC_ALPHA;
+        m_DeferredPointMaterial->BlendSrc = GL_ONE;
         m_DeferredPointMaterial->BlendDst = GL_ONE;
         m_DeferredPointMaterial->DepthTest = false;
         m_DeferredPointMaterial->SetTexture("gPositionMetallic", m_GBuffer->GetColorTexture(0), 0);
@@ -371,11 +378,12 @@ namespace Cell
             renderDeferredDirLight(*it);
         }
         // point lights
-        // TODO(Joey): stencil state
+        glCullFace(GL_FRONT);
         for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
         {
-            //renderDeferredPointLight(*it);
+            renderDeferredPointLight(*it);
         }
+        glCullFace(GL_BACK);
 
         attachments[1] = GL_NONE;
         attachments[2] = GL_NONE;
@@ -896,12 +904,11 @@ namespace Cell
     {
         m_DeferredDirectionalMaterial->SetVector("lightDir", light->Direction);
         m_DeferredDirectionalMaterial->SetVector("lightColor", light->Color);
-        m_DeferredDirectionalMaterial->SetVector("CamPos", m_Camera->Position);
 
         RenderCommand command;
         command.Material = m_DeferredDirectionalMaterial;
         command.Mesh = m_NDCPlane;
-        renderCustomCommand(&command, nullptr);
+        renderCustomCommand(&command, m_Camera);
     }
     // --------------------------------------------------------------------------------------------
     void Renderer::renderDeferredPointLight(PointLight *light)
@@ -909,11 +916,15 @@ namespace Cell
         m_DeferredPointMaterial->SetVector("lightPos", light->Position);
         m_DeferredPointMaterial->SetVector("lightColor", light->Color);
         m_DeferredPointMaterial->SetFloat("lightRadius", light->Radius);
-        m_DeferredPointMaterial->SetVector("CamPos", m_Camera->Position);
 
         RenderCommand command;
         command.Material = m_DeferredPointMaterial;
         command.Mesh = m_DeferredPointMesh;
-        renderCustomCommand(&command, nullptr);
+        math::mat4 model;
+        math::translate(model, light->Position);
+        math::scale(model, math::vec3(light->Radius));
+        command.Transform = model;
+
+        renderCustomCommand(&command, m_Camera);
     }
 }

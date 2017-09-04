@@ -87,6 +87,7 @@ int main(int argc, char *argv[])
     // NOTE(Joey): configure default OpenGL state
     Log::Message("Configuring OpenGL", LOG_INIT);
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
         glEnable(GL_MULTISAMPLE);
@@ -238,15 +239,18 @@ int main(int argc, char *argv[])
             dirLight.Color = math::vec3(0.3f, 0.3f, 0.25f);
             renderer->PushLight(&dirLight);
 
-  /*          Cell::PointLight light;
-            light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 0.0f, 4.0f);
-            light.Color = math::vec3(1.0f, 0.7f, 0.7f);
-            renderer->PushLight(&light, true);
+            Cell::PointLight light;
+            light.Radius = 4.0;
+            //light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 1.0f, 0.0f);
+            light.Position = math::vec3(0.0f, 1.0f, 0.0f);
+            light.Color = math::vec3(1.0f, 1.0, 1.0f);
+            renderer->PushLight(&light, false);
 
             Cell::PointLight light2;
-            light2.Position = math::vec3(sin(glfwGetTime() * 0.3f) * 5.5, 0.0f, cos(glfwGetTime() * 0.1f) * 10.0f);
+            light.Radius = 3.0;
+            light2.Position = math::vec3(sin(glfwGetTime() * 0.3f) * 5.5, 3.0f, cos(glfwGetTime() * 0.1f) * 2.0f);
             light2.Color = math::vec3(0.5f, 0.5f, 1.0f);
-            renderer->PushLight(&light2, true);*/
+            renderer->PushLight(&light2, false);
         }
         {
             //CLOCK(CUBEMAP);
