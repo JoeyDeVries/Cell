@@ -166,14 +166,14 @@ int main(int argc, char *argv[])
     light.Radius = 4.0;
     light.Position = math::vec3(0.0f, 1.0f, 0.0f);
     light.Color = math::vec3(1.0f, 1.0, 1.0f);
-    light.RenderMesh = true;
+    //light.RenderMesh = true;
     renderer->AddLight(&light);
 
     Cell::PointLight light2;
     light2.Radius = 3.0;
     light2.Color = math::vec3(0.5f, 0.5f, 2.0f);
     light2.Intensity = 10.0f;
-    light2.RenderMesh = true;
+    //light2.RenderMesh = true;
     renderer->AddLight(&light2);
 
 
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
 
         {
             //CLOCK(PUSH);
-            renderer->PushRender(mainTorus);
+            //renderer->PushRender(mainTorus);
             renderer->PushRender(test);
 
             renderer->PushRender(&background);

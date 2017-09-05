@@ -35,16 +35,16 @@ namespace Cell
             {
                 for (int x = 0; x <= xSegments; ++x)
                 {
-                    Indices.push_back(y       * (xSegments + 1) + x);
                     Indices.push_back((y + 1) * (xSegments + 1) + x);
+                    Indices.push_back(y       * (xSegments + 1) + x);
                 }
             }
             else
             {
                 for (int x = xSegments; x >= 0; --x)
                 {
-                    Indices.push_back((y + 1) * (xSegments + 1) + x);
                     Indices.push_back(y       * (xSegments + 1) + x);
+                    Indices.push_back((y + 1) * (xSegments + 1) + x);
                 }
             }
             oddRow = !oddRow;

@@ -118,9 +118,9 @@ namespace Cell
         m_DefaultBlitMaterial = new Material(defaultBlit);
 
         // lights
-        m_DebugLightMesh = new Sphere(8, 8);
+        m_DebugLightMesh = new Sphere(16, 16);
         m_DebugLightMaterial = new Material(shader);
-        m_DeferredPointMesh = new Sphere(8, 8);
+        m_DeferredPointMesh = new Sphere(16, 16);
 
 
         // deferred renderer
@@ -447,6 +447,7 @@ namespace Cell
                 m_DebugLightMaterial->SetVector("lightColor", (*it)->Color);
 
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                glDisable(GL_CULL_FACE);
                 RenderCommand command;
                 command.Material = m_DebugLightMaterial;
                 command.Mesh = m_DebugLightMesh;
@@ -456,6 +457,7 @@ namespace Cell
                 command.Transform = model;
 
                 renderCustomCommand(&command, m_Camera);
+                glEnable(GL_CULL_FACE);
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
         }
