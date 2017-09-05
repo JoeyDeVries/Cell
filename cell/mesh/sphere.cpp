@@ -31,26 +31,37 @@ namespace Cell
         bool oddRow = false;
         for (int y = 0; y < ySegments; ++y)
         {
-            if (!oddRow) // NOTE(Joey): even rows: y == 0, y == 2; and so on
+            for (int x = 0; x < xSegments; ++x)
             {
-                for (int x = 0; x <= xSegments; ++x)
-                {
-                    Indices.push_back((y + 1) * (xSegments + 1) + x);
-                    Indices.push_back(y       * (xSegments + 1) + x);
-                }
+                Indices.push_back((y + 1) * (xSegments + 1) + x);
+                Indices.push_back(y       * (xSegments + 1) + x);
+                Indices.push_back(y       * (xSegments + 1) + x + 1);
+
+                Indices.push_back((y + 1) * (xSegments + 1) + x);
+                Indices.push_back(y       * (xSegments + 1) + x + 1);
+                Indices.push_back((y + 1) * (xSegments + 1) + x + 1);
             }
-            else
-            {
-                for (int x = xSegments; x >= 0; --x)
-                {
-                    Indices.push_back(y       * (xSegments + 1) + x);
-                    Indices.push_back((y + 1) * (xSegments + 1) + x);
-                }
-            }
-            oddRow = !oddRow;
+
+            //if (!oddRow) // NOTE(Joey): even rows: y == 0, y == 2; and so on
+            //{
+            //    for (int x = 0; x <= xSegments; ++x)
+            //    {
+            //        Indices.push_back(y       * (xSegments + 1) + x);
+            //        Indices.push_back((y + 1) * (xSegments + 1) + x);
+            //    }
+            //}
+            //else
+            //{
+            //    for (int x = xSegments; x >= 0; --x)
+            //    {
+            //        Indices.push_back((y + 1) * (xSegments + 1) + x);
+            //        Indices.push_back(y       * (xSegments + 1) + x);
+            //    }
+            //}
+            //oddRow = !oddRow;
         }
 
-        Topology = TRIANGLE_STRIP;
+        Topology = TRIANGLES;
         Finalize();
     }
 }

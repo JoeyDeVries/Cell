@@ -121,6 +121,8 @@ int main(int argc, char *argv[])
     Cell::SceneNode *thirdTorus  = Cell::Scene::MakeSceneNode(&torus, matPbr);
     Cell::SceneNode *sphereNode  = Cell::Scene::MakeSceneNode(&sphere, matPbrGlass);
 
+    Cell::SceneNode* testSphere = Cell::Scene::MakeSceneNode(&sphere, matPbr);
+
     mainTorus->AddChild(secondTorus);
     secondTorus->AddChild(thirdTorus);
     thirdTorus->AddChild(sphereNode);
@@ -255,6 +257,7 @@ int main(int argc, char *argv[])
             //CLOCK(PUSH);
             //renderer->PushRender(mainTorus);
             renderer->PushRender(test);
+            //renderer->PushRender(testSphere);
 
             renderer->PushRender(&background);
 
