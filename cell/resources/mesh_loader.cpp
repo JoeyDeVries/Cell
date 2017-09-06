@@ -31,7 +31,7 @@ namespace Cell
         Log::Message("Loading mesh file at: " + path + ".", LOG_INIT);
 
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+        const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
         if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
         {
@@ -98,6 +98,7 @@ namespace Cell
         std::vector<math::vec2> uv;
         std::vector<math::vec3> normals;
         std::vector<math::vec3> tangents;
+        std::vector<math::vec3> bitangents;
         std::vector<unsigned int> indices;
 
         positions.resize(aMesh->mNumVertices);
@@ -106,6 +107,7 @@ namespace Cell
         {
             uv.resize(aMesh->mNumVertices);
             tangents.resize(aMesh->mNumVertices);
+            bitangents.resize(aMesh->mNumVertices);
         }
         // NOTE(Joey): we assume a constant of 3 vertex indices per face as we always triangulate
         // in Assimp's post-processing step; otherwise you'll want transform this to a more 
@@ -127,6 +129,8 @@ namespace Cell
             {
                 tangents[i] = math::vec3(aMesh->mTangents[i].x, aMesh->mTangents[i].y,
                     aMesh->mTangents[i].z);
+                bitangents[i] = math::vec3(aMesh->mBitangents[i].x, aMesh->mBitangents[i].y,
+                    aMesh->mBitangents[i].z);
             }
         }
         for (unsigned int f = 0; f < aMesh->mNumFaces; ++f)
@@ -143,6 +147,7 @@ namespace Cell
         mesh->UV = uv;
         mesh->Normals = normals;
         mesh->Tangents = tangents;
+        mesh->Bitangents = bitangents;
         mesh->Indices = indices;
         mesh->Topology = TRIANGLES;
         mesh->Finalize(true);
@@ -186,17 +191,17 @@ namespace Cell
             std::string fileName = MeshLoader::processPath(&file, directory);
             // NOTE(Joey): we name the texture the same as the filename as to reduce naming 
             // conflicts while still only loading unique textures.
-            Texture *texture = Resources::LoadTexture(fileName, fileName); 
+            Texture *texture = Resources::LoadTexture(fileName, fileName, GL_TEXTURE_2D, GL_RGB, true);
             if (texture)
             {
                 //texture->SetWrapMode(GL_REPEAT, true);
                 material->SetTexture("TexAlbedo", texture, 3);
             }
         }
-        if (aMaterial->GetTextureCount(aiTextureType_NORMALS) > 0)
+        if (aMaterial->GetTextureCount(aiTextureType_DISPLACEMENT) > 0)
         {
             aiString file;
-            aMaterial->GetTexture(aiTextureType_NORMALS, 0, &file);
+            aMaterial->GetTexture(aiTextureType_DISPLACEMENT, 0, &file);
             std::string fileName = MeshLoader::processPath(&file, directory);
 
             Texture *texture = Resources::LoadTexture(fileName, fileName);

@@ -72,17 +72,18 @@ namespace Cell
         }
     }
     // ------------------------------------------------------------------------
-    Texture* Resources::LoadTexture(std::string name, std::string path, GLenum target, GLenum format)
+    Texture* Resources::LoadTexture(std::string name, std::string path, GLenum target, GLenum format, bool srgb)
     {
-        Log::Message("Loading texture file at: " + path + ".", LOG_INIT);
-
         unsigned int id = SID(name);
 
         // NOTE(Joey): if texture already exists, return that handle
         if (Resources::m_Textures.find(id) != Resources::m_Textures.end())
             return &Resources::m_Textures[id];
 
-        Texture texture = TextureLoader::LoadTexture(path, target, format);
+        Log::Message("Loading texture file at: " + path + ".", LOG_INIT);
+
+        Texture texture = TextureLoader::LoadTexture(path, target, format, srgb);
+
         Log::Message("Succesfully loaded: " + path + ".", LOG_INIT);
 
         // NOTE(Joey): make sure texture got properly loaded

@@ -11,7 +11,6 @@ namespace Cell
     // where u is longitude [0, 2PI] and v is lattitude [0, PI] (note the difference in their range)
     Sphere::Sphere(unsigned int xSegments, unsigned int ySegments)
     {
-        // NOTE(Joey): my own version w/ triangle strips; small issue, but can't properly tell without 3D so fix that first.
         for (unsigned int y = 0; y <= ySegments; ++y)
         {
             for (unsigned int x = 0; x <= xSegments; ++x)
@@ -41,24 +40,6 @@ namespace Cell
                 Indices.push_back(y       * (xSegments + 1) + x + 1);
                 Indices.push_back((y + 1) * (xSegments + 1) + x + 1);
             }
-
-            //if (!oddRow) // NOTE(Joey): even rows: y == 0, y == 2; and so on
-            //{
-            //    for (int x = 0; x <= xSegments; ++x)
-            //    {
-            //        Indices.push_back(y       * (xSegments + 1) + x);
-            //        Indices.push_back((y + 1) * (xSegments + 1) + x);
-            //    }
-            //}
-            //else
-            //{
-            //    for (int x = xSegments; x >= 0; --x)
-            //    {
-            //        Indices.push_back((y + 1) * (xSegments + 1) + x);
-            //        Indices.push_back(y       * (xSegments + 1) + x);
-            //    }
-            //}
-            //oddRow = !oddRow;
         }
 
         Topology = TRIANGLES;

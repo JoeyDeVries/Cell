@@ -10,11 +10,15 @@
 namespace Cell
 {
     // ------------------------------------------------------------------------
-    Texture TextureLoader::LoadTexture(std::string path, GLenum target, GLenum internalFormat)
+    Texture TextureLoader::LoadTexture(std::string path, GLenum target, GLenum internalFormat, bool srgb)
     {
         Texture texture;
         texture.Target = target;
-        texture.Format = internalFormat;
+        texture.InternalFormat = internalFormat;
+        if(texture.InternalFormat == GL_RGB || texture.InternalFormat == GL_SRGB)
+            texture.InternalFormat = srgb ? GL_SRGB : GL_RGB;
+        if (texture.InternalFormat == GL_RGBA || texture.InternalFormat == GL_SRGB_ALPHA)
+            texture.InternalFormat = srgb ? GL_SRGB_ALPHA : GL_RGBA;
 
         // NOTE(Joey): flip textures on their y coordinate while loading
         stbi_set_flip_vertically_on_load(true);
@@ -33,9 +37,9 @@ namespace Cell
                 format = GL_RGBA;
 
             if(target == GL_TEXTURE_1D)
-                texture.Generate(width, format, format, GL_UNSIGNED_BYTE, data);
+                texture.Generate(width, texture.InternalFormat, format, GL_UNSIGNED_BYTE, data);
             else if (target == GL_TEXTURE_2D)
-                texture.Generate(width, height, format, format, GL_UNSIGNED_BYTE, data);
+                texture.Generate(width, height, texture.InternalFormat, format, GL_UNSIGNED_BYTE, data);
             stbi_image_free(data);
         }
         else

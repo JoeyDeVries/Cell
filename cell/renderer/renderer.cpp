@@ -86,7 +86,7 @@ namespace Cell
         // NOTE(Joey): and materials
         Material *defaultMat = new Material(defaultShader);
         defaultMat->Type = MATERIAL_DEFAULT;
-        defaultMat->SetTexture("TexAlbedo",    Resources::LoadTexture("default albedo",    "textures/checkerboard.png"), 3);
+        defaultMat->SetTexture("TexAlbedo",    Resources::LoadTexture("default albedo",    "textures/checkerboard.png", GL_TEXTURE_2D, GL_RGB), 3);
         defaultMat->SetTexture("TexNormal",    Resources::LoadTexture("default normal",    "textures/norm.png"),         4);
         defaultMat->SetTexture("TexMetallic",  Resources::LoadTexture("default metallic",  "textures/black.png"),        5);
         defaultMat->SetTexture("TexRoughness", Resources::LoadTexture("default roughness", "textures/checkerboard.png"), 6);
@@ -96,7 +96,7 @@ namespace Cell
         Shader *glassShader = Resources::LoadShader("glass", "shaders/pbr/pbr.vs", "shaders/pbr/pbr.fs", { "ALPHA" });
         Material *glassMat = new Material(glassShader);
         glassMat->Type = MATERIAL_CUSTOM; // this material can't fit in the deferred rendering pipeline (due to transparency sorting).
-        glassMat->SetTexture("TexAlbedo",    Cell::Resources::LoadTexture("glass albedo",    "textures/glass.png"), 3);
+        glassMat->SetTexture("TexAlbedo",    Cell::Resources::LoadTexture("glass albedo",    "textures/glass.png", GL_TEXTURE_2D, GL_RGB), 3);
         glassMat->SetTexture("TexNormal",    Cell::Resources::LoadTexture("glass normal",    "textures/pbr/plastic/normal.png"), 4);
         glassMat->SetTexture("TexMetallic",  Cell::Resources::LoadTexture("glass metallic",  "textures/pbr/plastic/metallic.png"), 5);
         glassMat->SetTexture("TexRoughness", Cell::Resources::LoadTexture("glass roughness", "textures/pbr/plastic/roughness.png"), 6);
@@ -111,7 +111,7 @@ namespace Cell
         glGenFramebuffers(1, &m_FramebufferCubemap);
         glGenRenderbuffers(1, &m_CubemapDepthRBO);
 
-        m_CustomTarget = new RenderTarget(1, 1, GL_FLOAT, 1, true);
+        m_CustomTarget = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, true);
         m_PostProcessTarget1 = new RenderTarget(1, 1, GL_UNSIGNED_BYTE, 1, false);
 
         Shader *defaultBlit = Cell::Resources::LoadShader("blit", "shaders/screen_quad.vs", "shaders/default_blit.fs");
