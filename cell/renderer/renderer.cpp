@@ -1,6 +1,8 @@
 #include "renderer.h"
 
 #include "render_target.h"
+#include "MaterialLibrary.h"
+
 #include "../mesh/mesh.h"
 #include "../mesh/cube.h"
 #include "../shading/material.h"
@@ -8,7 +10,6 @@
 #include "../scene/scene_node.h"
 #include "../camera/camera.h"
 #include "../camera/fly_camera.h"
-
 #include "../resources/resources.h"
 
 #include <math/linear_algebra/vector.h>
@@ -34,22 +35,16 @@ namespace Cell
     {       
         delete m_NDCPlane;
 
-        for (auto it = m_DefaultMaterials.begin(); it != m_DefaultMaterials.end(); ++it)
-        {
-            delete it->second;
-        }
+        delete m_MaterialLibrary;
 
         delete m_GBuffer;
         delete m_CustomTarget;
 
         // lighting
         delete m_DebugLightMesh;
-        delete m_DebugLightMaterial;
 
         // post-processing
         delete m_PostProcessTarget1;
-        delete m_DefaultBlitMaterial;
-        delete m_PostProcessingMaterial;
 
         // pbr
         delete m_PBRCaptureCube;
@@ -64,46 +59,12 @@ namespace Cell
             delete m_PBREnvironments[i]->Prefiltered;
             delete m_PBREnvironments[i];
         }
-
-        // mats
-        for (unsigned int i = 0; i < m_Materials.size(); ++i)
-        {
-            delete m_Materials[i];
-        }
-
     }
     // ------------------------------------------------------------------------
     void Renderer::Init(GLADloadproc loadProcFunc)
     {
         // NOTE(Joey): pre-compute PBR 
         // ---
-
-
-        // TODO(Joey): load default set of shaders (do this in Init function!; here or in resources)
-        Shader *shader = Resources::LoadShader("light", "shaders/light.vs", "shaders/light.fs");
-     
-        Shader *defaultShader = Resources::LoadShader("default", "shaders/deferred/g_buffer.vs", "shaders/deferred/g_buffer.fs");
-        // NOTE(Joey): and materials
-        Material *defaultMat = new Material(defaultShader);
-        defaultMat->Type = MATERIAL_DEFAULT;
-        defaultMat->SetTexture("TexAlbedo",    Resources::LoadTexture("default albedo",    "textures/checkerboard.png", GL_TEXTURE_2D, GL_RGB), 3);
-        defaultMat->SetTexture("TexNormal",    Resources::LoadTexture("default normal",    "textures/norm.png"),         4);
-        defaultMat->SetTexture("TexMetallic",  Resources::LoadTexture("default metallic",  "textures/black.png"),        5);
-        defaultMat->SetTexture("TexRoughness", Resources::LoadTexture("default roughness", "textures/checkerboard.png"), 6);
-        defaultMat->SetTexture("TexAO",        Resources::LoadTexture("default ao",        "textures/white.png"),        7);
-        m_DefaultMaterials[SID("default")] = defaultMat;
-        // - glass
-        Shader *glassShader = Resources::LoadShader("glass", "shaders/pbr/pbr.vs", "shaders/pbr/pbr.fs", { "ALPHA" });
-        Material *glassMat = new Material(glassShader);
-        glassMat->Type = MATERIAL_CUSTOM; // this material can't fit in the deferred rendering pipeline (due to transparency sorting).
-        glassMat->SetTexture("TexAlbedo",    Cell::Resources::LoadTexture("glass albedo",    "textures/glass.png", GL_TEXTURE_2D, GL_RGB), 3);
-        glassMat->SetTexture("TexNormal",    Cell::Resources::LoadTexture("glass normal",    "textures/pbr/plastic/normal.png"), 4);
-        glassMat->SetTexture("TexMetallic",  Cell::Resources::LoadTexture("glass metallic",  "textures/pbr/plastic/metallic.png"), 5);
-        glassMat->SetTexture("TexRoughness", Cell::Resources::LoadTexture("glass roughness", "textures/pbr/plastic/roughness.png"), 6);
-        glassMat->SetTexture("TexAO",        Cell::Resources::LoadTexture("glass ao",        "textures/pbr/plastic/ao.png"), 7);
-        glassMat->Blend = true;
-        m_DefaultMaterials[SID("glass")] = glassMat;
-
 
         // NOTE(Joey): initialize render items
         // TODO(Joey): do we want to abstract this or not? as it is very specific.
@@ -114,49 +75,17 @@ namespace Cell
         m_CustomTarget = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, true);
         m_PostProcessTarget1 = new RenderTarget(1, 1, GL_UNSIGNED_BYTE, 1, false);
 
-        Shader *defaultBlit = Cell::Resources::LoadShader("blit", "shaders/screen_quad.vs", "shaders/default_blit.fs");
-        m_DefaultBlitMaterial = new Material(defaultBlit);
-
         // lights
         m_DebugLightMesh = new Sphere(16, 16);
-        m_DebugLightMaterial = new Material(shader);
         m_DeferredPointMesh = new Sphere(16, 16);
 
 
         // deferred renderer
         m_GBuffer = new RenderTarget(1, 1, GL_HALF_FLOAT, 3, true);
-        Cell::Resources::LoadShader("deferred ambient", "shaders/screen_quad.vs", "shaders/deferred/ambient.fs");
-        m_DeferredAmbientMaterial = new Material(Cell::Resources::GetShader("deferred ambient"));
-        Cell::Resources::LoadShader("deferred directional", "shaders/screen_quad.vs", "shaders/deferred/directional.fs");
-        m_DeferredDirectionalMaterial = new Material(Cell::Resources::GetShader("deferred directional"));
-        Cell::Resources::LoadShader("deferred point", "shaders/deferred/point.vs", "shaders/deferred/point.fs");
-        m_DeferredPointMaterial = new Material(Cell::Resources::GetShader("deferred point"));
 
-        m_DeferredAmbientMaterial->Blend = true;
-        m_DeferredAmbientMaterial->BlendSrc = GL_ONE;
-        m_DeferredAmbientMaterial->BlendDst = GL_ONE;
-        m_DeferredAmbientMaterial->DepthTest = false;
-        m_DeferredAmbientMaterial->SetTexture("gPositionMetallic", m_GBuffer->GetColorTexture(0), 0);
-        m_DeferredAmbientMaterial->SetTexture("gNormalRoughness", m_GBuffer->GetColorTexture(1), 1);
-        m_DeferredAmbientMaterial->SetTexture("gAlbedoAO", m_GBuffer->GetColorTexture(2), 2);
-        m_DeferredDirectionalMaterial->Blend = true;
-        m_DeferredDirectionalMaterial->BlendSrc = GL_ONE;
-        m_DeferredDirectionalMaterial->BlendDst = GL_ONE;
-        m_DeferredDirectionalMaterial->DepthTest = false;
-        m_DeferredDirectionalMaterial->SetTexture("gPositionMetallic", m_GBuffer->GetColorTexture(0), 0);
-        m_DeferredDirectionalMaterial->SetTexture("gNormalRoughness", m_GBuffer->GetColorTexture(1), 1);
-        m_DeferredDirectionalMaterial->SetTexture("gAlbedoAO", m_GBuffer->GetColorTexture(2), 2);
-        m_DeferredPointMaterial->Blend = true;
-        m_DeferredPointMaterial->BlendSrc = GL_ONE;
-        m_DeferredPointMaterial->BlendDst = GL_ONE;
-        m_DeferredPointMaterial->DepthTest = false;
-        m_DeferredPointMaterial->SetTexture("gPositionMetallic", m_GBuffer->GetColorTexture(0), 0);
-        m_DeferredPointMaterial->SetTexture("gNormalRoughness", m_GBuffer->GetColorTexture(1), 1);
-        m_DeferredPointMaterial->SetTexture("gAlbedoAO", m_GBuffer->GetColorTexture(2), 2);
-
-        Shader *postProcessing = Cell::Resources::LoadShader("post processing", "shaders/screen_quad.vs", "shaders/post_processing.fs");
-        m_PostProcessingMaterial = new Material(postProcessing);
-
+        // materials
+        m_MaterialLibrary = new MaterialLibrary(m_GBuffer);       
+       
         m_PBRCaptureCube = new Cube();
         m_TargetBRDFLUT = new RenderTarget(128, 128, GL_HALF_FLOAT, 1, true);
         Cell::Shader *hdrToCubemap      = Cell::Resources::LoadShader("pbr:hdr to cubemap", "shaders/pbr/cube_sample.vs", "shaders/pbr/spherical_to_cube.fs");
@@ -173,10 +102,10 @@ namespace Cell
 
         // - brdf integration
         Blit(nullptr, m_TargetBRDFLUT, m_PBRIntegrateBRDF);
-        for (auto it = m_DefaultMaterials.begin(); it != m_DefaultMaterials.end(); ++it)
-        {
-            it->second->SetTexture("BRDFLUT", m_TargetBRDFLUT->GetColorTexture(0), 0);
-        }
+        //for (auto it = m_DefaultMaterials.begin(); it != m_DefaultMaterials.end(); ++it)
+        //{
+        //    it->second->SetTexture("BRDFLUT", m_TargetBRDFLUT->GetColorTexture(0), 0);
+        //}
 
         // NOTE(Joey): default PBR pre-compute (get a more default oriented HDR map for this)
         Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/hamarikyu bridge.hdr");
@@ -223,37 +152,17 @@ namespace Cell
     // ------------------------------------------------------------------------
     Material* Renderer::CreateMaterial(std::string base)
     {
-        // NOTE(Joey): first check if the given base material exists, otherwise
-        // log error.
-        auto found = m_DefaultMaterials.find(SID(base));
-        if (found != m_DefaultMaterials.end())
-        {
-            Material copy = found->second->Copy();
-            Material *mat = new Material(copy);
-            m_Materials.push_back(mat); // TODO(Joey): a bit ugly for now, come up with more proper memory management scheme for materials
-            return mat;
-        }
-        else
-        {
-            Log::Message("Material of template: " + base + " requested, but template did not exist.", LOG_ERROR);
-            return nullptr;
-        }
+        return m_MaterialLibrary->CreateMaterial(base);      
     }
     // ------------------------------------------------------------------------
     Material* Renderer::CreateCustomMaterial(Shader *shader)
     {
-        Material *mat = new Material(shader);
-        mat->Type = MATERIAL_CUSTOM;
-        m_Materials.push_back(mat);
-        return mat;
+        return m_MaterialLibrary->CreateCustomMaterial(shader);
     }
     // ------------------------------------------------------------------------
     Material* Renderer::CreatePostProcessingMaterial(Shader *shader)
     {
-        Material *mat = new Material(shader);
-        mat->Type = MATERIAL_POST_PROCESS;
-        m_Materials.push_back(mat);
-        return mat;
+        return m_MaterialLibrary->CreatePostProcessingMaterial(shader);
     }
     // ------------------------------------------------------------------------
     void Renderer::PushRender(Mesh *mesh, Material *material, math::mat4 transform)
@@ -444,12 +353,12 @@ namespace Cell
         {
             if ((*it)->RenderMesh)
             {
-                m_DebugLightMaterial->SetVector("lightColor", (*it)->Color);
+                m_MaterialLibrary->debugLightMaterial->SetVector("lightColor", (*it)->Color);
 
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
                 glDisable(GL_CULL_FACE);
                 RenderCommand command;
-                command.Material = m_DebugLightMaterial;
+                command.Material = m_MaterialLibrary->debugLightMaterial;
                 command.Mesh = m_DebugLightMesh;
                 math::mat4 model;
                 math::translate(model, (*it)->Position);
@@ -479,7 +388,7 @@ namespace Cell
         // NOTE(Joey): then do a final blit to the default framebuffer, with gamma correction and 
         // tone mapping post-processing step.
         Blit(postProcessingCommands.size() % 2 == 0 ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0),
-             nullptr, m_PostProcessingMaterial);
+             nullptr, m_MaterialLibrary->postProcessingMaterial);
 
         //Blit(m_GBuffer->GetColorTexture(0));
 
@@ -520,7 +429,7 @@ namespace Cell
         // if no material is given, use default blit material
         if (!material)
         {
-            material = m_DefaultBlitMaterial;
+            material = m_MaterialLibrary->defaultBlitMaterial;
         }
         // NOTE(Joey): if a source render target is given, use its color buffer
         // as input to the material shader.
@@ -658,11 +567,12 @@ namespace Cell
                 m_PBREnvironmentIndex = i;
                 // NOTE(Joey): loop through all the default shaders and set PBR environments
                 // TODO(Joey): update UBO object, instead of setting uniforms like we do now.
-                for (auto it = m_DefaultMaterials.begin(); it != m_DefaultMaterials.end(); ++it)
+                // TODO(Joey): manage this with pbr toolkit
+                /*for (auto it = m_DefaultMaterials.begin(); it != m_DefaultMaterials.end(); ++it)
                 {
                     it->second->SetTextureCube("EnvIrradiance", pbrEnvironment->Irradiance, 1);
                     it->second->SetTextureCube("EnvPrefilter", pbrEnvironment->Prefiltered, 2);
-                }
+                }*/
                 return;
             }
         }
@@ -911,30 +821,30 @@ namespace Cell
     void Renderer::renderDeferredAmbient()
     {
         RenderCommand command;
-        command.Material = m_DeferredAmbientMaterial;
+        command.Material = m_MaterialLibrary->deferredAmbientMaterial;
         command.Mesh = m_NDCPlane;
         renderCustomCommand(&command, nullptr);
     }
     // --------------------------------------------------------------------------------------------
     void Renderer::renderDeferredDirLight(DirectionalLight *light)
     {
-        m_DeferredDirectionalMaterial->SetVector("lightDir", light->Direction);
-        m_DeferredDirectionalMaterial->SetVector("lightColor", math::normalize(light->Color) * light->Intensity); // TODO(Joey): enforce light normalization with light setter?
+        m_MaterialLibrary->deferredDirectionalMaterial->SetVector("lightDir", light->Direction);
+        m_MaterialLibrary->deferredDirectionalMaterial->SetVector("lightColor", math::normalize(light->Color) * light->Intensity); // TODO(Joey): enforce light normalization with light setter?
 
         RenderCommand command;
-        command.Material = m_DeferredDirectionalMaterial;
+        command.Material = m_MaterialLibrary->deferredDirectionalMaterial;
         command.Mesh = m_NDCPlane;
         renderCustomCommand(&command, m_Camera);
     }
     // --------------------------------------------------------------------------------------------
     void Renderer::renderDeferredPointLight(PointLight *light)
     {
-        m_DeferredPointMaterial->SetVector("lightPos", light->Position);
-        m_DeferredPointMaterial->SetVector("lightColor", math::normalize(light->Color) * light->Intensity);
-        m_DeferredPointMaterial->SetFloat("lightRadius", light->Radius);
+        m_MaterialLibrary->deferredPointMaterial->SetVector("lightPos", light->Position);
+        m_MaterialLibrary->deferredPointMaterial->SetVector("lightColor", math::normalize(light->Color) * light->Intensity);
+        m_MaterialLibrary->deferredPointMaterial->SetFloat("lightRadius", light->Radius);
 
         RenderCommand command;
-        command.Material = m_DeferredPointMaterial;
+        command.Material = m_MaterialLibrary->deferredPointMaterial;
         command.Mesh = m_DeferredPointMesh;
         math::mat4 model;
         math::translate(model, light->Position);

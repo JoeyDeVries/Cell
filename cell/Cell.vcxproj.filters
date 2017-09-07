@@ -108,6 +108,9 @@
     <ClCompile Include="renderer\pbr_environment.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="renderer\MaterialLibrary.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mesh\mesh.h">
@@ -210,6 +213,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="renderer\pbr_environment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\MaterialLibrary.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

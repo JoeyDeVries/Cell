@@ -29,6 +29,7 @@ namespace Cell
     class SceneNode;
     class Camera;
     class RenderTarget;
+    class MaterialLibrary;
 
     /* NOTE(Joey):
 
@@ -41,47 +42,31 @@ namespace Cell
     class Renderer
     {
     private:
-        CommandBuffer m_CommandBuffer;
-
-        Camera       *m_Camera;
-
         // render state
+        CommandBuffer m_CommandBuffer;
         math::vec2 m_RenderSize;
 
+        // lighting
+        std::vector<DirectionalLight*> m_DirectionalLights;
+        std::vector<PointLight*>       m_PointLights;
+        RenderTarget* m_GBuffer = nullptr;
+        Mesh*         m_DeferredPointMesh;
+
+        // materials
+        MaterialLibrary *m_MaterialLibrary;
+
+        // camera
+        Camera       *m_Camera;
+
+        // render-targets/post
         std::vector<RenderTarget*>  m_RenderTargetsCustom;
         RenderTarget               *m_CurrentRenderTargetCustom = nullptr;
         RenderTarget               *m_CustomTarget;
+        RenderTarget               *m_PostProcessTarget1;
         Quad                       *m_NDCPlane;
-
-        // deferred
-        RenderTarget               *m_GBuffer = nullptr;
-
-        Material *m_DefaultBlitMaterial;
-        Material *m_DeferredAmbientMaterial;
-        Material *m_DeferredDirectionalMaterial;
-        Material *m_DeferredPointMaterial;
-        Material *m_DebugLightMaterial;
-
-        Mesh *m_DeferredPointMesh;
-
-        // lights
-        Mesh *m_DebugLightMesh;
-        std::vector<DirectionalLight*> m_DirectionalLights;
-        std::vector<PointLight*>       m_PointLights;
-
-        // final post-processing
-        RenderTarget *m_PostProcessTarget1;
-        Material     *m_PostProcessingMaterial;
-
-        // (dynamic) cubemap generation
         unsigned int m_FramebufferCubemap; // NOTE(Joey): cubemap render targets are a very specific case so we can do these without abstractions.
         unsigned int m_CubemapDepthRBO;
-
-        // set of default materials 
-        // NOTE(Joey): do we want to abstract this from the renderer?
-        std::map<unsigned int, Material*> m_DefaultMaterials;
-        std::vector<Material*> m_Materials; // NOTE(Joey): store generated materials here for easy memory management (TODO(Joey): think of cleaner way; same for scene!)
-
+       
         // pbr
         std::vector<PBREnvironment*> m_PBREnvironments;
         unsigned int m_PBREnvironmentIndex;
@@ -92,7 +77,8 @@ namespace Cell
         Material *m_PBRPrefilterCapture;
         Material *m_PBRIntegrateBRDF;
 
-        // deferred
+        // debug
+        Mesh *m_DebugLightMesh;
 
     public:
         Renderer();
