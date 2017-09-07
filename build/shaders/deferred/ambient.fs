@@ -13,7 +13,7 @@ void main()
     vec4 normalRoughness = texture(gNormalRoughness, TexCoords);
     vec4 positionMetallic = texture(gPositionMetallic, TexCoords);
     
-    const float ambientTerm = 0.05;
+    const float ambientTerm = 0.01;
     FragColor.rgb = albedoAO.rgb * ambientTerm;
     FragColor.a = 1.0;
 }

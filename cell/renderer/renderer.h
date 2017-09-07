@@ -7,7 +7,7 @@
 #include "../lighting/directional_light.h"
 #include "../mesh/quad.h"
 #include "command_buffer.h"
-#include "pbr_environment.h"
+#include "pbr_capture.h"
 
 #include "../glad/glad.h"
 
@@ -30,6 +30,7 @@ namespace Cell
     class Camera;
     class RenderTarget;
     class MaterialLibrary;
+    class PBR;
 
     /* NOTE(Joey):
 
@@ -68,14 +69,8 @@ namespace Cell
         unsigned int m_CubemapDepthRBO;
        
         // pbr
-        std::vector<PBREnvironment*> m_PBREnvironments;
+        PBR* m_PBR;
         unsigned int m_PBREnvironmentIndex;
-        RenderTarget  *m_TargetBRDFLUT;
-        Mesh     *m_PBRCaptureCube;
-        Material *m_PBRHdrToCubemap;
-        Material *m_PBRIrradianceCapture;
-        Material *m_PBRPrefilterCapture;
-        Material *m_PBRIntegrateBRDF;
 
         // debug
         Mesh *m_DebugLightMesh;
@@ -89,30 +84,29 @@ namespace Cell
         void SetRenderSize(unsigned int width, unsigned int height);
         math::vec2 GetRenderSize();
 
-        void SetTarget(RenderTarget *renderTarget, GLenum target = GL_TEXTURE_2D);
+        void SetTarget(RenderTarget* renderTarget, GLenum target = GL_TEXTURE_2D);
 
         Camera* GetCamera();
-        void    SetCamera(Camera *camera);
+        void    SetCamera(Camera* camera);
 
         // NOTE(Joey): idea, create either a deferred default material (based on default set of materials available (like glass)), or a custom material (with custom you have to supply your own shader)
         Material* CreateMaterial(std::string base = "default"); // NOTE(Joey): these don't have the custom flag set (default material has default state and uses checkerboard texture as albedo (and black metallic, half roughness, purple normal, white ao)
-        Material* CreateCustomMaterial(Shader *shader);         // NOTE(Joey): these have the custom flag set (will be rendered in forward pass)
-        Material* CreatePostProcessingMaterial(Shader *shader); // NOTE(Joey): these have the post-processing flag set (will be rendered after deferred/forward pass)
+        Material* CreateCustomMaterial(Shader* shader);         // NOTE(Joey): these have the custom flag set (will be rendered in forward pass)
+        Material* CreatePostProcessingMaterial(Shader* shader); // NOTE(Joey): these have the post-processing flag set (will be rendered after deferred/forward pass)
 
-        void PushRender(Mesh *mesh, Material *material, math::mat4 transform = math::mat4());
-        void PushRender(SceneNode *node);
-        void PushPostProcessor(Material *postProcessor);
+        void PushRender(Mesh* mesh, Material* material, math::mat4 transform = math::mat4());
+        void PushRender(SceneNode* node);
+        void PushPostProcessor(Material* postProcessor);
 
         void AddLight(DirectionalLight *light);
         void AddLight(PointLight       *light);        
 
         void RenderPushedCommands();
 
-        void Blit(Texture *src, RenderTarget *dst = nullptr, Material *material = nullptr, std::string textureUniformName = "TexSrc");
-        void RenderToCubemap(SceneNode *scene, TextureCube *target, math::vec3 position = math::vec3(0.0f), unsigned int mipLevel = 0);
-        PBREnvironment* PBREnvMapPrecompute(Texture *hdriEnvironment, math::vec3 location = math::vec3(0.0f));
-        void SetPBREnvironment(PBREnvironment *pbrEnvironment);
-        PBREnvironment* GetPBREnvironment();
+        void Blit(Texture* src, RenderTarget* dst = nullptr, Material* material = nullptr, std::string textureUniformName = "TexSrc");
+        void RenderToCubemap(SceneNode* scene, TextureCube* target, math::vec3 position = math::vec3(0.0f), unsigned int mipLevel = 0);
+        void SetPBREnvironment(PBRCapture* pbrEnvironment);
+        PBRCapture* GetPBREnvironment();
     private:
         // renderer-specific logic for rendering a 'default' deferred command.
         void renderDeferredCommand(RenderCommand *command, Camera *camera);

@@ -2,6 +2,7 @@
 
 #include "render_target.h"
 #include "MaterialLibrary.h"
+#include "PBR.h"
 
 #include "../mesh/mesh.h"
 #include "../mesh/cube.h"
@@ -47,25 +48,11 @@ namespace Cell
         delete m_PostProcessTarget1;
 
         // pbr
-        delete m_PBRCaptureCube;
-        delete m_TargetBRDFLUT;
-        delete m_PBRHdrToCubemap;
-        delete m_PBRIrradianceCapture;
-        delete m_PBRPrefilterCapture;
-        delete m_PBRIntegrateBRDF;
-        for (unsigned int i = 0; i < m_PBREnvironments.size(); ++i)
-        {
-            delete m_PBREnvironments[i]->Irradiance;
-            delete m_PBREnvironments[i]->Prefiltered;
-            delete m_PBREnvironments[i];
-        }
+        delete m_PBR;      
     }
     // ------------------------------------------------------------------------
     void Renderer::Init(GLADloadproc loadProcFunc)
     {
-        // NOTE(Joey): pre-compute PBR 
-        // ---
-
         // NOTE(Joey): initialize render items
         // TODO(Joey): do we want to abstract this or not? as it is very specific.
         m_NDCPlane = new Quad;
@@ -86,30 +73,12 @@ namespace Cell
         // materials
         m_MaterialLibrary = new MaterialLibrary(m_GBuffer);       
        
-        m_PBRCaptureCube = new Cube();
-        m_TargetBRDFLUT = new RenderTarget(128, 128, GL_HALF_FLOAT, 1, true);
-        Cell::Shader *hdrToCubemap      = Cell::Resources::LoadShader("pbr:hdr to cubemap", "shaders/pbr/cube_sample.vs", "shaders/pbr/spherical_to_cube.fs");
-        Cell::Shader *irradianceCapture = Cell::Resources::LoadShader("pbr:irradiance",     "shaders/pbr/cube_sample.vs", "shaders/pbr/irradiance_capture.fs");
-        Cell::Shader *prefilterCapture  = Cell::Resources::LoadShader("pbr:prefilter",      "shaders/pbr/cube_sample.vs", "shaders/pbr/prefilter_capture.fs");
-        Cell::Shader *integrateBrdf     = Cell::Resources::LoadShader("pbr:integrate_brdf", "shaders/screen_quad.vs",     "shaders/pbr/integrate_brdf.fs");
-        m_PBRHdrToCubemap      = new Material(hdrToCubemap);
-        m_PBRIrradianceCapture = new Material(irradianceCapture);
-        m_PBRPrefilterCapture  = new Material(prefilterCapture);
-        m_PBRIntegrateBRDF     = new Material(integrateBrdf);
-        m_PBRHdrToCubemap->DepthCompare      = GL_LEQUAL;
-        m_PBRIrradianceCapture->DepthCompare = GL_LEQUAL;
-        m_PBRPrefilterCapture->DepthCompare  = GL_LEQUAL;
+        // pbr
+        m_PBR = new PBR(this);
 
-        // - brdf integration
-        Blit(nullptr, m_TargetBRDFLUT, m_PBRIntegrateBRDF);
-        //for (auto it = m_DefaultMaterials.begin(); it != m_DefaultMaterials.end(); ++it)
-        //{
-        //    it->second->SetTexture("BRDFLUT", m_TargetBRDFLUT->GetColorTexture(0), 0);
-        //}
-
-        // NOTE(Joey): default PBR pre-compute (get a more default oriented HDR map for this)
+        // default PBR pre-compute (get a more default oriented HDR map for this)
         Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/hamarikyu bridge.hdr");
-        Cell::PBREnvironment *envBridge = PBREnvMapPrecompute(hdrMap);
+        Cell::PBRCapture *envBridge = m_PBR->ProcessEquirectangular(hdrMap);
         SetPBREnvironment(envBridge);
     }
     // ------------------------------------------------------------------------
@@ -521,67 +490,30 @@ namespace Cell
         glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
     }
     // ------------------------------------------------------------------------
-    PBREnvironment* Renderer::PBREnvMapPrecompute(Texture *hdriEnvironment, math::vec3 location)
+    void Renderer::SetPBREnvironment(PBRCapture* pbrEnvironment)
     {
-        // TODO(Joey): memory management here is not cleanly organized, come up with better solution!
-        PBREnvironment *result = new PBREnvironment;
-
-        // NOTE(Joey): convert HDR radiance image to HDR environment cubemap
-        Cell::SceneNode *environmentCube = Cell::Scene::MakeSceneNode(m_PBRCaptureCube, m_PBRHdrToCubemap);
-        m_PBRHdrToCubemap->SetTexture("environment", hdriEnvironment, 0);
-        // TODO(Joey): think of proper way to manage memory here.
-        Cell::TextureCube hdrEnvMap;
-        hdrEnvMap.DefaultInitialize(128, 128, GL_RGB, GL_FLOAT);
-        RenderToCubemap(environmentCube, &hdrEnvMap);
-        // - irradiance
-        result->Irradiance = new TextureCube;
-        result->Irradiance->DefaultInitialize(32, 32, GL_RGB, GL_FLOAT);
-        m_PBRIrradianceCapture->SetTextureCube("environment", &hdrEnvMap, 0);
-        environmentCube->Material = m_PBRIrradianceCapture;
-        RenderToCubemap(environmentCube, result->Irradiance, math::vec3(0.0f), 0);
-        // - prefilter 
-        result->Prefiltered = new TextureCube;;
-        result->Prefiltered->FilterMin = GL_LINEAR_MIPMAP_LINEAR;
-        result->Prefiltered->DefaultInitialize(128, 128, GL_RGB, GL_FLOAT, true);
-        m_PBRPrefilterCapture->SetTextureCube("environment", &hdrEnvMap, 0);
-        environmentCube->Material = m_PBRPrefilterCapture;
-        // calculate prefilter for multiple roughness levels
-        unsigned int maxMipLevels = 5;
-        for (unsigned int i = 0; i < maxMipLevels; ++i)
-        {
-            m_PBRPrefilterCapture->SetFloat("roughness", (float)i / (float)(maxMipLevels - 1));
-            RenderToCubemap(environmentCube, result->Prefiltered, math::vec3(0.0f), i);
-
-        }
-        m_PBREnvironments.push_back(result);
-        Scene::DeleteSceneNode(environmentCube);
-        return result;
-    }
-    // ------------------------------------------------------------------------
-    void Renderer::SetPBREnvironment(PBREnvironment *pbrEnvironment)
-    {
-        for(unsigned int i = 0; i < m_PBREnvironments.size(); ++i)
-        {
-            if (pbrEnvironment->Irradiance == m_PBREnvironments[i]->Irradiance)
-            {
-                m_PBREnvironmentIndex = i;
-                // NOTE(Joey): loop through all the default shaders and set PBR environments
-                // TODO(Joey): update UBO object, instead of setting uniforms like we do now.
-                // TODO(Joey): manage this with pbr toolkit
-                /*for (auto it = m_DefaultMaterials.begin(); it != m_DefaultMaterials.end(); ++it)
-                {
-                    it->second->SetTextureCube("EnvIrradiance", pbrEnvironment->Irradiance, 1);
-                    it->second->SetTextureCube("EnvPrefilter", pbrEnvironment->Prefiltered, 2);
-                }*/
-                return;
-            }
-        }
+        //for(unsigned int i = 0; i < m_PBREnvironments.size(); ++i)
+        //{
+        //    if (pbrEnvironment->Irradiance == m_PBREnvironments[i]->Irradiance)
+        //    {
+        //        m_PBREnvironmentIndex = i;
+        //        // NOTE(Joey): loop through all the default shaders and set PBR environments
+        //        // TODO(Joey): update UBO object, instead of setting uniforms like we do now.
+        //        // TODO(Joey): manage this with pbr toolkit
+        //        /*for (auto it = m_DefaultMaterials.begin(); it != m_DefaultMaterials.end(); ++it)
+        //        {
+        //            it->second->SetTextureCube("EnvIrradiance", pbrEnvironment->Irradiance, 1);
+        //            it->second->SetTextureCube("EnvPrefilter", pbrEnvironment->Prefiltered, 2);
+        //        }*/
+        //        return;
+        //    }
+        //}
         Log::Message("Tried to set PBR environment, but wasn't indexed before.");
     }
     // ------------------------------------------------------------------------
-    PBREnvironment* Renderer::GetPBREnvironment()
+    PBRCapture* Renderer::GetPBREnvironment()
     {
-        return m_PBREnvironments[m_PBREnvironmentIndex];
+        return m_PBR->m_CaptureProbes[m_PBREnvironmentIndex];
     }
     // ------------------------------------------------------------------------
     void Renderer::renderDeferredCommand(RenderCommand *command, Camera *camera)

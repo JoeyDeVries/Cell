@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
     cubemap.DefaultInitialize(1024, 1024, GL_RGB, GL_UNSIGNED_BYTE);
   
     // - background
-    Cell::PBREnvironment *pbrEnv = renderer->GetPBREnvironment();
+    Cell::PBRCapture *pbrEnv = renderer->GetPBREnvironment();
     background.SetCubemap(pbrEnv->Prefiltered);
 	float lodLevel = 1.5f; 
 	background.Material->SetFloat("lodLevel", lodLevel);
@@ -162,6 +162,7 @@ int main(int argc, char *argv[])
     Cell::DirectionalLight dirLight;
     dirLight.Direction = math::vec3(-0.3f, -1.0f, 0.7f);
     dirLight.Color = math::vec3(0.3f, 0.3f, 0.25f);
+    dirLight.Intensity = 1.0f;
     renderer->AddLight(&dirLight);
 
     Cell::PointLight light;

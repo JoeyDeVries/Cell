@@ -27,7 +27,7 @@ void main()
     float lambert = max(dot(-lightDir, N), 0.0);
     float specular = pow(max(dot(H, N), 0.0), 16.0);
     
-    vec3 color = lambert * albedoAO.rgb + specular * lightColor;
+    vec3 color = lambert * lightColor * albedoAO.rgb + specular * lightColor;
     
     FragColor.rgb = color;
     FragColor.a = 1.0;
