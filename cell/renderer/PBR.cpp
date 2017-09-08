@@ -96,6 +96,6 @@ namespace Cell
     // --------------------------------------------------------------------------------------------
     PBRCapture* PBR::GetClosestCapture(math::vec3 position)
     {
-
+        return m_CaptureProbes[0];
     }
 }

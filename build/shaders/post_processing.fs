@@ -12,6 +12,7 @@ void main()
     // HDR tonemapping
     float exposure = 1.0;
 	// color = vec3(1.0) - exp(-color * exposure);	
+    color = color / (color + vec3(1.0));
 	// gamma correct
 	color = pow(color, vec3(1.0/2.2));     
 

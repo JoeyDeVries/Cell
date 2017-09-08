@@ -752,10 +752,15 @@ namespace Cell
     // --------------------------------------------------------------------------------------------
     void Renderer::renderDeferredAmbient()
     {
+        PBRCapture *iblCapture = m_PBR->GetClosestCapture(math::vec3(0.0f));
+        m_MaterialLibrary->deferredAmbientMaterial->SetTextureCube("envIrradiance", iblCapture->Irradiance, 3);
+        m_MaterialLibrary->deferredAmbientMaterial->SetTextureCube("envPrefilter", iblCapture->Prefiltered, 4);
+        m_MaterialLibrary->deferredAmbientMaterial->SetTexture("BRDFLUT", m_PBR->m_RenderTargetBRDFLUT->GetColorTexture(0), 5);
+
         RenderCommand command;
         command.Material = m_MaterialLibrary->deferredAmbientMaterial;
         command.Mesh = m_NDCPlane;
-        renderCustomCommand(&command, nullptr);
+        renderCustomCommand(&command, m_Camera);
     }
     // --------------------------------------------------------------------------------------------
     void Renderer::renderDeferredDirLight(DirectionalLight *light)

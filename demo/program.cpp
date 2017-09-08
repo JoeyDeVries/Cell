@@ -147,35 +147,36 @@ int main(int argc, char *argv[])
     matPbr->GetShader()->Use();
     matPbr->GetShader()->SetFloat("Exposure", exposure);
 
-    // NOTE(Joey): post processing
+    // post processing
     Cell::Shader *postProcessing1 = Cell::Resources::LoadShader("postprocessing1", "shaders/screen_quad.vs", "shaders/custom_post_1.fs");
     Cell::Shader *postProcessing2 = Cell::Resources::LoadShader("postprocessing2", "shaders/screen_quad.vs", "shaders/custom_post_2.fs");
     Cell::Material *customPostProcessing1 = renderer->CreatePostProcessingMaterial(postProcessing1);
     Cell::Material *customPostProcessing2 = renderer->CreatePostProcessingMaterial(postProcessing2);
 
-    // NOTE(Joey): test mesh loading
+    // test mesh loading
     Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/sponza/sponza.obj");
     test->Scale = math::vec3(0.01f);
     //Cell::SceneNode *test2 = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
 
 
     Cell::DirectionalLight dirLight;
-    dirLight.Direction = math::vec3(-0.3f, -1.0f, 0.7f);
-    dirLight.Color = math::vec3(0.3f, 0.3f, 0.25f);
-    dirLight.Intensity = 1.0f;
+    dirLight.Direction = math::vec3(-0.3f, -1.0f, 0.5f);
+    dirLight.Color = math::vec3(1.0f, 1.0f, 0.6f);
+    dirLight.Intensity = 5.0f;
     renderer->AddLight(&dirLight);
 
     Cell::PointLight light;
     light.Radius = 4.0;
     light.Position = math::vec3(0.0f, 1.0f, 0.0f);
     light.Color = math::vec3(1.0f, 1.0, 1.0f);
+    light.Intensity = 25.0f;
     //light.RenderMesh = true;
     renderer->AddLight(&light);
 
     Cell::PointLight light2;
     light2.Radius = 3.0;
     light2.Color = math::vec3(0.5f, 0.5f, 2.0f);
-    light2.Intensity = 10.0f;
+    light2.Intensity = 25.0f;
     //light2.RenderMesh = true;
     renderer->AddLight(&light2);
 
@@ -241,10 +242,10 @@ int main(int argc, char *argv[])
                 glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
             }
 
-            // NOTE(Joey): update render logic
+            // update render logic
             camera.Update(deltaTime);
 
-            // NOTE(Joey): fill the renderer's command buffer with default test scene
+            // fill the renderer's command buffer with default test scene
             mainTorus->Rotation = math::vec4(math::vec3(1.0f, 0.0f, 0.0f), glfwGetTime());
             secondTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
             thirdTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
@@ -266,19 +267,19 @@ int main(int argc, char *argv[])
         }
         {
             //CLOCK(CUBEMAP);
-            // NOTE(Joey): also generate dynamic cubemap from scene
+            // also generate dynamic cubemap from scene
             //renderer.RenderToCubemap(mainTorus, &cubemap, math::vec3(0.0f, 8.0f, 0.0f), 0);
         }
 
         {
-            // NOTE(Joey): push post-processing calls
+            // push post-processing calls
             //renderer->PushPostProcessor(&customPostProcessing1);
             //renderer->PushPostProcessor(&customPostProcessing2);
         }
 
         {
             //CLOCK(RENDER);
-            // NOTE(Joey): request Cell to render all currently pushed commands
+            // request Cell to render all currently pushed commands
             renderer->RenderPushedCommands();
         }
 
