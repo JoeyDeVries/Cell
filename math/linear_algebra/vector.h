@@ -451,6 +451,14 @@ namespace math
         return result;
     }
     template <std::size_t n, typename T>
+    vector<n, T>& operator*=(vector<n, T>& lhs, T scalar)
+    {
+        for (std::size_t i = 0; i < n; ++i) {
+            lhs[i] *= scalar;
+        }
+        return lhs;
+    }
+    template <std::size_t n, typename T>
     inline vector<n, T> operator*(T scalar, vector<n, T> lhs)
     {
         vector<n, T> result;

@@ -218,17 +218,13 @@ namespace Cell
             post-processing shaders (before/after HDR-tonemap/gamma-correct?).
 
         */
-
-        // NOTE(Joey): begin with a forward renderer context for rendering of
-        // the command buffer, later switch to a deferred render pipeline once
-        // all sub-systems in place work properly.
         m_CommandBuffer.Sort();
 
         // NOTE(Joey); deferred here:
         std::vector<RenderCommand> deferredRenderCommands = m_CommandBuffer.GetDeferredRenderCommands();
         // 1. Geometry buffer
         glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
-        glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer->m_ID);
+        glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer->ID);
         unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
         glDrawBuffers(3, attachments);
         if (m_GBuffer->Width != m_RenderSize.x || m_GBuffer->Height != m_RenderSize.y)
@@ -241,10 +237,16 @@ namespace Cell
         {
             renderDeferredCommand(&deferredRenderCommands[i], m_Camera);
         }
-        glBindFramebuffer(GL_FRAMEBUFFER, m_CustomTarget->m_ID);
+      
+        // 2. do post-processing steps before lighting stage (e.g. SSAO)
+        m_PostProcessor->ProcessPreLighting(this, m_GBuffer, m_Camera);
+
+
+        glBindFramebuffer(GL_FRAMEBUFFER, m_CustomTarget->ID);
+        glViewport(0, 0, m_CustomTarget->Width, m_CustomTarget->Height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        // 2. Render deferred shader for each light (full quad for directional, spheres for point lights)
+        // 3. Render deferred shader for each light (full quad for directional, spheres for point lights)
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
@@ -278,12 +280,14 @@ namespace Cell
         attachments[2] = GL_NONE;
         glDrawBuffers(3, attachments);
 
-        // 3. blit depth buffer to default for forward rendering
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, m_GBuffer->m_ID);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_CustomTarget->m_ID); // write to default framebuffer
+        // 4. blit depth buffer to default for forward rendering
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, m_GBuffer->ID);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_CustomTarget->ID); // write to default framebuffer
         glBlitFramebuffer(
             0, 0, m_GBuffer->Width, m_GBuffer->Height, 0, 0, m_RenderSize.x, m_RenderSize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST
         );
+
+        // 5. custom forward render pass 
 
         // NOTE(Joey): push default render target to the end of the render
         // target buffer s.t. we always render the default buffer last.
@@ -302,7 +306,7 @@ namespace Cell
             if (renderTarget)
             {
                 glViewport(0, 0, renderTarget->Width, renderTarget->Height);
-                glBindFramebuffer(GL_FRAMEBUFFER, renderTarget->m_ID);
+                glBindFramebuffer(GL_FRAMEBUFFER, renderTarget->ID);
                 if (renderTarget->HasDepthAndStencil)
                     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
                 else
@@ -318,22 +322,22 @@ namespace Cell
                 // NOTE(Joey): don't render to default framebuffer, but to custom target framebuffer
                 // which we'll use for post-processing.
                 glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
-                glBindFramebuffer(GL_FRAMEBUFFER, m_CustomTarget->m_ID);
+                glBindFramebuffer(GL_FRAMEBUFFER, m_CustomTarget->ID);
                 m_Camera->SetPerspective(m_Camera->FOV, m_RenderSize.x / m_RenderSize.y, 0.1, 
                                          100.0f);
             }
 
-            // NOTE(Joey): sort all render commands and retrieve the sorted array
+            // sort all render commands and retrieve the sorted array
             std::vector<RenderCommand> renderCommands = m_CommandBuffer.GetCustomRenderCommands(renderTarget);
 
-            // NOTE(Joey): iterate over all the render commands and execute
+            // terate over all the render commands and execute
             for (unsigned int i = 0; i < renderCommands.size(); ++i)
             {
                 renderCustomCommand(&renderCommands[i], m_Camera);
             }
         }
 
-        // render (debug) visuals
+        // 6. render (debug) visuals
         for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
         {
             if ((*it)->RenderMesh)
@@ -356,10 +360,7 @@ namespace Cell
             }
         }
 
-        // NOTE(Joey): get combined color/depth texture of deferred/custom pass
-
-
-        // NOTE(Joey): then do post-processing
+        // 7. custom post-processing pass
         std::vector<RenderCommand> postProcessingCommands = m_CommandBuffer.GetPostProcessingRenderCommands();
         for (unsigned int i = 0; i < postProcessingCommands.size(); ++i)
         {
@@ -370,16 +371,12 @@ namespace Cell
                  postProcessingCommands[i].Material);
         }
 
-        // NOTE(Joey): then do a final blit to the default framebuffer, with gamma correction and 
-        // tone mapping post-processing step.
+        // 8. final post-processing steps, blitting to default framebuffer
         m_PostProcessor->Blit(this, postProcessingCommands.size() % 2 == 0 ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0));
-      /*  Blit(postProcessingCommands.size() % 2 == 0 ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0),
-             nullptr, m_MaterialLibrary->postProcessingMaterial);*/
 
-        //Blit(m_GBuffer->GetColorTexture(0));
+        Blit(m_PostProcessor->SSAOOutput, nullptr);
 
-        // NOTE(Joey): clear the command buffer s.t. the next frame/call can
-        // start from an empty slate again.
+        // clear the command buffer s.t. the next frame/call can start from an empty slate again.
         m_CommandBuffer.Clear();
 
         // NOTE(Joey): clear render state
@@ -400,7 +397,7 @@ namespace Cell
         if (dst)
         {
             glViewport(0, 0, dst->Width, dst->Height);
-            glBindFramebuffer(GL_FRAMEBUFFER, dst->m_ID);
+            glBindFramebuffer(GL_FRAMEBUFFER, dst->ID);
             if (dst->HasDepthAndStencil)
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             else
@@ -783,6 +780,8 @@ namespace Cell
         iblCapture->Irradiance->Bind(3);
         iblCapture->Prefiltered->Bind(4);
         m_PBR->m_RenderTargetBRDFLUT->GetColorTexture(0)->Bind(5);
+
+        m_PostProcessor->SSAOOutput->Bind(6);
 
         ambientShader->Use();
         ambientShader->SetVector("CamPos", m_Camera->Position);

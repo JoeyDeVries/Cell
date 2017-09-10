@@ -14,6 +14,8 @@ uniform sampler2D gPositionMetallic;
 uniform sampler2D gNormalRoughness;
 uniform sampler2D gAlbedoAO;
 
+uniform sampler2D SSAO;
+
 uniform vec3 CamPos;
 
 void main()
@@ -22,6 +24,7 @@ void main()
     vec4 albedoAO = texture(gAlbedoAO, TexCoords);
     vec4 normalRoughness = texture(gNormalRoughness, TexCoords);
     vec4 positionMetallic = texture(gPositionMetallic, TexCoords);
+    float ao = texture(SSAO, TexCoords).r;
     
     vec3 worldPos = positionMetallic.xyz;
     vec3 albedo = albedoAO.rgb;
@@ -72,7 +75,8 @@ void main()
 	
 	// as the IBL lighting of both diffuse and specular counts as
     //(GI) ambient lighting, we multiply both with the AO component.
-    const float ao = 0.5;
+    // ao = 1.0;
     FragColor.rgb = color.rgb * ao;
+    // FragColor.rgb = vec3(ao);
     FragColor.a = 1.0;
 }

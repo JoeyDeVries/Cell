@@ -11,8 +11,8 @@ namespace Cell
         Height = height;
         Type   = type;
 
-        glGenFramebuffers(1, &m_ID);
-        glBindFramebuffer(GL_FRAMEBUFFER, m_ID);
+        glGenFramebuffers(1, &ID);
+        glBindFramebuffer(GL_FRAMEBUFFER, ID);
         // NOTE(Joey): generate all color attachments
         for (unsigned int i = 0; i < nrColorAttachments; ++i)
         {
@@ -87,4 +87,24 @@ namespace Cell
     {
         m_Target = target;
     }
+    // ------------------------------------------------------------------------
+   /* void RenderTarget::Bind(bool clear, bool setViewport)
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, ID);
+        if (clear)
+        {
+            if (HasDepthAndStencil)
+            {
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+            } 
+            else
+            {
+                glClear(GL_COLOR_BUFFER_BIT);
+            }
+        }
+        if (setViewport)
+        {
+            glViewport(0, 0, Width, Height);
+        }
+    }*/
 }

@@ -14,15 +14,15 @@ namespace Cell
     {
         friend Renderer;
     public:
+        unsigned int ID;
+
         unsigned int Width;
         unsigned int Height;
         GLenum       Type;
 
         bool HasDepthAndStencil;
     private:
-        unsigned int m_ID;
         GLenum       m_Target = GL_TEXTURE_2D;
-
         Texture              m_DepthStencil;
         std::vector<Texture> m_ColorAttachments;
     public:
@@ -32,8 +32,10 @@ namespace Cell
         Texture *GetColorTexture(unsigned int index);
 
         void Resize(unsigned int width, unsigned int height);
-
         void SetTarget(GLenum target);
+
+        // TODO(Joey): this shouldn't be called by end-users, come up with something else than private/friend
+        //void Bind(bool clear = true, bool setViewport = true);
     };
 }
 

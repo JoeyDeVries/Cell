@@ -50,6 +50,9 @@ Feature List (complete:base-functionality)
 	1. Calculate diffuse integral and store into cubemap.
 	2. Prefilter environment map w/ integral and store into cubemap as diffuse integral.
 	3. Pre-calculate active BRDF in 2D LUT (approach by Unreal for split sum approximation).
+9. Post-processing
+    1. HDR/Gamma/Tone-mapping
+    2. Vignette
 	
 Feature List (work-in-progress)
 ------
@@ -64,12 +67,10 @@ Feature List (work-in-progress)
 	3. Shadow Mapping (default, omni, CSM).
 	4. Per-object motion blur.
 3. Post-processing
-    1. HDR/Gamma/Tone-mapping
-    2. Bloom
-    3. SSAO 
-    4. Vignette
-    5. SSR
-    6. TXAA
+    1. Bloom
+    2. SSAO 
+    3. SSR
+    4. TXAA
 		
 Feature List (todo)
 ------
