@@ -41,15 +41,15 @@ namespace Cell
             for (int i = 0; i < SSAOKernelSize; ++i)
             {
                 math::vec3 sample(
-                    randomFloats(generator) * 2.0 - 1.0,
-                    randomFloats(generator) * 2.0 - 1.0,
+                    randomFloats(generator) * 2.0f - 1.0f,
+                    randomFloats(generator) * 2.0f - 1.0f,
                     randomFloats(generator)
                 );
                 sample = math::normalize(sample);
-                sample *= randomFloats(generator);
+                sample = sample * randomFloats(generator);
                 float scale = (float)i / (float)SSAOKernelSize;
                 scale = math::lerp(0.1f, 1.0f, scale * scale);
-                sample *= scale;
+                sample = sample * scale;
                 ssaoKernel.push_back(sample);
             }
             std::vector<math::vec3> ssaoNoise;
@@ -64,14 +64,16 @@ namespace Cell
             m_SSAONoise = new Texture();
             m_SSAONoise->Generate(4, 4, GL_RGBA16F, GL_RGB, GL_HALF_FLOAT, &ssaoNoise[0]);
 
-            for (int i = 0; i < SSAOKernelSize; ++i)
-            {
+            m_SSAOShader->SetVectorArray("kernel", ssaoKernel.size(), ssaoKernel);
+            m_SSAOShader->SetInt("sampleCount", SSAOKernelSize);
+            //for (int i = 0; i < SSAOKernelSize; ++i)
+            //{
                 // TODO(Joey): make Set...Array calls for shader
-                m_SSAOShader->SetVector("kernel[" + std::to_string(i) + "]", ssaoKernel[i]);
-            }
+                //m_SSAOShader->SetVector("kernel[" + std::to_string(i) + "]", ssaoKernel[i]);
+            //}
         }
 
-        // bloom
+        // bloom 
         {
 
         }

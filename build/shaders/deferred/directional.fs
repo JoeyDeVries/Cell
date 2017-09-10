@@ -2,6 +2,8 @@
 out vec4 FragColor;
 
 in vec2 TexCoords;
+in vec3 CamPos;
+in vec3 LightDir;
 
 #include ../common/constants.glsl
 #include ../common/brdf.glsl
@@ -10,10 +12,7 @@ uniform sampler2D gPositionMetallic;
 uniform sampler2D gNormalRoughness;
 uniform sampler2D gAlbedoAO;
 
-uniform vec3 lightDir;
 uniform vec3 lightColor;
-
-uniform vec3 CamPos;
 
 void main()
 {
@@ -21,16 +20,16 @@ void main()
     vec4 normalRoughness = texture(gNormalRoughness, TexCoords);
     vec4 positionMetallic = texture(gPositionMetallic, TexCoords);
     
-    vec3 worldPos = positionMetallic.xyz;
-    vec3 albedo = albedoAO.rgb;
-    vec3 normal = normalRoughness.rgb;
+    vec3 viewPos    = positionMetallic.xyz;
+    vec3 albedo     = albedoAO.rgb;
+    vec3 normal     = normalRoughness.rgb;
     float roughness = normalRoughness.a;
-    float metallic = positionMetallic.a;
+    float metallic  = positionMetallic.a;
        
     // lighting input
     vec3 N = normalize(normal);
-    vec3 V = normalize(CamPos - worldPos);
-    vec3 L = normalize(-lightDir);
+    vec3 V = normalize(-viewPos); // view-space camera is (0, 0, 0): (0, 0, 0) - viewPos = -viewPos
+    vec3 L = normalize(-LightDir);
     vec3 H = normalize(V + L);     
 	              
     vec3 F0 = vec3(0.04); 
@@ -55,7 +54,6 @@ void main()
     // add to outgoing radiance Lo
     float NdotL = max(dot(N, L), 0.0);                
     vec3 Lo = (kD * albedo / PI + specular) * radiance * NdotL; 
-
     
     FragColor.rgb = Lo;
     FragColor.a = 1.0;

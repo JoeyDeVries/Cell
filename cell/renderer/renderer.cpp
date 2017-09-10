@@ -262,7 +262,7 @@ namespace Cell
         // directional lights
         for (auto it = m_DirectionalLights.begin(); it != m_DirectionalLights.end(); ++it)
         {
-            renderDeferredDirLight(*it);
+            //renderDeferredDirLight(*it);
         }
         // point lights
         glCullFace(GL_FRONT);
@@ -374,7 +374,7 @@ namespace Cell
         // 8. final post-processing steps, blitting to default framebuffer
         m_PostProcessor->Blit(this, postProcessingCommands.size() % 2 == 0 ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0));
 
-        Blit(m_PostProcessor->SSAOOutput, nullptr);
+        //Blit(m_PostProcessor->SSAOOutput, nullptr);
 
         // clear the command buffer s.t. the next frame/call can start from an empty slate again.
         m_CommandBuffer.Clear();
@@ -784,7 +784,8 @@ namespace Cell
         m_PostProcessor->SSAOOutput->Bind(6);
 
         ambientShader->Use();
-        ambientShader->SetVector("CamPos", m_Camera->Position);
+        ambientShader->SetVector("camPos", m_Camera->Position);
+        ambientShader->SetMatrix("view", m_Camera->View);
 
         renderMesh(m_NDCPlane, ambientShader);
     }
@@ -794,9 +795,10 @@ namespace Cell
         Shader* dirShader = m_MaterialLibrary->deferredDirectionalShader;
 
         dirShader->Use();
-        dirShader->SetVector("CamPos", m_Camera->Position);
+        dirShader->SetVector("camPos", m_Camera->Position);
         dirShader->SetVector("lightDir", light->Direction);
         dirShader->SetVector("lightColor", math::normalize(light->Color) * light->Intensity); // TODO(Joey): enforce light normalization with light setter?
+        dirShader->SetMatrix("view", m_Camera->View);
 
         renderMesh(m_NDCPlane, dirShader);
     }
@@ -806,7 +808,7 @@ namespace Cell
         Shader *pointShader = m_MaterialLibrary->deferredPointShader;
 
         pointShader->Use();
-        pointShader->SetVector("CamPos", m_Camera->Position);
+        pointShader->SetVector("camPos", m_Camera->Position);
         pointShader->SetVector("lightPos", light->Position);
         pointShader->SetFloat("lightRadius", light->Radius);
         pointShader->SetVector("lightColor", math::normalize(light->Color) * light->Intensity);

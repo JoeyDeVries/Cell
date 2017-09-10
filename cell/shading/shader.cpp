@@ -222,6 +222,31 @@ namespace Cell
             logUniformNotFound(location);
     }
     // ------------------------------------------------------------------------
+    void Shader::SetVectorArray(std::string location, int size, const std::vector<math::vec2>& values)
+    {
+        // TODO(Joey): figure out if we can get these beforehand as well?
+        unsigned int loc = glGetUniformLocation(ID, location.c_str());
+        if (loc >= 0)
+        {
+            glUniform2fv(loc, size, (float*)(&values[0].x));
+        }
+    }
+    // ------------------------------------------------------------------------
+    void Shader::SetVectorArray(std::string location, int size, const std::vector<math::vec3>& values)
+    {
+        // TODO(Joey): figure out if we can get these beforehand as well?
+        unsigned int loc = glGetUniformLocation(ID, location.c_str());
+        if (loc >= 0)
+        {
+            glUniform3fv(loc, size, (float*)(&values[0].x));
+        }
+    }
+    // ------------------------------------------------------------------------
+    void Shader::SetVectorArray(std::string location, int size, const std::vector<math::vec4>& values)
+    {
+
+    }
+    // ------------------------------------------------------------------------
     void Shader::SetMatrix(std::string location, math::mat2 value)
     {
         int loc = getUniformLocation(location);

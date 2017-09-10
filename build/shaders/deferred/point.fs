@@ -3,6 +3,8 @@ out vec4 FragColor;
 
 in vec3 FragPos;
 in vec4 ScreenPos;
+in vec3 CamPos;
+in vec3 LightPos;
 
 #include ../common/constants.glsl
 #include ../common/brdf.glsl
@@ -11,11 +13,8 @@ uniform sampler2D gPositionMetallic;
 uniform sampler2D gNormalRoughness;
 uniform sampler2D gAlbedoAO;
 
-uniform vec3 lightPos;
 uniform vec3 lightColor;
 uniform float lightRadius;
-
-uniform vec3 CamPos;
 
 void main()
 {
@@ -25,23 +24,23 @@ void main()
     vec4 normalRoughness = texture(gNormalRoughness, uv);
     vec4 positionMetallic = texture(gPositionMetallic, uv);
     
-    vec3 worldPos = positionMetallic.xyz;
-    vec3 albedo = albedoAO.rgb;
-    vec3 normal = normalRoughness.rgb;
+    vec3 viewPos    = positionMetallic.xyz;
+    vec3 albedo     = albedoAO.rgb;
+    vec3 normal     = normalRoughness.rgb;
     float roughness = normalRoughness.a;
-    float metallic = positionMetallic.a;
+    float metallic  = positionMetallic.a;
        
     // lighting input
     vec3 N = normalize(normal);
-    vec3 V = normalize(CamPos - worldPos);
-    vec3 L = normalize(lightPos - worldPos);
+    vec3 V = normalize(-viewPos); // view-space camera is (0, 0, 0): (0, 0, 0) - viewPos = -viewPos
+    vec3 L = normalize(LightPos - viewPos);
     vec3 H = normalize(V + L);     
 	              
     vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo, metallic);
           
     // calculate light radiance    
-    float attenuation = max(0.95 - length(worldPos - lightPos) / lightRadius, 0.0);
+    float attenuation = max(0.95 - length(viewPos - LightPos) / lightRadius, 0.0);
     vec3 radiance = lightColor * attenuation;        
         
     // cook-torrance brdf

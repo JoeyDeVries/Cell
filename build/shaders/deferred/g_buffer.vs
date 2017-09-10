@@ -18,10 +18,10 @@ float time;
 void main()
 {
 	UV0 = aUV0;
-	FragPos = vec3(model * vec4(aPos, 1.0));
-    
-    vec3 N = normalize(mat3(model) * aNormal);
-    vec3 T = normalize(mat3(model) * aTangent);
+	FragPos = vec3(view * model * vec4(aPos, 1.0));
+        
+    vec3 N = normalize(mat3(view * model) * aNormal);
+    vec3 T = normalize(mat3(view * model) * aTangent);
     T = normalize(T - dot(N, T) * N);
     // vec3 B = cross(N, T);
     vec3 B = normalize(mat3(model) * aBitangent);
@@ -33,5 +33,5 @@ void main()
     
     TBN = mat3(T, B, N);
 	
-	gl_Position =  projection * view * vec4(FragPos, 1.0);
+	gl_Position =  projection * vec4(FragPos, 1.0);
 }

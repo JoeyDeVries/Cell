@@ -108,8 +108,8 @@ namespace Cell
         postProcessingMaterial = new Material(postProcessingShader);
 
         // deferred
-        deferredAmbientShader     = Cell::Resources::LoadShader("deferred ambient", "shaders/screen_quad.vs", "shaders/deferred/ambient.fs");
-        deferredDirectionalShader = Cell::Resources::LoadShader("deferred directional", "shaders/screen_quad.vs", "shaders/deferred/directional.fs");
+        deferredAmbientShader     = Cell::Resources::LoadShader("deferred ambient", "shaders/deferred/screen_ambient.vs", "shaders/deferred/ambient.fs");
+        deferredDirectionalShader = Cell::Resources::LoadShader("deferred directional", "shaders/deferred/screen_directional.vs", "shaders/deferred/directional.fs");
         deferredPointShader       = Cell::Resources::LoadShader("deferred point", "shaders/deferred/point.vs", "shaders/deferred/point.fs");
 
         deferredAmbientShader->Use();

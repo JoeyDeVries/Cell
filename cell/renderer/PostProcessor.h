@@ -22,15 +22,15 @@ namespace Cell
         Texture* BloomOutput;
 
         // toggles
-        bool Sepia    = false;
-        bool Vignette = false;
+        bool Sepia    = true;
+        bool Vignette = true;
         bool Bloom    = true;
         bool SSAO     = true;
         bool TXAA     = true;
         bool SSR      = true;
 
         // ssao
-        int SSAOKernelSize;
+        int SSAOKernelSize = 32;
     private:
         // global post-process state
         Shader*       m_PostProcessShader;
@@ -40,7 +40,7 @@ namespace Cell
         RenderTarget* m_SSAORenderTarget;
         Shader* m_SSAOShader;
         Shader* m_SSAOBlur;
-        std::vector<math::vec3> m_SSAOKernel;
+        //std::vector<math::vec3> m_SSAOKernel;
         Texture* m_SSAONoise;
         // bloom
         Shader* m_BloomBlur;

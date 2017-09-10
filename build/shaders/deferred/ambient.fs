@@ -2,6 +2,7 @@
 out vec4 FragColor;
 
 in vec2 TexCoords;
+in vec3 CamPos;
 
 #include ../common/constants.glsl
 #include ../common/brdf.glsl
@@ -16,27 +17,23 @@ uniform sampler2D gAlbedoAO;
 
 uniform sampler2D SSAO;
 
-uniform vec3 CamPos;
-
 void main()
 {
     // extract data from GBuffer
-    vec4 albedoAO = texture(gAlbedoAO, TexCoords);
-    vec4 normalRoughness = texture(gNormalRoughness, TexCoords);
+    vec4 albedoAO         = texture(gAlbedoAO, TexCoords);
+    vec4 normalRoughness  = texture(gNormalRoughness, TexCoords);
     vec4 positionMetallic = texture(gPositionMetallic, TexCoords);
-    float ao = texture(SSAO, TexCoords).r;
+    float ao              = texture(SSAO, TexCoords).r;
     
-    vec3 worldPos = positionMetallic.xyz;
-    vec3 albedo = albedoAO.rgb;
-    vec3 normal = normalRoughness.rgb;
+    vec3 viewPos    = positionMetallic.xyz;
+    vec3 albedo     = albedoAO.rgb;
+    vec3 normal     = normalRoughness.rgb;
     float roughness = normalRoughness.a;
-    // float roughness = 0.0f;
-    float metallic = positionMetallic.a;
-    // float metallic = 1.0f;
+    float metallic  = positionMetallic.a;
     
     // lighting data
     vec3 N = normalize(normal);
-    vec3 V = normalize(CamPos - worldPos);
+    vec3 V = normalize(-viewPos); // view-space camera is (0, 0, 0): (0, 0, 0) - viewPos = -viewPos
 	vec3 R = reflect(-V, N); 
 	
 	// calculate color/reflectance at normal incidence
