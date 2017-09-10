@@ -62,5 +62,7 @@ void main()
     vec3 Lo = (kD * albedo / PI + specular) * radiance * NdotL; 
 
     FragColor.rgb = Lo;
+    // FragColor.rgb = vec3(uv * 10.0, 0.0);
+    // FragColor.rgb = vec3(1.0, 0.0, 0.0);
     FragColor.a = 1.0;
 }

@@ -183,6 +183,7 @@
     <ClCompile Include="renderer\MaterialLibrary.cpp" />
     <ClCompile Include="renderer\PBR.cpp" />
     <ClCompile Include="renderer\pbr_capture.cpp" />
+    <ClCompile Include="renderer\PostProcessor.cpp" />
     <ClCompile Include="renderer\renderer.cpp" />
     <ClCompile Include="renderer\render_target.cpp" />
     <ClCompile Include="resources\mesh_loader.cpp" />
@@ -219,6 +220,7 @@
     <ClInclude Include="renderer\MaterialLibrary.h" />
     <ClInclude Include="renderer\PBR.h" />
     <ClInclude Include="renderer\pbr_capture.h" />
+    <ClInclude Include="renderer\PostProcessor.h" />
     <ClInclude Include="renderer\renderer.h" />
     <ClInclude Include="renderer\render_command.h" />
     <ClInclude Include="renderer\render_target.h" />

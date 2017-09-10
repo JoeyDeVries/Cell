@@ -3,6 +3,7 @@
 #include "render_target.h"
 #include "MaterialLibrary.h"
 #include "PBR.h"
+#include "PostProcessor.h"
 
 #include "../mesh/mesh.h"
 #include "../mesh/cube.h"
@@ -46,6 +47,7 @@ namespace Cell
 
         // post-processing
         delete m_PostProcessTarget1;
+        delete m_PostProcessor;
 
         // pbr
         delete m_PBR;      
@@ -61,6 +63,7 @@ namespace Cell
 
         m_CustomTarget = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, true);
         m_PostProcessTarget1 = new RenderTarget(1, 1, GL_UNSIGNED_BYTE, 1, false);
+        m_PostProcessor = new PostProcessor();
 
         // lights
         m_DebugLightMesh = new Sphere(16, 16);
@@ -242,6 +245,15 @@ namespace Cell
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         // 2. Render deferred shader for each light (full quad for directional, spheres for point lights)
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
+
+        // bind gbuffer
+        m_GBuffer->GetColorTexture(0)->Bind(0);
+        m_GBuffer->GetColorTexture(1)->Bind(1);
+        m_GBuffer->GetColorTexture(2)->Bind(2);
+        
         // ambient lighting
         renderDeferredAmbient();
 
@@ -257,6 +269,10 @@ namespace Cell
             renderDeferredPointLight(*it);
         }
         glCullFace(GL_BACK);
+
+        glEnable(GL_DEPTH_TEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDisable(GL_BLEND);
 
         attachments[1] = GL_NONE;
         attachments[2] = GL_NONE;
@@ -356,8 +372,9 @@ namespace Cell
 
         // NOTE(Joey): then do a final blit to the default framebuffer, with gamma correction and 
         // tone mapping post-processing step.
-        Blit(postProcessingCommands.size() % 2 == 0 ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0),
-             nullptr, m_MaterialLibrary->postProcessingMaterial);
+        m_PostProcessor->Blit(this, postProcessingCommands.size() % 2 == 0 ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0));
+      /*  Blit(postProcessingCommands.size() % 2 == 0 ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0),
+             nullptr, m_MaterialLibrary->postProcessingMaterial);*/
 
         //Blit(m_GBuffer->GetColorTexture(0));
 
@@ -379,7 +396,7 @@ namespace Cell
                         Material     *material, 
                         std::string   textureUniformName)
     {
-        // NOTE(Joey): if a destination target is given, bind to its framebuffer
+        // if a destination target is given, bind to its framebuffer
         if (dst)
         {
             glViewport(0, 0, dst->Width, dst->Height);
@@ -389,10 +406,11 @@ namespace Cell
             else
                 glClear(GL_COLOR_BUFFER_BIT);
         }
-        // NOTE(Joey): else we bind to the default framebuffer
+        // else we bind to the default framebuffer
         else
         {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         }
         // if no material is given, use default blit material
@@ -400,23 +418,16 @@ namespace Cell
         {
             material = m_MaterialLibrary->defaultBlitMaterial;
         }
-        // NOTE(Joey): if a source render target is given, use its color buffer
-        // as input to the material shader.
+        // if a source render target is given, use its color buffer as input to material shader.
         if (src)
         {
             material->SetTexture(textureUniformName, src, 0);
         }
-        // NOTE(Joey): render screen-space material to quad which will be 
-        // stored/displayer inside dst's buffers.
+        // render screen-space material to quad which will be displayed in dst's buffers.
         RenderCommand command;
         command.Material = material;
         command.Mesh = m_NDCPlane;
         renderCustomCommand(&command, nullptr);
-
-        // NOTE(Joey): revert back to default framebuffer
-        // NOTE(Joey): is this necessary? do we want this?
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, m_RenderSize.x, m_RenderSize.y); 
     }
     // ------------------------------------------------------------------------
     void Renderer::RenderToCubemap(SceneNode *  scene, 
@@ -723,7 +734,22 @@ namespace Cell
             }
         }
 
+        renderMesh(mesh, material->GetShader());
         // NOTE(Joey): bind OpenGL render state
+     /*   glBindVertexArray(mesh->m_VAO);
+        if (mesh->Indices.size() > 0)
+        {
+            glDrawElements(mesh->Topology == TRIANGLE_STRIP ? GL_TRIANGLE_STRIP : GL_TRIANGLES, mesh->Indices.size(), GL_UNSIGNED_INT, 0);
+        }
+        else
+        {
+            glDrawArrays(mesh->Topology == TRIANGLE_STRIP ? GL_TRIANGLE_STRIP : GL_TRIANGLES, 0, mesh->Positions.size());
+        }*/
+        //glBindVertexArray(0); // NOTE(Joey): consider skipping this call without damaging the render pipeline
+    }
+    // --------------------------------------------------------------------------------------------
+    void Renderer::renderMesh(Mesh* mesh, Shader* shader)
+    {
         glBindVertexArray(mesh->m_VAO);
         if (mesh->Indices.size() > 0)
         {
@@ -733,7 +759,6 @@ namespace Cell
         {
             glDrawArrays(mesh->Topology == TRIANGLE_STRIP ? GL_TRIANGLE_STRIP : GL_TRIANGLES, 0, mesh->Positions.size());
         }
-        glBindVertexArray(0); // NOTE(Joey): consider skipping this call without damaging the render pipeline
     }
     // --------------------------------------------------------------------------------------------
     void Renderer::updateGlobalUBOs()
@@ -753,30 +778,50 @@ namespace Cell
     void Renderer::renderDeferredAmbient()
     {
         PBRCapture *iblCapture = m_PBR->GetClosestCapture(math::vec3(0.0f));
-        m_MaterialLibrary->deferredAmbientMaterial->SetTextureCube("envIrradiance", iblCapture->Irradiance, 3);
-        m_MaterialLibrary->deferredAmbientMaterial->SetTextureCube("envPrefilter", iblCapture->Prefiltered, 4);
-        m_MaterialLibrary->deferredAmbientMaterial->SetTexture("BRDFLUT", m_PBR->m_RenderTargetBRDFLUT->GetColorTexture(0), 5);
+        Shader* ambientShader = m_MaterialLibrary->deferredAmbientShader;
 
-        RenderCommand command;
-        command.Material = m_MaterialLibrary->deferredAmbientMaterial;
-        command.Mesh = m_NDCPlane;
-        renderCustomCommand(&command, m_Camera);
+        iblCapture->Irradiance->Bind(3);
+        iblCapture->Prefiltered->Bind(4);
+        m_PBR->m_RenderTargetBRDFLUT->GetColorTexture(0)->Bind(5);
+
+        ambientShader->Use();
+        ambientShader->SetVector("CamPos", m_Camera->Position);
+
+        renderMesh(m_NDCPlane, ambientShader);
     }
     // --------------------------------------------------------------------------------------------
     void Renderer::renderDeferredDirLight(DirectionalLight *light)
     {
-        m_MaterialLibrary->deferredDirectionalMaterial->SetVector("lightDir", light->Direction);
-        m_MaterialLibrary->deferredDirectionalMaterial->SetVector("lightColor", math::normalize(light->Color) * light->Intensity); // TODO(Joey): enforce light normalization with light setter?
+        Shader* dirShader = m_MaterialLibrary->deferredDirectionalShader;
 
-        RenderCommand command;
-        command.Material = m_MaterialLibrary->deferredDirectionalMaterial;
-        command.Mesh = m_NDCPlane;
-        renderCustomCommand(&command, m_Camera);
+        dirShader->Use();
+        dirShader->SetVector("CamPos", m_Camera->Position);
+        dirShader->SetVector("lightDir", light->Direction);
+        dirShader->SetVector("lightColor", math::normalize(light->Color) * light->Intensity); // TODO(Joey): enforce light normalization with light setter?
+
+        renderMesh(m_NDCPlane, dirShader);
     }
     // --------------------------------------------------------------------------------------------
     void Renderer::renderDeferredPointLight(PointLight *light)
     {
-        m_MaterialLibrary->deferredPointMaterial->SetVector("lightPos", light->Position);
+        Shader *pointShader = m_MaterialLibrary->deferredPointShader;
+
+        pointShader->Use();
+        pointShader->SetVector("CamPos", m_Camera->Position);
+        pointShader->SetVector("lightPos", light->Position);
+        pointShader->SetFloat("lightRadius", light->Radius);
+        pointShader->SetVector("lightColor", math::normalize(light->Color) * light->Intensity);
+
+        math::mat4 model;
+        math::translate(model, light->Position);
+        math::scale(model, math::vec3(light->Radius));
+        pointShader->SetMatrix("projection", m_Camera->Projection);
+        pointShader->SetMatrix("view", m_Camera->View);
+        pointShader->SetMatrix("model", model);
+
+        renderMesh(m_DeferredPointMesh, pointShader);
+
+       /* m_MaterialLibrary->deferredPointMaterial->SetVector("lightPos", light->Position);
         m_MaterialLibrary->deferredPointMaterial->SetVector("lightColor", math::normalize(light->Color) * light->Intensity);
         m_MaterialLibrary->deferredPointMaterial->SetFloat("lightRadius", light->Radius);
 
@@ -788,6 +833,6 @@ namespace Cell
         math::scale(model, math::vec3(light->Radius));
         command.Transform = model;
 
-        renderCustomCommand(&command, m_Camera);
+        renderCustomCommand(&command, m_Camera);*/
     }
 }

@@ -102,40 +102,31 @@ namespace Cell
     void MaterialLibrary::generateInternalMaterials(RenderTarget *gBuffer)
     {
         // post-processing
-        Shader *defaultBlitShader = Cell::Resources::LoadShader("blit", "shaders/screen_quad.vs", "shaders/default_blit.fs");
+        Shader* defaultBlitShader = Cell::Resources::LoadShader("blit", "shaders/screen_quad.vs", "shaders/default_blit.fs");
         defaultBlitMaterial = new Material(defaultBlitShader);
-        Shader *postProcessingShader = Cell::Resources::LoadShader("post processing", "shaders/screen_quad.vs", "shaders/post_processing.fs");
+        Shader* postProcessingShader = Cell::Resources::LoadShader("post processing", "shaders/screen_quad.vs", "shaders/post_processing.fs");
         postProcessingMaterial = new Material(postProcessingShader);
-      
-        // deferred
-        Cell::Resources::LoadShader("deferred ambient", "shaders/screen_quad.vs", "shaders/deferred/ambient.fs");
-        deferredAmbientMaterial = new Material(Cell::Resources::GetShader("deferred ambient"));
-        Cell::Resources::LoadShader("deferred directional", "shaders/screen_quad.vs", "shaders/deferred/directional.fs");
-        deferredDirectionalMaterial = new Material(Cell::Resources::GetShader("deferred directional"));
-        Cell::Resources::LoadShader("deferred point", "shaders/deferred/point.vs", "shaders/deferred/point.fs");
-        deferredPointMaterial = new Material(Cell::Resources::GetShader("deferred point"));
 
-        deferredAmbientMaterial->Blend = true;
-        deferredAmbientMaterial->BlendSrc = GL_ONE;
-        deferredAmbientMaterial->BlendDst = GL_ONE;
-        deferredAmbientMaterial->DepthTest = false;
-        deferredAmbientMaterial->SetTexture("gPositionMetallic", gBuffer->GetColorTexture(0), 0);
-        deferredAmbientMaterial->SetTexture("gNormalRoughness", gBuffer->GetColorTexture(1), 1);
-        deferredAmbientMaterial->SetTexture("gAlbedoAO", gBuffer->GetColorTexture(2), 2);
-        deferredDirectionalMaterial->Blend = true;
-        deferredDirectionalMaterial->BlendSrc = GL_ONE;
-        deferredDirectionalMaterial->BlendDst = GL_ONE;
-        deferredDirectionalMaterial->DepthTest = false;
-        deferredDirectionalMaterial->SetTexture("gPositionMetallic", gBuffer->GetColorTexture(0), 0);
-        deferredDirectionalMaterial->SetTexture("gNormalRoughness", gBuffer->GetColorTexture(1), 1);
-        deferredDirectionalMaterial->SetTexture("gAlbedoAO", gBuffer->GetColorTexture(2), 2);
-        deferredPointMaterial->Blend = true;
-        deferredPointMaterial->BlendSrc = GL_ONE;
-        deferredPointMaterial->BlendDst = GL_ONE;
-        deferredPointMaterial->DepthTest = false;
-        deferredPointMaterial->SetTexture("gPositionMetallic", gBuffer->GetColorTexture(0), 0);
-        deferredPointMaterial->SetTexture("gNormalRoughness", gBuffer->GetColorTexture(1), 1);
-        deferredPointMaterial->SetTexture("gAlbedoAO", gBuffer->GetColorTexture(2), 2);
+        // deferred
+        deferredAmbientShader     = Cell::Resources::LoadShader("deferred ambient", "shaders/screen_quad.vs", "shaders/deferred/ambient.fs");
+        deferredDirectionalShader = Cell::Resources::LoadShader("deferred directional", "shaders/screen_quad.vs", "shaders/deferred/directional.fs");
+        deferredPointShader       = Cell::Resources::LoadShader("deferred point", "shaders/deferred/point.vs", "shaders/deferred/point.fs");
+
+        deferredAmbientShader->Use();
+        deferredAmbientShader->SetInt("gPositionMetallic", 0);
+        deferredAmbientShader->SetInt("gNormalRoughness", 1);
+        deferredAmbientShader->SetInt("gAlbedoAO", 2);
+        deferredAmbientShader->SetInt("envIrradiance", 3);
+        deferredAmbientShader->SetInt("envPrefilter", 4);
+        deferredAmbientShader->SetInt("BRDFLUT", 5);
+        deferredDirectionalShader->Use();
+        deferredDirectionalShader->SetInt("gPositionMetallic", 0);
+        deferredDirectionalShader->SetInt("gNormalRoughness", 1);
+        deferredDirectionalShader->SetInt("gAlbedoAO", 2);
+        deferredPointShader->Use();
+        deferredPointShader->SetInt("gPositionMetallic", 0);
+        deferredPointShader->SetInt("gNormalRoughness", 1);
+        deferredPointShader->SetInt("gAlbedoAO", 2);
 
         // debug
         Shader *debugLightShader = Resources::LoadShader("debug light", "shaders/light.vs", "shaders/light.fs");

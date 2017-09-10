@@ -41,6 +41,11 @@ Feature List (complete:base-functionality)
     3. Sort render commands per pass; execute (batch where necessary) to minimize state changes.
 7. Configure Deferred rendering pipeline:
     1. Configure render buffer w/ geometry pass.
+    2. Build fully functional shaders w/ Blinn-Phong (now PBR) lighting.
+    3. Normal mapping.
+    4. Environment lighting.
+	5. Environment reflection support.
+    6. Number of lights optimization.
 8. Functioning PBR render pipeline.
 	1. Calculate diffuse integral and store into cubemap.
 	2. Prefilter environment map w/ integral and store into cubemap as diffuse integral.
@@ -55,14 +60,16 @@ Feature List (work-in-progress)
 1. Add Camera functionality; add multiple camera variations: FPS, FlightSim, ArcBall.
 2. Configure Deferred rendering pipeline:
 	1. Set up light architecture; types of light, material interaction, volume calculation.
-	2. Build fully functional shaders w/ Blinn-Phong lighting.
-	3. Normal mapping.
-	4. Fog.
-	5. Shadow Mapping (default, omni, CSM).
-	6. Environment lighting.
-	7. Environment reflection support.
-	8. Per-object motion blur.
-	9. Number of lights optimization.
+	2. Fog.
+	3. Shadow Mapping (default, omni, CSM).
+	4. Per-object motion blur.
+3. Post-processing
+    1. HDR/Gamma/Tone-mapping
+    2. Bloom
+    3. SSAO 
+    4. Vignette
+    5. SSR
+    6. TXAA
 		
 Feature List (todo)
 ------
@@ -78,8 +85,8 @@ Feature List (todo)
 	2. Spatial partitioning.
 	3. Portal rendering (overkill perhaps)?
     4. Cache GL state.
-    5. Store material-independent uniforms in UBO; together with barely changing shader parameters.
-11. Skeletal animation:
+    5. Store material-independent uniforms in UBO; together with barely changing shader parameters.    
+12. Skeletal animation:
 	1. Define Bone structure on top of current scene hierarchy system.
 	2. Load skeletal mesh from Assimp as skeletal hierarchy as well? Think of different design solutions that would work well in current environment.
 	3. Animation blending.

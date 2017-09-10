@@ -21,12 +21,12 @@ namespace Cell
         std::vector<Material*> m_Materials;
 
         // internal render-specific materials
-        Material *defaultBlitMaterial;
-        Material *postProcessingMaterial; // TODO(Joey): move to post-processing toolkit
+        Material* defaultBlitMaterial;
+        Material* postProcessingMaterial; // TODO(Joey): move to post-processing toolkit
 
-        Material *deferredAmbientMaterial;
-        Material *deferredDirectionalMaterial;
-        Material *deferredPointMaterial;
+        Shader *deferredAmbientShader;
+        Shader* deferredDirectionalShader;
+        Shader* deferredPointShader;
 
         Material *debugLightMaterial;
 

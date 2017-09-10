@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
     secondTorus->AddChild(thirdTorus);
     thirdTorus->AddChild(sphereNode);
 
-    mainTorus->Scale    = math::vec3(2.0f);
+    mainTorus->Scale    = math::vec3(1.0f);
     mainTorus->Position = math::vec3(0.0f, 2.5f, 0.0f);
     secondTorus->Scale  = math::vec3(0.65f);
     thirdTorus->Scale   = math::vec3(0.65f);
@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
 
     Cell::DirectionalLight dirLight;
     dirLight.Direction = math::vec3(-0.3f, -1.0f, 0.5f);
-    dirLight.Color = math::vec3(1.0f, 1.0f, 0.6f);
+    dirLight.Color = math::vec3(1.0f, 0.89f, 0.7f);
     dirLight.Intensity = 5.0f;
     renderer->AddLight(&dirLight);
 

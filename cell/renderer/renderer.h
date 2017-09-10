@@ -31,6 +31,7 @@ namespace Cell
     class RenderTarget;
     class MaterialLibrary;
     class PBR;
+    class PostProcessor;
 
     /* NOTE(Joey):
 
@@ -42,6 +43,7 @@ namespace Cell
     */
     class Renderer
     {
+        friend PostProcessor;
     private:
         // render state
         CommandBuffer m_CommandBuffer;
@@ -60,11 +62,12 @@ namespace Cell
         Camera       *m_Camera;
 
         // render-targets/post
-        std::vector<RenderTarget*>  m_RenderTargetsCustom;
-        RenderTarget               *m_CurrentRenderTargetCustom = nullptr;
-        RenderTarget               *m_CustomTarget;
-        RenderTarget               *m_PostProcessTarget1;
-        Quad                       *m_NDCPlane;
+        std::vector<RenderTarget*> m_RenderTargetsCustom;
+        RenderTarget*              m_CurrentRenderTargetCustom = nullptr;
+        RenderTarget*              m_CustomTarget;
+        RenderTarget*              m_PostProcessTarget1;
+        PostProcessor*             m_PostProcessor;
+        Quad*                      m_NDCPlane;
         unsigned int m_FramebufferCubemap; // NOTE(Joey): cubemap render targets are a very specific case so we can do these without abstractions.
         unsigned int m_CubemapDepthRBO;
        
@@ -112,6 +115,8 @@ namespace Cell
         void renderDeferredCommand(RenderCommand *command, Camera *camera);
         // renderer-specific logic for rendering a custom (forward-pass) command
         void renderCustomCommand(RenderCommand *command, Camera *camera);
+        // minimal render logic to render a mesh 
+        void renderMesh(Mesh* mesh, Shader* shader);
         // updates the global uniform buffer objects
         void updateGlobalUBOs();
         // returns the currently active render target
