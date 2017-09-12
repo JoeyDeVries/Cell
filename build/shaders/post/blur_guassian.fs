@@ -5,57 +5,32 @@ in vec2 TexCoords;
 
 uniform sampler2D TexSrc;
 
-// post-process effect toggles
-uniform int Vignette;
-uniform int Sepia;
-uniform int Bloom;
-uniform int SSAO;
+uniform bool horizontal;
+uniform float range;
 
-// settings: sepia
-const vec3 sepiaColor = vec3(1.2, 1.0, 0.8);
-
-// settings: vignette
-
-// settings: bloom
-uniform sampler2D TexBloom;
-
-// settings: ssao
-
-
+const float weights[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
 
 void main()
-{
-    vec3 color = texture(TexSrc, TexCoords).rgb;
-    vec3 grayscale = vec3(dot(color, vec3(0.299, 0.587, 0.114)));
-       
-    if(Bloom)
+{             
+    vec2 texSize = textureSize(TexSrc, 0); 
+    // vec2 texSize = vec2(247.32, 271.91);
+    vec2 tex_offset = (1.0 / texSize) * range; // gets size of single texel
+    vec3 result = texture(TexSrc, TexCoords).rgb * weights[0]; // current fragment's contribution
+    if(horizontal)
     {
-        const float strength = 1.0;
-        vec3 bloom = texture(TexBloom, TexCoords).rgb;
-        bloom *= strength;
-        color += bloom;
+        for(int i = 1; i < 5; ++i)
+        {
+            result += texture(TexSrc, TexCoords + vec2(tex_offset.x * i, 0.0)).rgb * weights[i];
+            result += texture(TexSrc, TexCoords - vec2(tex_offset.x * i, 0.0)).rgb * weights[i];
+        }
     }
-    
-    // HDR tonemapping
-    float exposure = 1.0;
-	// color = vec3(1.0) - exp(-color * exposure);	
-    color = color / (color + vec3(1.0));
-	// gamma correct
-	color = pow(color, vec3(1.0/2.2));     
-    
-    if(Sepia)
+    else
     {
-        color = mix(color, grayscale * sepiaColor, 0.7);
+        for(int i = 1; i < 5; ++i)
+        {
+            result += texture(TexSrc, TexCoords + vec2(0.0, tex_offset.y * i)).rgb * weights[i];
+            result += texture(TexSrc, TexCoords - vec2(0.0, tex_offset.y * i)).rgb * weights[i];
+        }
     }
-    if(Vignette)
-    {
-        const float strength = 10.0;
-        const float power = 0.1;
-        vec2 tuv = TexCoords * (vec2(1.0) - TexCoords.yx);
-        float vign = tuv.x*tuv.y * strength;
-        vign = pow(vign, power);
-        color *= vign;
-    }
-
-    FragColor = vec4(color, 1.0);
+    FragColor = vec4(result, 1.0);
 }

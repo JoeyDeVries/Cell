@@ -39,12 +39,15 @@ namespace Cell
         // ssao
         RenderTarget* m_SSAORenderTarget;
         Shader* m_SSAOShader;
-        Shader* m_SSAOBlur;
+        Shader* m_SSAOBlurShader;
         //std::vector<math::vec3> m_SSAOKernel;
         Texture* m_SSAONoise;
         // bloom
-        Shader* m_BloomBlur;
+        RenderTarget* m_BloomRenderTarget;
+        Shader* m_BloomShader;
+        Shader* m_BloomBlurShader;
         // blur
+        RenderTarget *m_GaussianRenderTarget; // to help with ping-ponging (note: do we want this to be a floating point framebuffer as well?)
         Shader* m_OnePassGaussianShader;
 
     public:
@@ -53,12 +56,13 @@ namespace Cell
 
         // process stages
         void ProcessPreLighting(Renderer* renderer, RenderTarget* gBuffer, Camera *camera);
+        void ProcessPostLighting(Renderer* renderer, RenderTarget* output, Camera *camera);
 
         // blit all combined post-processing steps to default framebuffer
         void Blit(Renderer* renderer, Texture* soruce);
 
     private:
-        //void blur();
+        Texture* blur(Renderer* renderer, Texture* src, RenderTarget *dst, int count, float range);
     };
 }
 #endif

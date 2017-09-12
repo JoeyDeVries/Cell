@@ -168,8 +168,8 @@ int main(int argc, char *argv[])
     Cell::PointLight light;
     light.Radius = 4.0;
     light.Position = math::vec3(0.0f, 1.0f, 0.0f);
-    light.Color = math::vec3(1.0f, 1.0, 1.0f);
-    light.Intensity = 25.0f;
+    light.Color = math::vec3(1.0f, 0.25, 0.25f);
+    light.Intensity = 50.0f;
     //light.RenderMesh = true;
     renderer->AddLight(&light);
 

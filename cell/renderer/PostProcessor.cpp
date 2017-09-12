@@ -22,6 +22,16 @@ namespace Cell
             m_PostProcessShader = Cell::Resources::LoadShader("post process", "shaders/screen_quad.vs", "shaders/post_processing.fs");
             m_PostProcessShader->Use();
             m_PostProcessShader->SetInt("TexSrc", 0);
+            m_PostProcessShader->SetInt("TexBloom", 1);
+        }
+
+        // gaussian blur shader
+        {
+            m_GaussianRenderTarget = new RenderTarget(256, 256, GL_HALF_FLOAT, 1, false); // TODO: 16-bit float? and resolution? make agnostic
+
+            m_OnePassGaussianShader = Cell::Resources::LoadShader("gaussian blur", "shaders/screen_quad.vs", "shaders/post/blur_guassian.fs");
+            m_OnePassGaussianShader->Use();
+            m_OnePassGaussianShader->SetInt("TexSrc", 0);
         }
 
         // ssao
@@ -75,31 +85,60 @@ namespace Cell
 
         // bloom 
         {
+            m_BloomRenderTarget = new RenderTarget(256, 256, GL_HALF_FLOAT, 1, false);
+            BloomOutput = m_BloomRenderTarget->GetColorTexture(0);
 
+            m_BloomShader = Cell::Resources::LoadShader("bloom", "shaders/screen_quad.vs", "shaders/post/bloom.fs");
+            m_SSAOShader->Use();
+            m_SSAOShader->SetInt("HDRScene", 0);
         }
     }
     // --------------------------------------------------------------------------------------------
     PostProcessor::~PostProcessor()
     {
+        delete m_GaussianRenderTarget;
         delete m_SSAONoise;
+        delete m_SSAORenderTarget;
+        delete m_BloomRenderTarget;
     }
     // --------------------------------------------------------------------------------------------
     void PostProcessor::ProcessPreLighting(Renderer* renderer, RenderTarget* gBuffer, Camera* camera)
     {
         // ssao
-        gBuffer->GetColorTexture(0)->Bind(0);
-        gBuffer->GetColorTexture(1)->Bind(1);
-        m_SSAONoise->Bind(2);
-        
-        m_SSAOShader->Use();
-        m_SSAOShader->SetVector("renderSize", renderer->GetRenderSize());
-        m_SSAOShader->SetMatrix("projection", camera->Projection);
-        m_SSAOShader->SetMatrix("view", camera->View);
+        if (SSAO)
+        {
+            gBuffer->GetColorTexture(0)->Bind(0);
+            gBuffer->GetColorTexture(1)->Bind(1);
+            m_SSAONoise->Bind(2);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, m_SSAORenderTarget->ID);
-        glViewport(0, 0, m_SSAORenderTarget->Width, m_SSAORenderTarget->Height);
-        glClear(GL_COLOR_BUFFER_BIT);
-        renderer->renderMesh(renderer->m_NDCPlane, m_SSAOShader);
+            m_SSAOShader->Use();
+            m_SSAOShader->SetVector("renderSize", renderer->GetRenderSize());
+            m_SSAOShader->SetMatrix("projection", camera->Projection);
+            m_SSAOShader->SetMatrix("view", camera->View);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, m_SSAORenderTarget->ID);
+            glViewport(0, 0, m_SSAORenderTarget->Width, m_SSAORenderTarget->Height);
+            glClear(GL_COLOR_BUFFER_BIT);
+            renderer->renderMesh(renderer->m_NDCPlane, m_SSAOShader);
+        }
+    }
+    // --------------------------------------------------------------------------------------------
+    void PostProcessor::ProcessPostLighting(Renderer* renderer, RenderTarget* output, Camera* camera)
+    {
+        // bloom
+        if (Bloom)
+        {
+            m_BloomShader->Use();
+            output->GetColorTexture(0)->Bind(0);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, m_BloomRenderTarget->ID);
+            glViewport(0, 0, m_BloomRenderTarget->Width, m_BloomRenderTarget->Height);
+            glClear(GL_COLOR_BUFFER_BIT);
+            renderer->renderMesh(renderer->m_NDCPlane, m_BloomShader);
+
+            // blur bloom result
+            blur(renderer, m_BloomRenderTarget->GetColorTexture(0), m_BloomRenderTarget, 4, 1.0f);
+        }
     }
     // --------------------------------------------------------------------------------------------
     void PostProcessor::Blit(Renderer* renderer, Texture* source)
@@ -110,13 +149,47 @@ namespace Cell
 
         // bind input texture data
         source->Bind(0);
+        BloomOutput->Bind(1);
 
         // set settings 
         // TODO(Joey): only update settings when changed
         m_PostProcessShader->Use();
         m_PostProcessShader->SetBool("Sepia", Sepia);
         m_PostProcessShader->SetBool("Vignette", Vignette);
+        m_PostProcessShader->SetBool("Bloom", Bloom);
 
         renderer->renderMesh(renderer->m_NDCPlane, m_PostProcessShader);
+    }
+    // --------------------------------------------------------------------------------------------
+    Texture* PostProcessor::blur(Renderer* renderer, Texture* src, RenderTarget *dst, int count, float range)
+    {
+        assert(count >= 2 && count % 2 == 0); // count must be more than 2 and be even
+        m_OnePassGaussianShader->Use();
+        m_OnePassGaussianShader->SetFloat("range", range);
+
+        glViewport(0, 0, m_GaussianRenderTarget->Width, m_GaussianRenderTarget->Height); // TODO: make this resolution-agnostic (now breaks with 2 different resolutions)
+
+        bool horizontal = true; 
+        for (int i = 0; i < count; ++i, horizontal = !horizontal)
+        {
+            m_OnePassGaussianShader->SetBool("horizontal", horizontal);
+            if (i == 0)
+            {
+                src->Bind(0);
+            } 
+            else if(horizontal)
+            {
+                dst->GetColorTexture(0)->Bind(0);
+            }
+            else if (!horizontal)
+            {
+                m_GaussianRenderTarget->GetColorTexture(0)->Bind(0);
+            }
+            glBindFramebuffer(GL_FRAMEBUFFER, horizontal ? m_GaussianRenderTarget->ID : dst->ID);
+            renderer->renderMesh(renderer->m_NDCPlane, m_OnePassGaussianShader);
+        }
+
+        // output resulting (blurred) texture
+        return dst->GetColorTexture(0); 
     }
 }

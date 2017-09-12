@@ -53,6 +53,7 @@ Feature List (complete:base-functionality)
 9. Post-processing
     1. HDR/Gamma/Tone-mapping
     2. Vignette
+    3. SSAO 
 	
 Feature List (work-in-progress)
 ------
@@ -68,9 +69,8 @@ Feature List (work-in-progress)
 	4. Per-object motion blur.
 3. Post-processing
     1. Bloom
-    2. SSAO 
-    3. SSR
-    4. TXAA
+    2. SSR
+    3. TXAA
 		
 Feature List (todo)
 ------

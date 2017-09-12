@@ -237,6 +237,10 @@ namespace Cell
         {
             renderDeferredCommand(&deferredRenderCommands[i], m_Camera);
         }
+
+        attachments[1] = GL_NONE;
+        attachments[2] = GL_NONE;
+        glDrawBuffers(3, attachments);
       
         // 2. do post-processing steps before lighting stage (e.g. SSAO)
         m_PostProcessor->ProcessPreLighting(this, m_GBuffer, m_Camera);
@@ -275,10 +279,6 @@ namespace Cell
         glEnable(GL_DEPTH_TEST);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_BLEND);
-
-        attachments[1] = GL_NONE;
-        attachments[2] = GL_NONE;
-        glDrawBuffers(3, attachments);
 
         // 4. blit depth buffer to default for forward rendering
         glBindFramebuffer(GL_READ_FRAMEBUFFER, m_GBuffer->ID);
@@ -337,7 +337,10 @@ namespace Cell
             }
         }
 
-        // 6. render (debug) visuals
+        // 6. post-processing stage after all lighting calculations 
+        m_PostProcessor->ProcessPostLighting(this, m_CustomTarget, m_Camera);
+
+        // 7. render (debug) visuals
         for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
         {
             if ((*it)->RenderMesh)
@@ -360,7 +363,7 @@ namespace Cell
             }
         }
 
-        // 7. custom post-processing pass
+        // 8. custom post-processing pass
         std::vector<RenderCommand> postProcessingCommands = m_CommandBuffer.GetPostProcessingRenderCommands();
         for (unsigned int i = 0; i < postProcessingCommands.size(); ++i)
         {
@@ -371,10 +374,12 @@ namespace Cell
                  postProcessingCommands[i].Material);
         }
 
-        // 8. final post-processing steps, blitting to default framebuffer
+        // 9. final post-processing steps, blitting to default framebuffer
         m_PostProcessor->Blit(this, postProcessingCommands.size() % 2 == 0 ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0));
 
-        //Blit(m_PostProcessor->SSAOOutput, nullptr);
+        //Blit(m_PostProcessor->BloomOutput, nullptr);
+
+
 
         // clear the command buffer s.t. the next frame/call can start from an empty slate again.
         m_CommandBuffer.Clear();
