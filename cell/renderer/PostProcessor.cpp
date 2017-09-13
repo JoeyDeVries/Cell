@@ -27,7 +27,14 @@ namespace Cell
 
         // gaussian blur shader
         {
-            m_GaussianRenderTarget = new RenderTarget(256, 256, GL_HALF_FLOAT, 1, false); // TODO: 16-bit float? and resolution? make agnostic
+            m_GaussianRT512_H = new RenderTarget(512, 512, GL_HALF_FLOAT, 1, false); // TODO: 16-bit float? and resolution? make agnostic
+            m_GaussianRT512_V = new RenderTarget(512, 512, GL_HALF_FLOAT, 1, false); // TODO: 16-bit float? and resolution? make agnostic
+            m_GaussianRT256_H = new RenderTarget(256, 256, GL_HALF_FLOAT, 1, false); 
+            m_GaussianRT256_V = new RenderTarget(256, 256, GL_HALF_FLOAT, 1, false); 
+            m_GaussianRT128_H = new RenderTarget(128, 128, GL_HALF_FLOAT, 1, false);
+            m_GaussianRT128_V = new RenderTarget(128, 128, GL_HALF_FLOAT, 1, false);
+            m_GaussianRT64_H  = new RenderTarget(64, 64, GL_HALF_FLOAT, 1, false);
+            m_GaussianRT64_V  = new RenderTarget(64, 64, GL_HALF_FLOAT, 1, false);
 
             m_OnePassGaussianShader = Cell::Resources::LoadShader("gaussian blur", "shaders/screen_quad.vs", "shaders/post/blur_guassian.fs");
             m_OnePassGaussianShader->Use();
@@ -85,7 +92,7 @@ namespace Cell
 
         // bloom 
         {
-            m_BloomRenderTarget = new RenderTarget(256, 256, GL_HALF_FLOAT, 1, false);
+            m_BloomRenderTarget = new RenderTarget(1024, 1024, GL_HALF_FLOAT, 1, false);
             BloomOutput = m_BloomRenderTarget->GetColorTexture(0);
 
             m_BloomShader = Cell::Resources::LoadShader("bloom", "shaders/screen_quad.vs", "shaders/post/bloom.fs");
@@ -96,7 +103,14 @@ namespace Cell
     // --------------------------------------------------------------------------------------------
     PostProcessor::~PostProcessor()
     {
-        delete m_GaussianRenderTarget;
+        delete m_GaussianRT512_H;
+        delete m_GaussianRT512_V;
+        delete m_GaussianRT256_H;
+        delete m_GaussianRT256_V;
+        delete m_GaussianRT128_H;
+        delete m_GaussianRT128_V;
+        delete m_GaussianRT64_H;
+        delete m_GaussianRT64_V;
         delete m_SSAONoise;
         delete m_SSAORenderTarget;
         delete m_BloomRenderTarget;
@@ -137,7 +151,12 @@ namespace Cell
             renderer->renderMesh(renderer->m_NDCPlane, m_BloomShader);
 
             // blur bloom result
-            blur(renderer, m_BloomRenderTarget->GetColorTexture(0), m_BloomRenderTarget, 4, 1.0f);
+            Texture* output;
+            output = blur(renderer, m_BloomRenderTarget->GetColorTexture(0), 512, 2, 1.0f);
+            output = blur(renderer, output, 256, 2, 1.0f);
+            output = blur(renderer, output, 128, 2, 1.0f);
+            output = blur(renderer, output, 64, 2, 1.0f);
+            BloomOutput = output;
         }
     }
     // --------------------------------------------------------------------------------------------
@@ -161,15 +180,39 @@ namespace Cell
         renderer->renderMesh(renderer->m_NDCPlane, m_PostProcessShader);
     }
     // --------------------------------------------------------------------------------------------
-    Texture* PostProcessor::blur(Renderer* renderer, Texture* src, RenderTarget *dst, int count, float range)
+    Texture* PostProcessor::blur(Renderer* renderer, Texture* src, int renderSize, int count, float range)
     {
-        assert(count >= 2 && count % 2 == 0); // count must be more than 2 and be even
+        assert(count >= 2 && count % 2 == 0); // count must be more than 2 and be even               
+
+        // pick pre-defined render targets for blur based on render size
+        // TODO: use renderSize as heuristic, or make pre-defined options
+        glViewport(0, 0, renderSize, renderSize); // TODO: make this resolution-agnostic (now breaks with 2 different resolutions)
+        RenderTarget *rtHorizontal;
+        RenderTarget *rtVertical;
+        if (renderSize == 512)
+        {
+            rtHorizontal = m_GaussianRT512_H;
+            rtVertical = m_GaussianRT512_V;
+        } 
+        else if (renderSize == 256)
+        {
+            rtHorizontal = m_GaussianRT256_H;
+            rtVertical = m_GaussianRT256_V;
+        } 
+        else if (renderSize == 128)
+        {
+            rtHorizontal = m_GaussianRT128_H;
+            rtVertical = m_GaussianRT128_V;
+        }
+        else 
+        {
+            rtHorizontal = m_GaussianRT64_H;
+            rtVertical = m_GaussianRT64_V;
+        }
+
+        bool horizontal = true;
         m_OnePassGaussianShader->Use();
-        m_OnePassGaussianShader->SetFloat("range", range);
-
-        glViewport(0, 0, m_GaussianRenderTarget->Width, m_GaussianRenderTarget->Height); // TODO: make this resolution-agnostic (now breaks with 2 different resolutions)
-
-        bool horizontal = true; 
+        m_OnePassGaussianShader->SetFloat("range", range);        
         for (int i = 0; i < count; ++i, horizontal = !horizontal)
         {
             m_OnePassGaussianShader->SetBool("horizontal", horizontal);
@@ -179,17 +222,17 @@ namespace Cell
             } 
             else if(horizontal)
             {
-                dst->GetColorTexture(0)->Bind(0);
+                rtVertical->GetColorTexture(0)->Bind(0);
             }
             else if (!horizontal)
             {
-                m_GaussianRenderTarget->GetColorTexture(0)->Bind(0);
+                rtHorizontal->GetColorTexture(0)->Bind(0);
             }
-            glBindFramebuffer(GL_FRAMEBUFFER, horizontal ? m_GaussianRenderTarget->ID : dst->ID);
+            glBindFramebuffer(GL_FRAMEBUFFER, horizontal ? rtHorizontal->ID : rtVertical->ID);
             renderer->renderMesh(renderer->m_NDCPlane, m_OnePassGaussianShader);
         }
 
         // output resulting (blurred) texture
-        return dst->GetColorTexture(0); 
+        return rtVertical->GetColorTexture(0); 
     }
 }

@@ -266,7 +266,7 @@ namespace Cell
         // directional lights
         for (auto it = m_DirectionalLights.begin(); it != m_DirectionalLights.end(); ++it)
         {
-            //renderDeferredDirLight(*it);
+            renderDeferredDirLight(*it);
         }
         // point lights
         glCullFace(GL_FRONT);

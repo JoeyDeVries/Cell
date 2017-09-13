@@ -47,7 +47,14 @@ namespace Cell
         Shader* m_BloomShader;
         Shader* m_BloomBlurShader;
         // blur
-        RenderTarget *m_GaussianRenderTarget; // to help with ping-ponging (note: do we want this to be a floating point framebuffer as well?)
+        RenderTarget* m_GaussianRT512_H; // to help with ping-ponging (note: do we want this to be a floating point framebuffer as well?)
+        RenderTarget* m_GaussianRT512_V;
+        RenderTarget* m_GaussianRT256_H;
+        RenderTarget* m_GaussianRT256_V;
+        RenderTarget* m_GaussianRT128_H;
+        RenderTarget* m_GaussianRT128_V;
+        RenderTarget* m_GaussianRT64_H;
+        RenderTarget* m_GaussianRT64_V;
         Shader* m_OnePassGaussianShader;
 
     public:
@@ -62,7 +69,7 @@ namespace Cell
         void Blit(Renderer* renderer, Texture* soruce);
 
     private:
-        Texture* blur(Renderer* renderer, Texture* src, RenderTarget *dst, int count, float range);
+        Texture* blur(Renderer* renderer, Texture* src, int renderSize, int count, float range = 1.0f);
     };
 }
 #endif

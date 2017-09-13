@@ -30,7 +30,7 @@ void main()
        
     if(Bloom)
     {
-        const float strength = 1.0;
+        const float strength = 3.0;
         vec3 bloom = texture(TexBloom, TexCoords).rgb;
         bloom *= strength;
         color += bloom;

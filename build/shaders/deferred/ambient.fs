@@ -17,6 +17,8 @@ uniform sampler2D gAlbedoAO;
 
 uniform sampler2D SSAO;
 
+uniform mat4 view;
+
 void main()
 {
     // extract data from GBuffer
@@ -32,10 +34,16 @@ void main()
     float metallic  = positionMetallic.a;
     
     // lighting data
+
     vec3 N = normalize(normal);
     vec3 V = normalize(-viewPos); // view-space camera is (0, 0, 0): (0, 0, 0) - viewPos = -viewPos
 	vec3 R = reflect(-V, N); 
 	
+    // get the inverse view matrix for transforming view dir vectors to world dir vectors for 
+    // sampling the prefilter and irradiance env. map (cubemap sampling requires world space).
+    // TODO: get these from CPU
+    mat3 invView = transpose(mat3(view));
+    
 	// calculate color/reflectance at normal incidence
     // if dia-electric (like plastic) use F0 as 0.04 and
     // if it's a metal, use their albedo color as F0 (metallic workflow)
@@ -48,10 +56,11 @@ void main()
 	
 	// calculate specular global illumination contribution w/ Epic's split-sum approximation
 	const float MAX_REFLECTION_LOD = 5.0;
-    vec3 prefilteredColor = pow(textureLod(envPrefilter, R,  roughness * MAX_REFLECTION_LOD).rgb, vec3(2.2));
+    vec3 prefilteredColor = pow(textureLod(envPrefilter, invView * R,  roughness * MAX_REFLECTION_LOD).rgb, vec3(2.2));
     vec2 envBRDF          = texture(BRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
     vec3 specular         = prefilteredColor * (F * envBRDF.x + envBRDF.y);
 
+    
 	// for energy conservation, the diffuse and specular light can't
     // be above 1.0 (unless the surface emits light) so to preserve this
     // relationship the diffuse component (kD) equals 1.0 - kS.
@@ -62,7 +71,7 @@ void main()
 	kD *= 1.0 - metallic;	
 	// directly obtain irradiance from irradiance environment map
 	// vec3 irradiance = pow(texture(EnvIrradiance, N).rgb, vec3(2.2));
-	vec3 irradiance = texture(envIrradiance, N).rgb;
+	vec3 irradiance = texture(envIrradiance, invView * N).rgb;
 	vec3 diffuse = albedo * irradiance;
 	
 	// combine contributions, note that we don't multiply by kS as kS equals
@@ -74,6 +83,5 @@ void main()
     //(GI) ambient lighting, we multiply both with the AO component.
     // ao = 1.0;
     FragColor.rgb = color.rgb * ao;
-    // FragColor.rgb = vec3(ao);
     FragColor.a = 1.0;
 }
