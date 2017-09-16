@@ -84,7 +84,7 @@ namespace Cell
         defaultMat->SetTexture("TexAO", Resources::LoadTexture("default ao", "textures/white.png"), 7);
         m_DefaultMaterials[SID("default")] = defaultMat;
         // glass material
-        Shader *glassShader = Resources::LoadShader("glass", "shaders/pbr/pbr.vs", "shaders/pbr/pbr.fs", { "ALPHA" });
+        Shader *glassShader = Resources::LoadShader("glass", "shaders/forward_render.vs", "shaders/forward_render.fs", { "ALPHA_GLASS" });
         Material *glassMat = new Material(glassShader);
         glassMat->Type = MATERIAL_CUSTOM; // this material can't fit in the deferred rendering pipeline (due to transparency sorting).
         glassMat->SetTexture("TexAlbedo", Cell::Resources::LoadTexture("glass albedo", "textures/glass.png", GL_TEXTURE_2D, GL_RGB), 3);
@@ -95,8 +95,17 @@ namespace Cell
         glassMat->Blend = true;
         m_DefaultMaterials[SID("glass")] = glassMat;
         // alpha blend material
-
+        Shader *alphaBlendShader = Resources::LoadShader("alpha blend", "shaders/forward_render.vs", "shaders/forward_render.fs", { "ALPHA_BLEND" });
+        Material *alphaBlendMaterial = new Material(alphaBlendShader);
+        alphaBlendMaterial->Type = MATERIAL_CUSTOM;
+        alphaBlendMaterial->Blend = true;
+        m_DefaultMaterials[SID("alpha blend")] = alphaBlendMaterial;
         // alpha cutout material
+        Shader *alphaDiscardShader = Resources::LoadShader("alpha discard", "shaders/forward_render.vs", "shaders/forward_render.fs", { "ALPHA_DISCARD" });
+        Material *alphaDiscardMaterial = new Material(alphaDiscardShader);
+        alphaDiscardMaterial->Type = MATERIAL_CUSTOM;
+        alphaDiscardMaterial->Cull = false;
+        m_DefaultMaterials[SID("alpha discard")] = alphaDiscardMaterial;
     }
     // --------------------------------------------------------------------------------------------
     void MaterialLibrary::generateInternalMaterials(RenderTarget *gBuffer)

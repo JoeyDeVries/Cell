@@ -50,7 +50,7 @@ namespace Cell
         // stencil state
 
         // face culling state
-        bool   Cull             = false;
+        bool   Cull             = true;
         GLenum CullFace         = GL_BACK;
         GLenum CullWindingOrder = GL_CCW;
 

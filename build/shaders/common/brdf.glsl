@@ -1,3 +1,5 @@
+#ifndef BRDF_GLSL
+#define BRDF_GLSL
 // ----------------------------------------------------------------------------
 // GGX/Throwbridge-Reitz
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -69,3 +71,4 @@ vec3 FresnelSphericalGaussian(float cosTheta, vec3 F0)
 {
 	return F0 + (1.0 - F0) * pow(2.0, (-5.55473 * cosTheta - 6.98316 * cosTheta));
 }
+#endif

@@ -69,7 +69,6 @@ namespace Cell
         m_DebugLightMesh = new Sphere(16, 16);
         m_DeferredPointMesh = new Sphere(16, 16);
 
-
         // deferred renderer
         m_GBuffer = new RenderTarget(1, 1, GL_HALF_FLOAT, 3, true);
 
@@ -269,12 +268,14 @@ namespace Cell
             renderDeferredDirLight(*it);
         }
         // point lights
+        glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
         for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
         {
             renderDeferredPointLight(*it);
         }
         glCullFace(GL_BACK);
+        glEnable(GL_CULL_FACE);
 
         glEnable(GL_DEPTH_TEST);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -641,6 +642,14 @@ namespace Cell
         else
         {
             glDisable(GL_BLEND);
+        }
+        if (material->Cull)
+        {
+            glEnable(GL_CULL_FACE);
+        }
+        else
+        {
+            glDisable(GL_CULL_FACE);
         }
 
 

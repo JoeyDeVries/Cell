@@ -161,8 +161,22 @@ namespace Cell
     // ------------------------------------------------------------------------
     Material *MeshLoader::parseMaterial(Renderer *renderer, aiMaterial *aMaterial, const aiScene *aScene, std::string directory)
     {
-        // NOTE(Joey): create a unique default material for each loaded mesh.
-        Material *material = renderer->CreateMaterial();
+        // NOTE(Joey): create a unique default material for each loaded mesh.     
+        Material *material;
+        // check if diffuse texture has alpha, if so: make alpha blend material; 
+        aiString file;
+        aMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &file);
+        std::string diffPath = std::string(file.C_Str());
+        bool alpha = false;
+        if (diffPath.find("_alpha") != std::string::npos)
+        {
+            material = renderer->CreateMaterial("alpha discard");
+            alpha = true;
+        }
+        else  // else, make default deferred material
+        {
+            material = renderer->CreateMaterial();
+        }
 
         /* NOTE(Joey):
 
@@ -191,7 +205,7 @@ namespace Cell
             std::string fileName = MeshLoader::processPath(&file, directory);
             // NOTE(Joey): we name the texture the same as the filename as to reduce naming 
             // conflicts while still only loading unique textures.
-            Texture *texture = Resources::LoadTexture(fileName, fileName, GL_TEXTURE_2D, GL_RGB, true);
+            Texture *texture = Resources::LoadTexture(fileName, fileName, GL_TEXTURE_2D, alpha ? GL_RGBA : GL_RGB, true);
             if (texture)
             {
                 //texture->SetWrapMode(GL_REPEAT, true);
