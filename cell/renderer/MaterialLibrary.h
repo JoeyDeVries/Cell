@@ -28,6 +28,8 @@ namespace Cell
         Shader* deferredDirectionalShader;
         Shader* deferredPointShader;
 
+        Shader *dirShadowShader;
+
         Material *debugLightMaterial;
 
         // TODO: move these to PBR toolkit

@@ -55,10 +55,14 @@ namespace Cell
         GLenum CullWindingOrder = GL_CCW;
 
         // blending state
-        bool   Blend           = false;
+        bool   Blend         = false;
         GLenum BlendSrc      = GL_SRC_ALPHA;
         GLenum BlendDst      = GL_ONE_MINUS_SRC_ALPHA;
         GLenum BlendEquation = GL_FUNC_ADD;
+
+        // shadow state
+        bool ShadowCast    = true;
+        bool ShadowReceive = true;
 
     private:
       

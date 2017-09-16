@@ -70,6 +70,10 @@ namespace Cell
         Quad*                      m_NDCPlane;
         unsigned int m_FramebufferCubemap; // NOTE(Joey): cubemap render targets are a very specific case so we can do these without abstractions.
         unsigned int m_CubemapDepthRBO;
+
+        // shadow buffers
+        std::vector<RenderTarget*> m_ShadowRenderTargets;
+        std::vector<math::mat4>    m_ShadowViewProjections;
        
         // pbr
         PBR* m_PBR;
@@ -130,6 +134,9 @@ namespace Cell
         // render point light
         void renderDeferredPointLight(PointLight *light);
         // render spot light
+
+        // render mesh for shadow buffer generation
+        void renderShadowCastCommand(RenderCommand* command, const math::mat4& projection, const math::mat4& view);
 
         // render (debug) mesh at light position
 

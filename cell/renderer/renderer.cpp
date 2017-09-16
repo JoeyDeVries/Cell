@@ -42,6 +42,12 @@ namespace Cell
         delete m_GBuffer;
         delete m_CustomTarget;
 
+        // shadows
+        for (int i = 0; i < m_ShadowRenderTargets.size(); ++i)
+        {
+            delete m_ShadowRenderTargets[i];
+        }
+
         // lighting
         delete m_DebugLightMesh;
 
@@ -73,7 +79,16 @@ namespace Cell
         m_GBuffer = new RenderTarget(1, 1, GL_HALF_FLOAT, 3, true);
 
         // materials
-        m_MaterialLibrary = new MaterialLibrary(m_GBuffer);       
+        m_MaterialLibrary = new MaterialLibrary(m_GBuffer);
+
+        // shadows
+        // TODO: think of a more flexible system to allow any number of shadow casters
+        // TODO:  (add shadow cast caching; detect light/dynamic-object movement!)
+        for (int i = 0; i < 4; ++i) // allow up to a total of 4 dir/spot shadow casters
+        {
+            RenderTarget *rt = new RenderTarget(2048, 2048, GL_UNSIGNED_BYTE, 1, true);
+            m_ShadowRenderTargets.push_back(rt);
+        }
        
         // pbr
         m_PBR = new PBR(this);
@@ -220,7 +235,7 @@ namespace Cell
         m_CommandBuffer.Sort();
 
         // NOTE(Joey); deferred here:
-        std::vector<RenderCommand> deferredRenderCommands = m_CommandBuffer.GetDeferredRenderCommands();
+        std::vector<RenderCommand>& deferredRenderCommands = m_CommandBuffer.GetDeferredRenderCommands();
         // 1. Geometry buffer
         glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
         glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer->ID);
@@ -237,10 +252,40 @@ namespace Cell
             renderDeferredCommand(&deferredRenderCommands[i], m_Camera);
         }
 
+        //attachments[0] = GL_NONE; // disable for next pass (shadow map generation)
         attachments[1] = GL_NONE;
         attachments[2] = GL_NONE;
         glDrawBuffers(3, attachments);
-      
+
+        // 1.5. render all shadow casters to light shadow buffers
+        glCullFace(GL_FRONT);
+        std::vector<RenderCommand> shadowRenderCommands = m_CommandBuffer.GetShadowCastRenderCommands();
+        m_ShadowViewProjections.clear();
+
+        for (int i = 0; i < m_DirectionalLights.size(); ++i)
+        {
+            DirectionalLight* light = m_DirectionalLights[i];
+            if (light->CastShadows)
+            {
+                m_MaterialLibrary->dirShadowShader->Use();
+
+                glBindFramebuffer(GL_FRAMEBUFFER, m_ShadowRenderTargets[i]->ID);
+                glViewport(0, 0, m_ShadowRenderTargets[i]->Width, m_ShadowRenderTargets[i]->Height);
+                glClear(GL_DEPTH_BUFFER_BIT);
+
+                math::mat4 lightProjection = math::orthographic(-20.0f, 20.0f, 20.0f, -20.0f, -15.0f, 20.0f);
+                math::mat4 lightView = math::lookAt(-light->Direction * 10.0f, math::vec3(0.0), math::vec3::UP);
+                m_ShadowViewProjections.push_back(lightProjection * lightView);
+                for (int j = 0; j < shadowRenderCommands.size(); ++j)
+                {
+                    renderShadowCastCommand(&shadowRenderCommands[j], lightProjection, lightView);
+                }
+            }
+        }
+        glCullFace(GL_BACK);
+        attachments[0] = GL_COLOR_ATTACHMENT0;
+        glDrawBuffers(3, attachments);
+
         // 2. do post-processing steps before lighting stage (e.g. SSAO)
         m_PostProcessor->ProcessPreLighting(this, m_GBuffer, m_Camera);
 
@@ -329,7 +374,7 @@ namespace Cell
             }
 
             // sort all render commands and retrieve the sorted array
-            std::vector<RenderCommand> renderCommands = m_CommandBuffer.GetCustomRenderCommands(renderTarget);
+            std::vector<RenderCommand>& renderCommands = m_CommandBuffer.GetCustomRenderCommands(renderTarget);
 
             // terate over all the render commands and execute
             for (unsigned int i = 0; i < renderCommands.size(); ++i)
@@ -365,7 +410,7 @@ namespace Cell
         }
 
         // 8. custom post-processing pass
-        std::vector<RenderCommand> postProcessingCommands = m_CommandBuffer.GetPostProcessingRenderCommands();
+        std::vector<RenderCommand>& postProcessingCommands = m_CommandBuffer.GetPostProcessingRenderCommands();
         for (unsigned int i = 0; i < postProcessingCommands.size(); ++i)
         {
             // NOTE(Joey): ping-pong between render textures
@@ -379,6 +424,7 @@ namespace Cell
         m_PostProcessor->Blit(this, postProcessingCommands.size() % 2 == 0 ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0));
 
         //Blit(m_PostProcessor->BloomOutput, nullptr);
+        //Blit(m_ShadowRenderTargets[0]->GetColorTexture(0), nullptr);
 
 
 
@@ -814,6 +860,12 @@ namespace Cell
         dirShader->SetVector("lightColor", math::normalize(light->Color) * light->Intensity); // TODO(Joey): enforce light normalization with light setter?
         dirShader->SetMatrix("view", m_Camera->View);
 
+        if (m_ShadowViewProjections.size() > 0)
+        {
+            dirShader->SetMatrix("lightShadowViewProjection", m_ShadowViewProjections[0]);
+            m_ShadowRenderTargets[0]->GetDepthStencilTexture()->Bind(3);
+        }
+            
         renderMesh(m_NDCPlane, dirShader);
     }
     // --------------------------------------------------------------------------------------------
@@ -849,5 +901,16 @@ namespace Cell
         command.Transform = model;
 
         renderCustomCommand(&command, m_Camera);*/
+    }
+    // --------------------------------------------------------------------------------------------
+    void Renderer::renderShadowCastCommand(RenderCommand* command, const math::mat4& projection, const math::mat4& view)
+    {
+        Shader* shadowShader = m_MaterialLibrary->dirShadowShader;
+
+        shadowShader->SetMatrix("projection", projection);
+        shadowShader->SetMatrix("view", view);
+        shadowShader->SetMatrix("model", command->Transform);
+
+        renderMesh(command->Mesh, shadowShader);
     }
 }

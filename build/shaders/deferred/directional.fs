@@ -7,12 +7,17 @@ in vec3 LightDir;
 
 #include ../common/constants.glsl
 #include ../common/brdf.glsl
+#include ../common/shadows.glsl
 
 uniform sampler2D gPositionMetallic;
 uniform sampler2D gNormalRoughness;
 uniform sampler2D gAlbedoAO;
 
 uniform vec3 lightColor;
+
+uniform sampler2D lightShadowMap;
+uniform mat4 view;
+uniform mat4 lightShadowViewProjection;
 
 void main()
 {
@@ -38,6 +43,12 @@ void main()
     // calculate light radiance    
     vec3 radiance = lightColor;        
     
+    // light shadow
+    mat4 invView = inverse(view); // TODO: send inverse from CPU (or go to world-space)
+    vec3 worldPos = vec3(invView * vec4(viewPos, 1.0)); // this is getting annoying, back to world-space?
+    vec4 fragPosLightSpace = lightShadowViewProjection * vec4(worldPos, 1.0);
+    float shadow = ShadowFactor(lightShadowMap, fragPosLightSpace, N, L);
+    
     // cook-torrance brdf
     float NDF = DistributionGGX(N, H, roughness);        
     float G   = GeometryGGX(max(dot(N, V), 0.0), max(dot(N, L), 0.0), roughness);      
@@ -53,8 +64,9 @@ void main()
         
     // add to outgoing radiance Lo
     float NdotL = max(dot(N, L), 0.0);                
-    vec3 Lo = (kD * albedo / PI + specular) * radiance * NdotL; 
+    vec3 Lo = (kD * albedo / PI + specular) * radiance * NdotL * (1.0 - shadow); 
         
     FragColor.rgb = Lo;
+    // FragColor.rgb = vec3(shadow);
     FragColor.a = 1.0;
 }

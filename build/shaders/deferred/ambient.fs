@@ -82,6 +82,6 @@ void main()
 	// as the IBL lighting of both diffuse and specular counts as
     //(GI) ambient lighting, we multiply both with the AO component.
     // ao = 1.0;
-    FragColor.rgb = color.rgb * ao;
+    FragColor.rgb = color.rgb * ao * 1.0;
     FragColor.a = 1.0;
 }

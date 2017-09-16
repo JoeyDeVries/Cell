@@ -140,7 +140,7 @@ namespace math
     // NOTE(Joey): projection
     // ----------------------
     template <typename T>
-    matrix<4, 4, T> orthographic(const T& left, const T& right, const T& top, const T& bottom, const T& near, const T& far)
+    matrix<4, 4, T> orthographic(T left, T right, T top, T bottom, T near_plane, T far_plane)
     {
         matrix<4, 4, T> result;
 
@@ -148,36 +148,36 @@ namespace math
         
         result[1][1] = 2.0f / (top - bottom);
 
-        result[2][2] = -2.0f / (far - near);
+        result[2][2] = -2.0f / (far_plane - near_plane);
 
         result[3][0] = -(right + left) / (right - left);
         result[3][1] = -(top + bottom) / (top - bottom);
-        result[3][2] = -(far + near) / (far - near);
+        result[3][2] = -(far_plane + near_plane) / (far_plane - near_plane);
         result[3][3] = 1.0f;
 
         return result;
     }
 
     template <typename T>
-    matrix<4, 4, T> perspective(const T& fov, const T& aspect, const T& near, const T& far)
+    matrix<4, 4, T> perspective(T fov, T aspect, T near_plane, T far_plane)
     {
         matrix<4, 4, T> result;
 
-        float top    =  near * tan(fov / 2.0);
+        float top    = near_plane * tan(fov / 2.0);
         float bottom = -top;
         float right  =  top * aspect;
         float left   = -top * aspect;
 
-        result[0][0] = (2.0f*near) / (right - left);
+        result[0][0] = (2.0f*near_plane) / (right - left);
 
-        result[1][1] = (2.0f*near) / (top - bottom);
+        result[1][1] = (2.0f*near_plane) / (top - bottom);
 
         //result[2][0] = (right + left) / (right - left);
         //result[2][1] = (top + bottom) / (top - bottom);
-        result[2][2] = -(far + near) / (far - near); // NOTE(Joey): same as: (n + f) / (n - f)
+        result[2][2] = -(far_plane + near_plane) / (far_plane - near_plane); // NOTE(Joey): same as: (n + f) / (n - f)
         result[2][3] = -1.0f;
 
-        result[3][2] = -(2.0f*near*far) / (far - near); // NOTE(Joey): same as 2nf / (n-f)
+        result[3][2] = -(2.0f*near_plane*far_plane) / (far_plane - near_plane); // NOTE(Joey): same as 2nf / (n-f)
         result[3][3] = 0.0f;
         
 

@@ -133,10 +133,14 @@ namespace Cell
         deferredDirectionalShader->SetInt("gPositionMetallic", 0);
         deferredDirectionalShader->SetInt("gNormalRoughness", 1);
         deferredDirectionalShader->SetInt("gAlbedoAO", 2);
+        deferredDirectionalShader->SetInt("lightShadowMap", 3);
         deferredPointShader->Use();
         deferredPointShader->SetInt("gPositionMetallic", 0);
         deferredPointShader->SetInt("gNormalRoughness", 1);
         deferredPointShader->SetInt("gAlbedoAO", 2);
+
+        // shadows
+        dirShadowShader = Cell::Resources::LoadShader("shadow directional", "shaders/shadow_cast.vs", "shaders/shadow_cast.fs");
 
         // debug
         Shader *debugLightShader = Resources::LoadShader("debug light", "shaders/light.vs", "shaders/light.fs");

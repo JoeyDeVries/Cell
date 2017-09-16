@@ -26,28 +26,35 @@ namespace Cell
         command.Material  = material;
         command.Transform = transform;
 
-        // NOTE(Joey): check the type of the material and process differently where necessary
-        if (material->Type == MATERIAL_DEFAULT)
+        // if material requires alpha support, add it to alpha render commands for later rendering.
+      /*  if (material->Blend)
         {
-            m_DeferredRenderCommands.push_back(command);
+            m_AlphaRenderCommands.push_back(command);
         }
-        else if (material->Type == MATERIAL_CUSTOM)
-        {
-            // NOTE(Joey): check if this render target has been pushed before, if
-            // so add to vector, otherwise create new vector with this render
-            // target.
-            if (m_CustomRenderCommands.find(target) != m_CustomRenderCommands.end())
-                m_CustomRenderCommands[target].push_back(command);
-            else
+        else
+        {*/
+            // check the type of the material and process differently where necessary
+            if (material->Type == MATERIAL_DEFAULT)
             {
-                m_CustomRenderCommands[target] = std::vector<RenderCommand>();
-                m_CustomRenderCommands[target].push_back(command);
+                m_DeferredRenderCommands.push_back(command);
             }
-        }
-        else if (material->Type == MATERIAL_POST_PROCESS)
-        {
-            m_PostProcessingRenderCommands.push_back(command);
-        }
+            else if (material->Type == MATERIAL_CUSTOM)
+            {
+                // check if this render target has been pushed before, if so add to vector, 
+                // otherwise create new vector with this render target.
+                if (m_CustomRenderCommands.find(target) != m_CustomRenderCommands.end())
+                    m_CustomRenderCommands[target].push_back(command);
+                else
+                {
+                    m_CustomRenderCommands[target] = std::vector<RenderCommand>();
+                    m_CustomRenderCommands[target].push_back(command);
+                }
+            }
+            else if (material->Type == MATERIAL_POST_PROCESS)
+            {
+                m_PostProcessingRenderCommands.push_back(command);
+            }
+        //}
     }
     // ------------------------------------------------------------------------
     void CommandBuffer::Clear()
@@ -112,23 +119,43 @@ namespace Cell
         }
     }
     // ------------------------------------------------------------------------
-    std::vector<RenderCommand> CommandBuffer::GetDeferredRenderCommands()
+    std::vector<RenderCommand>& CommandBuffer::GetDeferredRenderCommands()
     {
         return m_DeferredRenderCommands;
     }
     // ------------------------------------------------------------------------
-    std::vector<RenderCommand> CommandBuffer::GetCustomRenderCommands(RenderTarget *target)
+    std::vector<RenderCommand>& CommandBuffer::GetCustomRenderCommands(RenderTarget *target)
     {
         return m_CustomRenderCommands[target];
     }
     // ------------------------------------------------------------------------
-    std::vector<RenderCommand> CommandBuffer::GetDeferredAlphaRenderCommands()
+    std::vector<RenderCommand>& CommandBuffer::GetAlphaRenderCommands()
     {
-        return m_DeferredAlphaRenderCommands;
+        return m_AlpharenderCommands;
     }
     // ------------------------------------------------------------------------
-    std::vector<RenderCommand> CommandBuffer::GetPostProcessingRenderCommands()
+    std::vector<RenderCommand>& CommandBuffer::GetPostProcessingRenderCommands()
     {
         return m_PostProcessingRenderCommands;
+    }
+    // ------------------------------------------------------------------------
+    std::vector<RenderCommand> CommandBuffer::GetShadowCastRenderCommands()
+    {
+        std::vector<RenderCommand> commands;
+        for (auto it = m_DeferredRenderCommands.begin(); it != m_DeferredRenderCommands.end(); ++it)
+        {
+            if (it->Material->ShadowCast)
+            {
+                commands.push_back(*it);
+            }
+        }
+        for (auto it = m_CustomRenderCommands[nullptr].begin(); it != m_CustomRenderCommands[nullptr].end(); ++it)
+        {
+            if (it->Material->ShadowCast)
+            {
+                commands.push_back(*it);
+            }
+        }
+        return commands;
     }
 };

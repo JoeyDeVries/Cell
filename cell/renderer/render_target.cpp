@@ -38,8 +38,12 @@ namespace Cell
         if (depthAndStencil)
         {
             Texture texture;
+            texture.FilterMin = GL_LINEAR;
+            texture.FilterMax = GL_LINEAR;
+            texture.WrapS = GL_CLAMP_TO_EDGE;
+            texture.WrapT = GL_CLAMP_TO_EDGE;
             texture.Mipmapping = false;
-            texture.Generate(width, height, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, 0);
+            texture.Generate(width, height, GL_DEPTH_STENCIL, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, 0);
 
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, texture.ID, 0);
             m_DepthStencil = texture;

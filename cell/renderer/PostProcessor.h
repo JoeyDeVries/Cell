@@ -22,9 +22,9 @@ namespace Cell
         Texture* BloomOutput;
 
         // toggles
-        bool Sepia    = true;
+        bool Sepia    = false;
         bool Vignette = true;
-        bool Bloom    = true;
+        bool Bloom    = false;
         bool SSAO     = true;
         bool TXAA     = true;
         bool SSR      = true;
