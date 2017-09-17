@@ -17,7 +17,7 @@ void keyFunc(GLFWwindow *window, int key, int scancode, int action, int mods);
 void mousePosFunc(GLFWwindow *window, double xpos, double ypos);
 
 Cell::Renderer *renderer;
-Cell::FlyCamera camera(math::vec3(0.0f, 0.0f, 0.0f), math::vec3(1.0f, 0.0f, 0.0f));
+Cell::FlyCamera camera(math::vec3(0.0f, 1.0f, 0.0f), math::vec3(1.0f, 0.0f, 0.0f));
 float deltaTime     = 0.0f;
 float lastFrameTime = 0.0f;
 bool keysPressed[1024];
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
         glfwMakeContextCurrent(window);
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  
 
-        // NOTE(Joey): register callbacks
+        // register callbacks
         glfwSetFramebufferSizeCallback(window, framebufferSizeFunc);
         glfwSetKeyCallback(window, keyFunc);
         glfwSetCursorPosCallback(window, mousePosFunc);
@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
         renderer->SetCamera(&camera);
     Log::Message("Render system initialized", LOG_INIT);
 
-    // NOTE(Joey): configure default OpenGL state
+    // configure default OpenGL state
     Log::Message("Configuring OpenGL", LOG_INIT);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
@@ -97,48 +97,42 @@ int main(int argc, char *argv[])
     Log::Message("OpenGL configured", LOG_INIT);
 
 
-    // NOTE(Joey): shapes
+    // basic shapes
     Cell::Plane plane(16, 16);
     Cell::Sphere sphere(64, 64);
     Cell::Torus torus(2.0f, 0.4f, 32, 32);
     Cell::Cube cube;
 
-    // NOTE(Joey): material setup
+    // material setup
     Cell::Material *matPbr = renderer->CreateMaterial();
-    //matPbr->SetTexture("TexAlbedo", Cell::Resources::LoadTexture("rusted metal albedo", "textures/pbr/rusted metal/albedo.png"), 3);
-    //matPbr->SetTexture("TexNormal", Cell::Resources::LoadTexture("rusted metal normal", "textures/pbr/rusted metal/normal.png"), 4);
-    //matPbr->SetTexture("TexMetallic", Cell::Resources::LoadTexture("rusted metal metallic", "textures/pbr/rusted metal/metallic.png"), 5);
-    //matPbr->SetTexture("TexRoughness", Cell::Resources::LoadTexture("rusted metal roughness", "textures/pbr/rusted metal/roughness.png"), 6);
-    //matPbr->SetTexture("TexAO", Cell::Resources::LoadTexture("rusted metal ao", "textures/pbr/rusted metal/ao.png"), 7);
     Cell::Material *matPbrGlass = renderer->CreateMaterial("glass");
  
-    // NOTE(Joey): configure camera
+    // configure camera
     camera.SetPerspective(math::Deg2Rad(60.0f), renderer->GetRenderSize().x / renderer->GetRenderSize().y ,0.1f, 100.0f);
 
-    // NOTE(Joey): scene setup
-    Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, matPbr);
-    Cell::SceneNode *secondTorus = Cell::Scene::MakeSceneNode(&torus, matPbr);
-    Cell::SceneNode *thirdTorus  = Cell::Scene::MakeSceneNode(&torus, matPbr);
-    Cell::SceneNode *sphereNode  = Cell::Scene::MakeSceneNode(&sphere, matPbrGlass);
+    // scene setup
+    //Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, matPbr);
+    //Cell::SceneNode *secondTorus = Cell::Scene::MakeSceneNode(&torus, matPbr);
+    //Cell::SceneNode *thirdTorus  = Cell::Scene::MakeSceneNode(&torus, matPbr);
+    //Cell::SceneNode *sphereNode  = Cell::Scene::MakeSceneNode(&sphere, matPbrGlass);
 
-    Cell::SceneNode* testSphere = Cell::Scene::MakeSceneNode(&sphere, matPbr);
+    //mainTorus->AddChild(secondTorus);
+    //secondTorus->AddChild(thirdTorus);
+    ////thirdTorus->AddChild(sphereNode);
 
-    mainTorus->AddChild(secondTorus);
-    secondTorus->AddChild(thirdTorus);
-    thirdTorus->AddChild(sphereNode);
-
-    mainTorus->Scale    = math::vec3(1.0f);
-    mainTorus->Position = math::vec3(0.0f, 2.5f, 0.0f);
-    secondTorus->Scale  = math::vec3(0.65f);
-    thirdTorus->Scale   = math::vec3(0.65f);
-    sphereNode->Scale   = math::vec3(1.35f);
+    //mainTorus->Scale    = math::vec3(3.0f);
+    //mainTorus->Position = math::vec3(0.0f, 2.5f, 0.0f);
+    //secondTorus->Scale  = math::vec3(0.65f);
+    //secondTorus->Rotation = math::vec4(0.0, 1.0, 0.0, math::Deg2Rad(90.0));
+    //thirdTorus->Scale   = math::vec3(0.65f);
+    //sphereNode->Scale   = math::vec3(1.35f);
 
     Cell::Background background;
     Cell::TextureCube cubemap;
     cubemap.DefaultInitialize(1024, 1024, GL_RGB, GL_UNSIGNED_BYTE);
   
     // - background
-    Cell::PBRCapture *pbrEnv = renderer->GetPBREnvironment();
+    Cell::PBRCapture *pbrEnv = renderer->GetSkypCature();
     background.SetCubemap(pbrEnv->Prefiltered);
 	float lodLevel = 1.5f; 
 	background.Material->SetFloat("lodLevel", lodLevel);
@@ -155,31 +149,38 @@ int main(int argc, char *argv[])
 
     // test mesh loading
     Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/sponza/sponza.obj");
+    test->Position = math::vec3(0.0, -1.0, 0.0);
     test->Scale = math::vec3(0.01f);
-    //Cell::SceneNode *test2 = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/nanosuit.obj");
-
 
     Cell::DirectionalLight dirLight;
     dirLight.Direction = math::vec3(0.2f, -1.0f, 0.25f);
     dirLight.Color = math::vec3(1.0f, 0.89f, 0.7f);
-    dirLight.Intensity = 100.0f;
+    dirLight.Intensity = 50.0f;
     renderer->AddLight(&dirLight);
+
+    Cell::DirectionalLight dirLight2;
+    dirLight2.Direction = math::vec3(0.5f, -0.9f, 0.0f);
+    dirLight2.Color = math::vec3(0.8f, 0.87f, 1.0f);
+    dirLight2.Intensity = 25.0f;
+    renderer->AddLight(&dirLight2);
 
     Cell::PointLight light;
     light.Radius = 4.0;
     light.Position = math::vec3(0.0f, 1.0f, 0.0f);
     light.Color = math::vec3(1.0f, 0.25, 0.25f);
     light.Intensity = 50.0f;
-    //light.RenderMesh = true;
+    light.RenderMesh = true;
     renderer->AddLight(&light);
 
     Cell::PointLight light2;
     light2.Radius = 3.0;
     light2.Color = math::vec3(0.5f, 0.5f, 2.0f);
     light2.Intensity = 25.0f;
-    //light2.RenderMesh = true;
+    light2.RenderMesh = true;
     renderer->AddLight(&light2);
 
+    // bake reflection probes before rendering
+    renderer->BakeProbes();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -209,57 +210,28 @@ int main(int argc, char *argv[])
                 camera.InputKey(deltaTime, Cell::CAMERA_UP);
             if (keysPressed[GLFW_KEY_Q])
                 camera.InputKey(deltaTime, Cell::CAMERA_DOWN);
-            if (keysPressed[GLFW_KEY_T])
-            {
-                lodLevel += 1.0 * deltaTime;
-				background.Material->SetFloat("lodLevel", lodLevel);
-                Log::Message("LOD:" + std::to_string(lodLevel), LOG_DEBUG);
-            }
-            if (keysPressed[GLFW_KEY_G])
-            {
-                lodLevel -= 1.0 * deltaTime;
-				background.Material->SetFloat("lodLevel", lodLevel);
-                Log::Message("LOD:" + std::to_string(lodLevel), LOG_DEBUG);
-            }
-			if (keysPressed[GLFW_KEY_Y])
-			{
-				exposure += 1.0 * deltaTime;
-				background.Material->SetFloat("Exposure", exposure);
-                matPbr->SetFloat("Exposure", exposure);
-
-				Log::Message("EXPOSURE:" + std::to_string(exposure), LOG_DEBUG);
-			}
-			if (keysPressed[GLFW_KEY_H])
-			{
-				exposure -= 1.0 * deltaTime;
-				background.Material->SetFloat("Exposure", exposure);
-				matPbr->SetFloat("Exposure", exposure);
-
-                Log::Message("EXPOSURE:" + std::to_string(exposure), LOG_DEBUG);
-			}
-            if (keysPressed[GLFW_KEY_Z]) {
-                wireframe = !wireframe;
-                glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
-            }
 
             // update render logic
             camera.Update(deltaTime);
 
             // fill the renderer's command buffer with default test scene
-            mainTorus->Rotation = math::vec4(math::vec3(1.0f, 0.0f, 0.0f), glfwGetTime());
+           /* mainTorus->Rotation = math::vec4(math::vec3(1.0f, 0.0f, 0.0f), glfwGetTime());
             secondTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
             thirdTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
-            sphereNode->Rotation = math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime());
+            sphereNode->Rotation = math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime());*/
 
             //light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 1.0f, 0.0f);
             light2.Position = math::vec3(sin(glfwGetTime() * 0.3f) * 1.5 + 3.0, 2.0f, cos(glfwGetTime() * 0.1f) * 5.0f);
+
+            dirLight.Direction.x = sin(glfwGetTime() * 0.05f) * 1.5;
+            dirLight.Direction.y = -(sin(glfwGetTime() * 0.1f) * 0.5 + 0.5) * 0.5 - 0.5;
+            dirLight.Direction.z = (cos(glfwGetTime() * 0.13f) * 0.5 + 0.5) * 0.5 + 0.5;
         }
 
         {
             //CLOCK(PUSH);
             //renderer->PushRender(mainTorus);
             renderer->PushRender(test);
-            //renderer->PushRender(testSphere);
 
             renderer->PushRender(&background);
 

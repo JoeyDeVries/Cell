@@ -44,6 +44,7 @@ namespace Cell
     class Renderer
     {
         friend PostProcessor;
+        friend PBR;
     private:
         // render state
         CommandBuffer m_CommandBuffer;
@@ -111,14 +112,19 @@ namespace Cell
         void RenderPushedCommands();
 
         void Blit(Texture* src, RenderTarget* dst = nullptr, Material* material = nullptr, std::string textureUniformName = "TexSrc");
-        void RenderToCubemap(SceneNode* scene, TextureCube* target, math::vec3 position = math::vec3(0.0f), unsigned int mipLevel = 0);
-        void SetPBREnvironment(PBRCapture* pbrEnvironment);
-        PBRCapture* GetPBREnvironment();
+
+        // pbr
+        void        SetSkyCapture(PBRCapture* pbrEnvironment);
+        PBRCapture* GetSkypCature();
+        void        BakeProbes(SceneNode* scene = nullptr);
     private:
         // renderer-specific logic for rendering a 'default' deferred command.
         void renderDeferredCommand(RenderCommand *command, Camera *camera);
         // renderer-specific logic for rendering a custom (forward-pass) command
         void renderCustomCommand(RenderCommand *command, Camera *camera);
+        // renderer-specific logic for rendering a list of commands to a target cubemap
+        void renderToCubemap(SceneNode* scene, TextureCube* target, math::vec3 position = math::vec3(0.0f), unsigned int mipLevel = 0);
+        void renderToCubemap(std::vector<RenderCommand>& renderCommands, TextureCube* target, math::vec3 position = math::vec3(0.0f), unsigned int mipLevel = 0);
         // minimal render logic to render a mesh 
         void renderMesh(Mesh* mesh, Shader* shader);
         // updates the global uniform buffer objects

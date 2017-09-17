@@ -38,7 +38,7 @@ namespace Cell
         // parents.
         if (node->m_Parent)
         {
-            node->m_Parent->RemoveChild(m_ID);
+            node->m_Parent->RemoveChild(node->m_ID);
         }
         node->m_Parent = this;
         m_Children.push_back(node);

@@ -2,9 +2,13 @@
 #define CELL_LIGHTING_DIRECTIONAL_LIGHT_H
 
 #include <math/linear_algebra/vector.h>
+#include <math/linear_algebra/matrix.h>
+#
 
 namespace Cell
 {
+    class RenderTarget;
+
     class DirectionalLight
     {
     public:
@@ -13,6 +17,8 @@ namespace Cell
         float Intensity      = 1.0f;
 
         bool CastShadows = true;
+        RenderTarget* ShadowMapRT;
+        math::mat4    LightSpaceViewProjection;
     };
 }
 

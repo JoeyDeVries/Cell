@@ -96,7 +96,7 @@ namespace Cell
         // default PBR pre-compute (get a more default oriented HDR map for this)
         Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/hamarikyu bridge.hdr");
         Cell::PBRCapture *envBridge = m_PBR->ProcessEquirectangular(hdrMap);
-        SetPBREnvironment(envBridge);
+        SetSkyCapture(envBridge);
     }
     // ------------------------------------------------------------------------
     void Renderer::SetRenderSize(unsigned int width, unsigned int height)
@@ -176,6 +176,7 @@ namespace Cell
         else
         {
             // do make sure we do always update the parent's transform.
+            // TODO: this needs to go!
             node->GetTransform();
         }
 
@@ -192,6 +193,12 @@ namespace Cell
             if (child->Mesh)
             {
                 m_CommandBuffer.Push(child->Mesh, child->Material, child->GetTransform(), target);
+            }
+            else
+            {
+                // do make sure we do always update the parent's transform.
+                // TODO: this needs to go!
+                node->GetTransform();
             }
             for(unsigned int i = 0; i < child->GetChildCount(); ++i)
                 childStack.push(child->GetChildByIndex(i));
@@ -262,6 +269,7 @@ namespace Cell
         std::vector<RenderCommand> shadowRenderCommands = m_CommandBuffer.GetShadowCastRenderCommands();
         m_ShadowViewProjections.clear();
 
+        unsigned int shadowRtIndex = 0;
         for (int i = 0; i < m_DirectionalLights.size(); ++i)
         {
             DirectionalLight* light = m_DirectionalLights[i];
@@ -269,17 +277,19 @@ namespace Cell
             {
                 m_MaterialLibrary->dirShadowShader->Use();
 
-                glBindFramebuffer(GL_FRAMEBUFFER, m_ShadowRenderTargets[i]->ID);
-                glViewport(0, 0, m_ShadowRenderTargets[i]->Width, m_ShadowRenderTargets[i]->Height);
+                glBindFramebuffer(GL_FRAMEBUFFER, m_ShadowRenderTargets[shadowRtIndex]->ID);
+                glViewport(0, 0, m_ShadowRenderTargets[shadowRtIndex]->Width, m_ShadowRenderTargets[shadowRtIndex]->Height);
                 glClear(GL_DEPTH_BUFFER_BIT);
 
                 math::mat4 lightProjection = math::orthographic(-20.0f, 20.0f, 20.0f, -20.0f, -15.0f, 20.0f);
                 math::mat4 lightView = math::lookAt(-light->Direction * 10.0f, math::vec3(0.0), math::vec3::UP);
-                m_ShadowViewProjections.push_back(lightProjection * lightView);
+                m_DirectionalLights[i]->LightSpaceViewProjection = lightProjection * lightView;
+                m_DirectionalLights[i]->ShadowMapRT = m_ShadowRenderTargets[shadowRtIndex];
                 for (int j = 0; j < shadowRenderCommands.size(); ++j)
                 {
                     renderShadowCastCommand(&shadowRenderCommands[j], lightProjection, lightView);
                 }
+                ++shadowRtIndex;
             }
         }
         glCullFace(GL_BACK);
@@ -387,6 +397,8 @@ namespace Cell
         m_PostProcessor->ProcessPostLighting(this, m_CustomTarget, m_Camera);
 
         // 7. render (debug) visuals
+        glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
+        glBindFramebuffer(GL_FRAMEBUFFER, m_CustomTarget->ID);
         for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
         {
             if ((*it)->RenderMesh)
@@ -408,6 +420,7 @@ namespace Cell
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
         }
+        m_PBR->RenderCaptures();
 
         // 8. custom post-processing pass
         std::vector<RenderCommand>& postProcessingCommands = m_CommandBuffer.GetPostProcessingRenderCommands();
@@ -477,81 +490,11 @@ namespace Cell
         command.Material = material;
         command.Mesh = m_NDCPlane;
         renderCustomCommand(&command, nullptr);
-    }
+    }   
     // ------------------------------------------------------------------------
-    void Renderer::RenderToCubemap(SceneNode *  scene, 
-                                   TextureCube *target, 
-                                   math::vec3   position, 
-                                   unsigned int mipLevel)
+    void Renderer::SetSkyCapture(PBRCapture* pbrEnvironment)
     {
-        // NOTE(Joey): create a command buffer specifically for this operation (as to not conflict 
-        // with main command buffer)
-        CommandBuffer commandBuffer;
-        // TODO(Joey): code duplication! re-factor!
-        commandBuffer.Push(scene->Mesh, scene->Material, scene->GetTransform());
-        // NOTE(Joey): originally a recursive function but transformed to 
-        // iterative version by maintaining a stack.
-        std::stack<SceneNode*> childStack;
-        for (unsigned int i = 0; i < scene->GetChildCount(); ++i)
-            childStack.push(scene->GetChildByIndex(i));
-        while (!childStack.empty())
-        {
-            SceneNode *child = childStack.top();
-            childStack.pop();
-            commandBuffer.Push(child->Mesh, child->Material, child->GetTransform());
-            for (unsigned int i = 0; i < child->GetChildCount(); ++i)
-                childStack.push(child->GetChildByIndex(i));
-        }
-        commandBuffer.Sort();
-        std::vector<RenderCommand> renderCommands = commandBuffer.GetCustomRenderCommands(nullptr);
-
-        // NOTE(Joey): define 6 camera directions/lookup vectors
-        Camera faceCameras[6] = {
-            Camera(position, math::vec3( 1.0f,  0.0f,  0.0f), math::vec3(0.0f, -1.0f,  0.0f)),
-            Camera(position, math::vec3(-1.0f,  0.0f,  0.0f), math::vec3(0.0f, -1.0f,  0.0f)),
-            Camera(position, math::vec3( 0.0f,  1.0f,  0.0f), math::vec3(0.0f,  0.0f,  1.0f)),
-            Camera(position, math::vec3( 0.0f, -1.0f,  0.0f), math::vec3(0.0f,  0.0f,- 1.0f)),
-            Camera(position, math::vec3( 0.0f,  0.0f,  1.0f), math::vec3(0.0f, -1.0f,  0.0f)),
-            Camera(position, math::vec3( 0.0f,  0.0f, -1.0f), math::vec3(0.0f, -1.0f,  0.0f))
-        };
-
-        // NOTE(Joey): resize target dimensions based on mip level we're rendering.
-        float width = (float)target->FaceWidth * pow(0.5, mipLevel);
-        float height = (float)target->FaceHeight * pow(0.5, mipLevel);
-
-        // TODO(Joey): only resize/recreate if faceWidth is different than before
-        glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferCubemap);
-        glBindRenderbuffer(GL_RENDERBUFFER, m_CubemapDepthRBO);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 
-                                  m_CubemapDepthRBO);
-
-        // NOTE(Joey): resize relevant buffers
-        glViewport(0, 0, width, height);
-        glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferCubemap);
-
-        for (unsigned int i = 0; i < 6; ++i)
-        {
-            Camera *camera = &faceCameras[i];
-            camera->SetPerspective(math::Deg2Rad(90.0f), width/height, 0.1f, 100.0f);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 
-                                   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, target->ID, mipLevel);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            for (unsigned int i = 0; i < renderCommands.size(); ++i)
-            {
-                // NOTE(Joey): cubemap generation only works w/ custom materials (for now; not 
-                // streamlined with deferred path yet)
-                assert(renderCommands[i].Material->Type == MATERIAL_CUSTOM); 
-                renderCustomCommand(&renderCommands[i], camera);
-            }
-        }
-        // NOTE(Joey): reset state
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
-    }
-    // ------------------------------------------------------------------------
-    void Renderer::SetPBREnvironment(PBRCapture* pbrEnvironment)
-    {
+        m_PBR->SetSkyCapture(pbrEnvironment);
         //for(unsigned int i = 0; i < m_PBREnvironments.size(); ++i)
         //{
         //    if (pbrEnvironment->Irradiance == m_PBREnvironments[i]->Irradiance)
@@ -571,9 +514,81 @@ namespace Cell
         Log::Message("Tried to set PBR environment, but wasn't indexed before.");
     }
     // ------------------------------------------------------------------------
-    PBRCapture* Renderer::GetPBREnvironment()
+    PBRCapture* Renderer::GetSkypCature()
     {
-        return m_PBR->m_CaptureProbes[m_PBREnvironmentIndex];
+        return m_PBR->GetSkyCapture();
+    }
+    // ------------------------------------------------------------------------
+    void Renderer::BakeProbes(SceneNode* scene)
+    {
+        if(!scene)
+        {
+            // if no scene node was provided, use root node (capture all)
+            scene = Scene::Root;
+        }
+        // build a command list of nodes within the reflection probe's capture box/radius.
+        CommandBuffer commandBuffer;
+        std::vector<Material*> materials;
+
+        //if (scene->Material)
+        //{
+        //    auto samplerUniforms = *(scene->Material->GetSamplerUniforms());
+        //    if (samplerUniforms.find("TexAlbedo") != samplerUniforms.end())
+        //    {
+        //        materials.push_back(new Material(m_PBR->m_ProbeCaptureShader));
+        //        materials[materials.size() - 1]->SetTexture("TexAlbedo", samplerUniforms["TexAlbedo"].Texture);
+        //        commandBuffer.Push(scene->Mesh, materials[materials.size() - 1], scene->GetTransform());
+        //    }
+        //}
+        // NOTE(Joey): originally a recursive function but transformed to 
+        // iterative version by maintaining a stack.
+        std::stack<SceneNode*> sceneStack;
+        sceneStack.push(scene);
+      /*  for (unsigned int i = 0; i < scene->GetChildCount(); ++i)
+            sceneStack.push(scene->GetChildByIndex(i));*/
+        while (!sceneStack.empty())
+        {
+            SceneNode *node = sceneStack.top();
+            sceneStack.pop();
+            if (node->Mesh)
+            {
+                auto samplerUniforms = *(node->Material->GetSamplerUniforms());
+                if (samplerUniforms.find("TexAlbedo") != samplerUniforms.end())
+                {
+                    materials.push_back(new Material(m_PBR->m_ProbeCaptureShader));
+                    materials[materials.size() - 1]->SetTexture("TexAlbedo", samplerUniforms["TexAlbedo"].Texture);
+                    commandBuffer.Push(node->Mesh, materials[materials.size() - 1], node->GetTransform());
+                }
+            }
+            else
+            {
+                // do make sure we do always update the parent's transform.
+                // TODO: this needs to go!
+                node->GetTransform();
+            }
+            for (unsigned int i = 0; i < node->GetChildCount(); ++i)
+                sceneStack.push(node->GetChildByIndex(i));
+        }
+        commandBuffer.Sort();
+        std::vector<RenderCommand> renderCommands = commandBuffer.GetCustomRenderCommands(nullptr);
+
+        TextureCube renderResult;
+        renderResult.DefaultInitialize(128, 128, GL_RGB, GL_FLOAT);
+
+        math::vec3 position(2.0f, 2.0f, 0.0f);
+        renderToCubemap(renderCommands, &renderResult, position);
+
+        // also render the skylight when doing a capture
+        // TODO: custom skylight shader for capture (use current active PBR skylight)
+
+        // TODO: re-factor PBR logic (do we add capture right away with procesS? should we even return it?)
+        PBRCapture* capture = m_PBR->ProcessCube(&renderResult, position, 10.0f);
+        m_PBR->AddCapture(capture, position);
+
+        for (int i = 0; i < materials.size(); ++i)
+        {
+            delete materials[i];
+        }
     }
     // ------------------------------------------------------------------------
     void Renderer::renderDeferredCommand(RenderCommand *command, Camera *camera)
@@ -792,17 +807,83 @@ namespace Cell
         }
 
         renderMesh(mesh, material->GetShader());
-        // NOTE(Joey): bind OpenGL render state
-     /*   glBindVertexArray(mesh->m_VAO);
-        if (mesh->Indices.size() > 0)
+    }
+    // ------------------------------------------------------------------------
+    void Renderer::renderToCubemap(SceneNode *  scene,
+        TextureCube *target,
+        math::vec3   position,
+        unsigned int mipLevel)
+    {
+        // NOTE(Joey): create a command buffer specifically for this operation (as to not conflict 
+        // with main command buffer)
+        CommandBuffer commandBuffer;
+        // TODO(Joey): code duplication! re-factor!
+        commandBuffer.Push(scene->Mesh, scene->Material, scene->GetTransform());
+        // NOTE(Joey): originally a recursive function but transformed to 
+        // iterative version by maintaining a stack.
+        std::stack<SceneNode*> childStack;
+        for (unsigned int i = 0; i < scene->GetChildCount(); ++i)
+            childStack.push(scene->GetChildByIndex(i));
+        while (!childStack.empty())
         {
-            glDrawElements(mesh->Topology == TRIANGLE_STRIP ? GL_TRIANGLE_STRIP : GL_TRIANGLES, mesh->Indices.size(), GL_UNSIGNED_INT, 0);
+            SceneNode *child = childStack.top();
+            childStack.pop();
+            commandBuffer.Push(child->Mesh, child->Material, child->GetTransform());
+            for (unsigned int i = 0; i < child->GetChildCount(); ++i)
+                childStack.push(child->GetChildByIndex(i));
         }
-        else
+        commandBuffer.Sort();
+        std::vector<RenderCommand> renderCommands = commandBuffer.GetCustomRenderCommands(nullptr);
+
+        renderToCubemap(renderCommands, target, position, mipLevel);
+    }
+    // ------------------------------------------------------------------------
+    void Renderer::renderToCubemap(std::vector<RenderCommand>& renderCommands, TextureCube* target, math::vec3 position, unsigned int mipLevel)
+    {
+        // define 6 camera directions/lookup vectors
+        Camera faceCameras[6] = {
+            Camera(position, math::vec3(1.0f,  0.0f,  0.0f), math::vec3(0.0f, -1.0f,  0.0f)),
+            Camera(position, math::vec3(-1.0f,  0.0f,  0.0f), math::vec3(0.0f, -1.0f,  0.0f)),
+            Camera(position, math::vec3(0.0f,  1.0f,  0.0f), math::vec3(0.0f,  0.0f,  1.0f)),
+            Camera(position, math::vec3(0.0f, -1.0f,  0.0f), math::vec3(0.0f,  0.0f,-1.0f)),
+            Camera(position, math::vec3(0.0f,  0.0f,  1.0f), math::vec3(0.0f, -1.0f,  0.0f)),
+            Camera(position, math::vec3(0.0f,  0.0f, -1.0f), math::vec3(0.0f, -1.0f,  0.0f))
+        };
+
+        // resize target dimensions based on mip level we're rendering.
+        float width = (float)target->FaceWidth * pow(0.5, mipLevel);
+        float height = (float)target->FaceHeight * pow(0.5, mipLevel);
+
+        // TODO(Joey): only resize/recreate if faceWidth is different than before
+        glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferCubemap);
+        glBindRenderbuffer(GL_RENDERBUFFER, m_CubemapDepthRBO);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
+            m_CubemapDepthRBO);
+
+        // resize relevant buffers
+        glViewport(0, 0, width, height);
+        glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferCubemap);
+
+        for (unsigned int i = 0; i < 6; ++i)
         {
-            glDrawArrays(mesh->Topology == TRIANGLE_STRIP ? GL_TRIANGLE_STRIP : GL_TRIANGLES, 0, mesh->Positions.size());
-        }*/
-        //glBindVertexArray(0); // NOTE(Joey): consider skipping this call without damaging the render pipeline
+            Camera *camera = &faceCameras[i];
+            camera->SetPerspective(math::Deg2Rad(90.0f), width / height, 0.1f, 100.0f);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, target->ID, mipLevel);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            for (unsigned int i = 0; i < renderCommands.size(); ++i)
+            {
+                // cubemap generation only works w/ custom materials 
+                // TODO: can we get this to work on the deferred materials as well?
+                assert(renderCommands[i].Material->Type == MATERIAL_CUSTOM);
+                renderCustomCommand(&renderCommands[i], camera);
+            }
+        }
+        // reset state
+        // TODO: is this still necessary (global render targets managed at a higher level)?
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
     }
     // --------------------------------------------------------------------------------------------
     void Renderer::renderMesh(Mesh* mesh, Shader* shader)
@@ -834,7 +915,7 @@ namespace Cell
     // --------------------------------------------------------------------------------------------
     void Renderer::renderDeferredAmbient()
     {
-        PBRCapture *iblCapture = m_PBR->GetClosestCapture(math::vec3(0.0f));
+        PBRCapture *iblCapture = m_PBR->GetSkyCapture();
         Shader* ambientShader = m_MaterialLibrary->deferredAmbientShader;
 
         iblCapture->Irradiance->Bind(3);
@@ -860,10 +941,10 @@ namespace Cell
         dirShader->SetVector("lightColor", math::normalize(light->Color) * light->Intensity); // TODO(Joey): enforce light normalization with light setter?
         dirShader->SetMatrix("view", m_Camera->View);
 
-        if (m_ShadowViewProjections.size() > 0)
+        if (light->ShadowMapRT)
         {
-            dirShader->SetMatrix("lightShadowViewProjection", m_ShadowViewProjections[0]);
-            m_ShadowRenderTargets[0]->GetDepthStencilTexture()->Bind(3);
+            dirShader->SetMatrix("lightShadowViewProjection", light->LightSpaceViewProjection);
+            light->ShadowMapRT->GetDepthStencilTexture()->Bind(3);
         }
             
         renderMesh(m_NDCPlane, dirShader);
