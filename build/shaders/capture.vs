@@ -24,7 +24,7 @@ void main()
 	Normal    = mat3(view * model) * normal;
     
     CamPosView      = vec3(view * vec4(CamPos, 1.0));
-    DirLightDirView = vec3(view * vec4(DirLight0_Dir, 0.0));
+    DirLightDirView = vec3(view * vec4(-DirLight0_Dir, 0.0));
 	
 	gl_Position =  projection * vec4(FragPos, 1.0);
 }

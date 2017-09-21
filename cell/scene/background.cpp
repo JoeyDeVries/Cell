@@ -14,10 +14,13 @@ namespace Cell
     // ------------------------------------------------------------------------
     Background::Background() : SceneNode(Scene::CounterID++)
     {
+        Scene::Root->AddChild(this);
+
         m_Shader  = Resources::LoadShader("background", "shaders/background.vs", "shaders/background.fs");
         //m_CubeMap = Resources::LoadTextureCube("yokohama", "textures/backgrounds/yokohama/");
         Material  = new Cell::Material(m_Shader);
         Mesh      = new Cell::Cube;
+
 
         // default material configuration
         //Material->SetShader(m_Shader);

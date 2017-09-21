@@ -1,5 +1,7 @@
 #include "PBR.h"
 
+#include <vector>
+
 #include "renderer.h"
 #include "render_target.h"
 #include "pbr_capture.h"
@@ -43,9 +45,12 @@ namespace Cell
         m_Renderer->Blit(nullptr, m_RenderTargetBRDFLUT, m_PBRIntegrateBRDF);
 
         // capture
-        m_ProbeCaptureShader = Resources::LoadShader("pbr:capture", "shaders/pbr/capture.vs", "shaders/pbr/capture.fs");
+        m_ProbeCaptureShader = Resources::LoadShader("pbr:capture", "shaders/capture.vs", "shaders/capture.fs");
         m_ProbeCaptureShader->Use();
         m_ProbeCaptureShader->SetInt("TexAlbedo", 0);
+        m_ProbeCaptureShader->SetInt("TexNormal", 1);
+        m_ProbeCaptureShader->SetInt("TexMetallic", 2);
+        m_ProbeCaptureShader->SetInt("TexRoughness", 3);
         m_ProbeCapture = new Material(m_ProbeCaptureShader);
 
         // debug render
@@ -65,7 +70,7 @@ namespace Cell
         delete m_PBRPrefilterCapture;
         delete m_PBRIntegrateBRDF;
         delete m_SkyCapture;
-        for (unsigned int i = 0; i < m_CaptureProbes.size(); ++i)
+        for (int i = 0; i < m_CaptureProbes.size(); ++i)
         {
             delete m_CaptureProbes[i]->Irradiance;
             delete m_CaptureProbes[i]->Prefiltered;
@@ -79,12 +84,23 @@ namespace Cell
     {
         m_SkyCapture = capture;
     }
-
     // --------------------------------------------------------------------------------------------
-    void PBR::AddCapture(PBRCapture* capture, math::vec3 position)
+    void PBR::AddIrradianceProbe(PBRCapture* capture, math::vec3 position, float radius)
     {
         capture->Position = position;
+        capture->Radius = radius;
         m_CaptureProbes.push_back(capture);
+    }
+    // --------------------------------------------------------------------------------------------
+    void PBR::ClearIrradianceProbes()
+    {
+        for (int i = 0; i < m_CaptureProbes.size(); ++i)
+        {
+            delete m_CaptureProbes[i]->Irradiance;
+            delete m_CaptureProbes[i]->Prefiltered;
+            delete m_CaptureProbes[i];
+        }
+        m_CaptureProbes.clear();
     }
     // --------------------------------------------------------------------------------------------
     PBRCapture* PBR::ProcessEquirectangular(Texture* envMap)
@@ -92,15 +108,14 @@ namespace Cell
         // convert HDR radiance image to HDR environment cubemap
         m_SceneEnvCube->Material = m_PBRHdrToCubemap;
         m_PBRHdrToCubemap->SetTexture("environment", envMap, 0);
-        // TODO(Joey): think of proper way to manage memory here.
         Cell::TextureCube hdrEnvMap;
         hdrEnvMap.DefaultInitialize(128, 128, GL_RGB, GL_FLOAT);
         m_Renderer->renderToCubemap(m_SceneEnvCube, &hdrEnvMap);
 
-        return ProcessCube(&hdrEnvMap, math::vec3(0.0f), 0.0f);
+        return ProcessCube(&hdrEnvMap);
     }
     // --------------------------------------------------------------------------------------------
-    PBRCapture* PBR::ProcessCube(TextureCube* capture, math::vec3 position, float radius)
+    PBRCapture* PBR::ProcessCube(TextureCube* capture, bool prefilter)
     {
         PBRCapture* captureProbe = new PBRCapture;
 
@@ -111,20 +126,22 @@ namespace Cell
         m_SceneEnvCube->Material = m_PBRIrradianceCapture;
         m_Renderer->renderToCubemap(m_SceneEnvCube, captureProbe->Irradiance, math::vec3(0.0f), 0);
         // prefilter 
-        captureProbe->Prefiltered = new TextureCube;;
-        captureProbe->Prefiltered->FilterMin = GL_LINEAR_MIPMAP_LINEAR;
-        captureProbe->Prefiltered->DefaultInitialize(128, 128, GL_RGB, GL_FLOAT, true);
-        m_PBRPrefilterCapture->SetTextureCube("environment", capture, 0);
-        m_SceneEnvCube->Material = m_PBRPrefilterCapture;
-        // calculate prefilter for multiple roughness levels
-        unsigned int maxMipLevels = 5;
-        for (unsigned int i = 0; i < maxMipLevels; ++i)
+        if (prefilter)
         {
-            m_PBRPrefilterCapture->SetFloat("roughness", (float)i / (float)(maxMipLevels - 1));
-            m_Renderer->renderToCubemap(m_SceneEnvCube, captureProbe->Prefiltered, math::vec3(0.0f), i);
+            captureProbe->Prefiltered = new TextureCube;;
+            captureProbe->Prefiltered->FilterMin = GL_LINEAR_MIPMAP_LINEAR;
+            captureProbe->Prefiltered->DefaultInitialize(128, 128, GL_RGB, GL_FLOAT, true);
+            m_PBRPrefilterCapture->SetTextureCube("environment", capture, 0);
+            m_SceneEnvCube->Material = m_PBRPrefilterCapture;
+            // calculate prefilter for multiple roughness levels
+            unsigned int maxMipLevels = 5;
+            for (unsigned int i = 0; i < maxMipLevels; ++i)
+            {
+                m_PBRPrefilterCapture->SetFloat("roughness", (float)i / (float)(maxMipLevels - 1));
+                m_Renderer->renderToCubemap(m_SceneEnvCube, captureProbe->Prefiltered, math::vec3(0.0f), i);
 
+            }
         }
-        //m_CaptureProbes.push_back(captureProbe);
         return captureProbe;
     }
     // --------------------------------------------------------------------------------------------
@@ -133,36 +150,35 @@ namespace Cell
         return m_SkyCapture;
     }
     // --------------------------------------------------------------------------------------------
-    PBRCapture* PBR::GetClosestCapture(math::vec3 position)
+    std::vector<PBRCapture*> PBR::GetIrradianceProbes(math::vec3 queryPos, float queryRadius)
     {
-        PBRCapture* closestCapture = nullptr;
-        float closestLength = 100000.0;
+        // retrieve all irradiance probes in proximity to queryPos and queryRadius
+        std::vector<PBRCapture*> capturesProximity;
         for (int i = 0; i < m_CaptureProbes.size(); ++i)
         {
-            float lengthSq = math::lengthSquared((m_CaptureProbes[i]->Position - position));
-            if (lengthSq < closestLength)
+            float lengthSq = math::lengthSquared((m_CaptureProbes[i]->Position - queryPos));
+            if (lengthSq < queryRadius*queryRadius)
             {
-                closestCapture = m_CaptureProbes[i];
-                closestLength = lengthSq;
+                m_CaptureProbes.push_back(m_CaptureProbes[i]);
             }
         }
-        // fall back to sky capture if no reflection probe was found
-        if (!closestCapture)
+        // fall back to sky capture if no irradiance probe was found
+        if (!capturesProximity.size() == 0)
         {
-            closestCapture = m_SkyCapture;
+            capturesProximity.push_back(m_SkyCapture);
         }
-        return closestCapture;
+        return capturesProximity;
     }
     // --------------------------------------------------------------------------------------------
-    void PBR::RenderCaptures()
+    void PBR::RenderProbes()
     {
         m_ProbeDebugShader->Use();
         m_ProbeDebugShader->SetMatrix("projection", m_Renderer->GetCamera()->Projection);
         m_ProbeDebugShader->SetMatrix("view", m_Renderer->GetCamera()->View);
         m_ProbeDebugShader->SetVector("CamPos", m_Renderer->GetCamera()->Position);
 
-        // first do the sky capture (at position (0, 0, 0)?)
-        m_ProbeDebugShader->SetVector("Position", math::vec3(0.0f));
+        // first render the sky capture
+        m_ProbeDebugShader->SetVector("Position", math::vec3(0.0f, 2.0, 0.0f));
         m_SkyCapture->Prefiltered->Bind(0);
         m_Renderer->renderMesh(m_ProbeDebugSphere, m_ProbeDebugShader);
 
@@ -170,7 +186,14 @@ namespace Cell
         for (int i = 0; i < m_CaptureProbes.size(); ++i)
         {
             m_ProbeDebugShader->SetVector("Position", m_CaptureProbes[i]->Position);
-            m_CaptureProbes[i]->Prefiltered->Bind(0);
+            if (m_CaptureProbes[i]->Prefiltered)
+            {
+                m_CaptureProbes[i]->Prefiltered->Bind(0);
+            }
+            else
+            {
+                m_CaptureProbes[i]->Irradiance->Bind(0);
+            }
             m_Renderer->renderMesh(m_ProbeDebugSphere, m_ProbeDebugShader);
         }
     }

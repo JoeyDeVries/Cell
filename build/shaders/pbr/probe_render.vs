@@ -11,7 +11,7 @@ uniform vec3 Position;
 
 void main()
 {
-    LocalPos = aPos;
-    WorldPos = aPos + Position;
+    LocalPos = aPos * 0.5;
+    WorldPos = LocalPos + Position;
 	gl_Position = projection * view * vec4(WorldPos, 1.0);
 }

@@ -118,6 +118,7 @@ namespace Cell
 
         // deferred
         deferredAmbientShader     = Cell::Resources::LoadShader("deferred ambient", "shaders/deferred/screen_ambient.vs", "shaders/deferred/ambient.fs");
+        deferredIrradianceShader  = Cell::Resources::LoadShader("deferred irradiance", "shaders/deferred/ambient_irradience.vs", "shaders/deferred/ambient_irradience.fs");
         deferredDirectionalShader = Cell::Resources::LoadShader("deferred directional", "shaders/deferred/screen_directional.vs", "shaders/deferred/directional.fs");
         deferredPointShader       = Cell::Resources::LoadShader("deferred point", "shaders/deferred/point.vs", "shaders/deferred/point.fs");
 
@@ -129,6 +130,18 @@ namespace Cell
         deferredAmbientShader->SetInt("envPrefilter", 4);
         deferredAmbientShader->SetInt("BRDFLUT", 5);
         deferredAmbientShader->SetInt("SSAO", 6);
+        deferredIrradianceShader->Use();
+        deferredIrradianceShader->SetInt("gPositionMetallic", 0);
+        deferredIrradianceShader->SetInt("gNormalRoughness", 1);
+        deferredIrradianceShader->SetInt("gAlbedoAO", 2);
+        deferredIrradianceShader->SetInt("envIrradiance", 3);
+        deferredIrradianceShader->SetInt("envPrefilter", 4);
+        deferredIrradianceShader->SetInt("BRDFLUT", 5);
+        deferredIrradianceShader->SetInt("SSAO", 6);
+  /*      deferredAmbientShader->SetInt("probe1Irradiance", 7);
+        deferredAmbientShader->SetInt("probe1Prefilter", 8);
+        deferredAmbientShader->SetInt("probe2Irradiance", 9);
+        deferredAmbientShader->SetInt("probe2Prefilter", 10);*/
         deferredDirectionalShader->Use();
         deferredDirectionalShader->SetInt("gPositionMetallic", 0);
         deferredDirectionalShader->SetInt("gNormalRoughness", 1);

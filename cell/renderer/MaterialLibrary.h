@@ -24,7 +24,8 @@ namespace Cell
         Material* defaultBlitMaterial;
         Material* postProcessingMaterial; // TODO(Joey): move to post-processing toolkit
 
-        Shader *deferredAmbientShader;
+        Shader* deferredAmbientShader;
+        Shader* deferredIrradianceShader;
         Shader* deferredDirectionalShader;
         Shader* deferredPointShader;
 

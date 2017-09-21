@@ -22,9 +22,6 @@
 
 #include <stack>
 
-
-//void APIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, void *userParam);
-
 namespace Cell
 {
     // ------------------------------------------------------------------------
@@ -94,7 +91,7 @@ namespace Cell
         m_PBR = new PBR(this);
 
         // default PBR pre-compute (get a more default oriented HDR map for this)
-        Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/hamarikyu bridge.hdr");
+        Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/alley.hdr");
         Cell::PBRCapture *envBridge = m_PBR->ProcessEquirectangular(hdrMap);
         SetSkyCapture(envBridge);
     }
@@ -153,16 +150,15 @@ namespace Cell
     // ------------------------------------------------------------------------
     void Renderer::PushRender(Mesh *mesh, Material *material, math::mat4 transform)
     {
-        // NOTE(Joey): get current render target
+        // get current render target
         RenderTarget *target = getCurrentRenderTarget();
-        // NOTE(Joey): don't render right away but push to the command buffer
-        // for later rendering.
+        // don't render right away but push to the command buffer for later rendering.
         m_CommandBuffer.Push(mesh, material, transform, target);
     }
     // ------------------------------------------------------------------------
     void Renderer::PushRender(SceneNode *node)
     {
-        // NOTE(Joey): get current render target
+        // get current render target
         RenderTarget *target = getCurrentRenderTarget();
         // NOTE(Joey): traverse through all the scene nodes and for each node:
         // push its render state to the command buffer together with a 
@@ -207,7 +203,7 @@ namespace Cell
     // ------------------------------------------------------------------------
     void Renderer::PushPostProcessor(Material *postProcessor)
     {
-        // NOTE(Joey): we only care about the material, mesh as NDC quad is pre-defined.
+        // we only care about the material, mesh as NDC quad is pre-defined.
         m_CommandBuffer.Push(nullptr, postProcessor, math::mat4());
     }
     // ------------------------------------------------------------------------
@@ -315,7 +311,11 @@ namespace Cell
         m_GBuffer->GetColorTexture(2)->Bind(2);
         
         // ambient lighting
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
         renderDeferredAmbient();
+        glCullFace(GL_BACK);
+        glEnable(GL_CULL_FACE);
 
         // directional lights
         for (auto it = m_DirectionalLights.begin(); it != m_DirectionalLights.end(); ++it)
@@ -327,7 +327,7 @@ namespace Cell
         glCullFace(GL_FRONT);
         for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
         {
-            renderDeferredPointLight(*it);
+            //renderDeferredPointLight(*it);
         }
         glCullFace(GL_BACK);
         glEnable(GL_CULL_FACE);
@@ -420,7 +420,7 @@ namespace Cell
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
         }
-        m_PBR->RenderCaptures();
+        m_PBR->RenderProbes();
 
         // 8. custom post-processing pass
         std::vector<RenderCommand>& postProcessingCommands = m_CommandBuffer.GetPostProcessingRenderCommands();
@@ -444,7 +444,7 @@ namespace Cell
         // clear the command buffer s.t. the next frame/call can start from an empty slate again.
         m_CommandBuffer.Clear();
 
-        // NOTE(Joey): clear render state
+        // clear render state
         m_RenderTargetsCustom.clear();
         // TODO(Joey): this can probably be done in a cleaner fashion:
         //m_RenderTargetsCustom.push_back(nullptr); // NOTE(Joey): always add the default render 
@@ -495,28 +495,16 @@ namespace Cell
     void Renderer::SetSkyCapture(PBRCapture* pbrEnvironment)
     {
         m_PBR->SetSkyCapture(pbrEnvironment);
-        //for(unsigned int i = 0; i < m_PBREnvironments.size(); ++i)
-        //{
-        //    if (pbrEnvironment->Irradiance == m_PBREnvironments[i]->Irradiance)
-        //    {
-        //        m_PBREnvironmentIndex = i;
-        //        // NOTE(Joey): loop through all the default shaders and set PBR environments
-        //        // TODO(Joey): update UBO object, instead of setting uniforms like we do now.
-        //        // TODO(Joey): manage this with pbr toolkit
-        //        /*for (auto it = m_DefaultMaterials.begin(); it != m_DefaultMaterials.end(); ++it)
-        //        {
-        //            it->second->SetTextureCube("EnvIrradiance", pbrEnvironment->Irradiance, 1);
-        //            it->second->SetTextureCube("EnvPrefilter", pbrEnvironment->Prefiltered, 2);
-        //        }*/
-        //        return;
-        //    }
-        //}
-        Log::Message("Tried to set PBR environment, but wasn't indexed before.");
     }
     // ------------------------------------------------------------------------
     PBRCapture* Renderer::GetSkypCature()
     {
         return m_PBR->GetSkyCapture();
+    }
+    // ------------------------------------------------------------------------
+    void Renderer::AddIrradianceProbe(math::vec3 position, float radius)
+    {
+        m_ProbeSpatials.push_back(math::vec4(position, radius));
     }
     // ------------------------------------------------------------------------
     void Renderer::BakeProbes(SceneNode* scene)
@@ -529,23 +517,10 @@ namespace Cell
         // build a command list of nodes within the reflection probe's capture box/radius.
         CommandBuffer commandBuffer;
         std::vector<Material*> materials;
-
-        //if (scene->Material)
-        //{
-        //    auto samplerUniforms = *(scene->Material->GetSamplerUniforms());
-        //    if (samplerUniforms.find("TexAlbedo") != samplerUniforms.end())
-        //    {
-        //        materials.push_back(new Material(m_PBR->m_ProbeCaptureShader));
-        //        materials[materials.size() - 1]->SetTexture("TexAlbedo", samplerUniforms["TexAlbedo"].Texture);
-        //        commandBuffer.Push(scene->Mesh, materials[materials.size() - 1], scene->GetTransform());
-        //    }
-        //}
-        // NOTE(Joey): originally a recursive function but transformed to 
-        // iterative version by maintaining a stack.
+     
+        // originally a recursive function but transformed to iterative version
         std::stack<SceneNode*> sceneStack;
         sceneStack.push(scene);
-      /*  for (unsigned int i = 0; i < scene->GetChildCount(); ++i)
-            sceneStack.push(scene->GetChildByIndex(i));*/
         while (!sceneStack.empty())
         {
             SceneNode *node = sceneStack.top();
@@ -556,8 +531,24 @@ namespace Cell
                 if (samplerUniforms.find("TexAlbedo") != samplerUniforms.end())
                 {
                     materials.push_back(new Material(m_PBR->m_ProbeCaptureShader));
-                    materials[materials.size() - 1]->SetTexture("TexAlbedo", samplerUniforms["TexAlbedo"].Texture);
+                    materials[materials.size() - 1]->SetTexture("TexAlbedo", samplerUniforms["TexAlbedo"].Texture, 0);
+                    if (samplerUniforms.find("TexNormal") != samplerUniforms.end())
+                    {
+                        materials[materials.size() - 1]->SetTexture("TexNormal", samplerUniforms["TexNormal"].Texture, 1);
+                    }
+                    if (samplerUniforms.find("TexMetallic") != samplerUniforms.end())
+                    {
+                        materials[materials.size() - 1]->SetTexture("TexMetallic", samplerUniforms["TexMetallic"].Texture, 2);
+                    }
+                    if (samplerUniforms.find("TexRoughness") != samplerUniforms.end())
+                    {
+                        materials[materials.size() - 1]->SetTexture("TexRoughness", samplerUniforms["TexRoughness"].Texture, 3);
+                    }
                     commandBuffer.Push(node->Mesh, materials[materials.size() - 1], node->GetTransform());
+                }
+                else if (samplerUniforms.find("background") != samplerUniforms.end())
+                {   // we have a background scene node, add those as well
+                    commandBuffer.Push(node->Mesh, node->Material, node->GetTransform());
                 }
             }
             else
@@ -572,18 +563,17 @@ namespace Cell
         commandBuffer.Sort();
         std::vector<RenderCommand> renderCommands = commandBuffer.GetCustomRenderCommands(nullptr);
 
-        TextureCube renderResult;
-        renderResult.DefaultInitialize(128, 128, GL_RGB, GL_FLOAT);
+        m_PBR->ClearIrradianceProbes();
+        for (int i = 0; i < m_ProbeSpatials.size(); ++i)
+        {
+            TextureCube renderResult;
+            renderResult.DefaultInitialize(32, 32, GL_RGB, GL_FLOAT);
 
-        math::vec3 position(2.0f, 2.0f, 0.0f);
-        renderToCubemap(renderCommands, &renderResult, position);
+            renderToCubemap(renderCommands, &renderResult, m_ProbeSpatials[i].xyz);
 
-        // also render the skylight when doing a capture
-        // TODO: custom skylight shader for capture (use current active PBR skylight)
-
-        // TODO: re-factor PBR logic (do we add capture right away with procesS? should we even return it?)
-        PBRCapture* capture = m_PBR->ProcessCube(&renderResult, position, 10.0f);
-        m_PBR->AddCapture(capture, position);
+            PBRCapture* capture = m_PBR->ProcessCube(&renderResult, false);
+            m_PBR->AddIrradianceProbe(capture, m_ProbeSpatials[i].xyz, m_ProbeSpatials[i].w);
+        }
 
         for (int i = 0; i < materials.size(); ++i)
         {
@@ -875,7 +865,6 @@ namespace Cell
             for (unsigned int i = 0; i < renderCommands.size(); ++i)
             {
                 // cubemap generation only works w/ custom materials 
-                // TODO: can we get this to work on the deferred materials as well?
                 assert(renderCommands[i].Material->Type == MATERIAL_CUSTOM);
                 renderCustomCommand(&renderCommands[i], camera);
             }
@@ -915,20 +904,34 @@ namespace Cell
     // --------------------------------------------------------------------------------------------
     void Renderer::renderDeferredAmbient()
     {
-        PBRCapture *iblCapture = m_PBR->GetSkyCapture();
-        Shader* ambientShader = m_MaterialLibrary->deferredAmbientShader;
+        PBRCapture* skyCapture = m_PBR->GetSkyCapture();        
+        skyCapture->Prefiltered->Bind(4);
 
-        iblCapture->Irradiance->Bind(3);
-        iblCapture->Prefiltered->Bind(4);
         m_PBR->m_RenderTargetBRDFLUT->GetColorTexture(0)->Bind(5);
-
         m_PostProcessor->SSAOOutput->Bind(6);
 
-        ambientShader->Use();
-        ambientShader->SetVector("camPos", m_Camera->Position);
-        ambientShader->SetMatrix("view", m_Camera->View);
+        //std::vector<PBRCapture*> irradianceProbes = m_PBR->GetIrradianceProbes(math::vec3(0.0f), 25.0f);
+        auto irradianceProbes = m_PBR->m_CaptureProbes;
+        for (int i = 0; i < irradianceProbes.size(); ++i)
+        {
+            PBRCapture* probe = irradianceProbes[i];
+            probe->Irradiance->Bind(3);
 
-        renderMesh(m_NDCPlane, ambientShader);
+            Shader* irradianceShader = m_MaterialLibrary->deferredIrradianceShader;
+            irradianceShader->Use();
+            irradianceShader->SetVector("camPos", m_Camera->Position);
+            irradianceShader->SetVector("probePos", probe->Position);
+            irradianceShader->SetFloat("probeRadius", probe->Radius);
+
+            math::mat4 model;
+            math::translate(model, probe->Position);
+            math::scale(model, math::vec3(probe->Radius));
+            irradianceShader->SetMatrix("projection", m_Camera->Projection);
+            irradianceShader->SetMatrix("view", m_Camera->View);
+            irradianceShader->SetMatrix("model", model);
+
+            renderMesh(m_DeferredPointMesh, irradianceShader);
+        }
     }
     // --------------------------------------------------------------------------------------------
     void Renderer::renderDeferredDirLight(DirectionalLight *light)
@@ -967,21 +970,7 @@ namespace Cell
         pointShader->SetMatrix("view", m_Camera->View);
         pointShader->SetMatrix("model", model);
 
-        renderMesh(m_DeferredPointMesh, pointShader);
-
-       /* m_MaterialLibrary->deferredPointMaterial->SetVector("lightPos", light->Position);
-        m_MaterialLibrary->deferredPointMaterial->SetVector("lightColor", math::normalize(light->Color) * light->Intensity);
-        m_MaterialLibrary->deferredPointMaterial->SetFloat("lightRadius", light->Radius);
-
-        RenderCommand command;
-        command.Material = m_MaterialLibrary->deferredPointMaterial;
-        command.Mesh = m_DeferredPointMesh;
-        math::mat4 model;
-        math::translate(model, light->Position);
-        math::scale(model, math::vec3(light->Radius));
-        command.Transform = model;
-
-        renderCustomCommand(&command, m_Camera);*/
+        renderMesh(m_DeferredPointMesh, pointShader);    
     }
     // --------------------------------------------------------------------------------------------
     void Renderer::renderShadowCastCommand(RenderCommand* command, const math::mat4& projection, const math::mat4& view)

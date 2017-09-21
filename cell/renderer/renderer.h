@@ -57,10 +57,10 @@ namespace Cell
         Mesh*         m_DeferredPointMesh;
 
         // materials
-        MaterialLibrary *m_MaterialLibrary;
+        MaterialLibrary* m_MaterialLibrary;
 
         // camera
-        Camera       *m_Camera;
+        Camera* m_Camera;
 
         // render-targets/post
         std::vector<RenderTarget*> m_RenderTargetsCustom;
@@ -69,7 +69,7 @@ namespace Cell
         RenderTarget*              m_PostProcessTarget1;
         PostProcessor*             m_PostProcessor;
         Quad*                      m_NDCPlane;
-        unsigned int m_FramebufferCubemap; // NOTE(Joey): cubemap render targets are a very specific case so we can do these without abstractions.
+        unsigned int m_FramebufferCubemap; // cubemap render targets are specific to renderer, so we can directly declare these here
         unsigned int m_CubemapDepthRBO;
 
         // shadow buffers
@@ -79,9 +79,10 @@ namespace Cell
         // pbr
         PBR* m_PBR;
         unsigned int m_PBREnvironmentIndex;
+        std::vector<math::vec4> m_ProbeSpatials;
 
         // debug
-        Mesh *m_DebugLightMesh;
+        Mesh* m_DebugLightMesh;
 
     public:
         Renderer();
@@ -97,10 +98,10 @@ namespace Cell
         Camera* GetCamera();
         void    SetCamera(Camera* camera);
 
-        // NOTE(Joey): idea, create either a deferred default material (based on default set of materials available (like glass)), or a custom material (with custom you have to supply your own shader)
-        Material* CreateMaterial(std::string base = "default"); // NOTE(Joey): these don't have the custom flag set (default material has default state and uses checkerboard texture as albedo (and black metallic, half roughness, purple normal, white ao)
-        Material* CreateCustomMaterial(Shader* shader);         // NOTE(Joey): these have the custom flag set (will be rendered in forward pass)
-        Material* CreatePostProcessingMaterial(Shader* shader); // NOTE(Joey): these have the post-processing flag set (will be rendered after deferred/forward pass)
+        // idea, create either a deferred default material (based on default set of materials available (like glass)), or a custom material (with custom you have to supply your own shader)
+        Material* CreateMaterial(std::string base = "default"); // these don't have the custom flag set (default material has default state and uses checkerboard texture as albedo (and black metallic, half roughness, purple normal, white ao)
+        Material* CreateCustomMaterial(Shader* shader);         // these have the custom flag set (will be rendered in forward pass)
+        Material* CreatePostProcessingMaterial(Shader* shader); // these have the post-processing flag set (will be rendered after deferred/forward pass)
 
         void PushRender(Mesh* mesh, Material* material, math::mat4 transform = math::mat4());
         void PushRender(SceneNode* node);
@@ -116,6 +117,7 @@ namespace Cell
         // pbr
         void        SetSkyCapture(PBRCapture* pbrEnvironment);
         PBRCapture* GetSkypCature();
+        void        AddIrradianceProbe(math::vec3 position, float radius);
         void        BakeProbes(SceneNode* scene = nullptr);
     private:
         // renderer-specific logic for rendering a 'default' deferred command.

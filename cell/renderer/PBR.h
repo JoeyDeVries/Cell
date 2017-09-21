@@ -35,7 +35,7 @@ namespace Cell
         Mesh*      m_PBRCaptureCube;
         SceneNode* m_SceneEnvCube;
 
-        // reflection probe capture
+        // irradiance capture 
         Shader*   m_ProbeCaptureShader;
         Material* m_ProbeCapture;
 
@@ -47,20 +47,24 @@ namespace Cell
         PBR(Renderer* renderer);
         ~PBR();
 
-        // asd
+        // sets the combined irradiance/pre-filter global environment skylight 
         void SetSkyCapture(PBRCapture* capture);
-        // asd
-        void AddCapture(PBRCapture* capture, math::vec3 position);
-        // asd
+        // adds a processed PBR capture to the list of irradiance probes
+        void AddIrradianceProbe(PBRCapture* capture, math::vec3 position, float radius);
+        // removes all irradiance probe entries from the global GI grid
+        void ClearIrradianceProbes();
+        // generate an irradiance and pre-filter map out of a 2D equirectangular map (preferably HDR)
         PBRCapture* ProcessEquirectangular(Texture* envMap);
-        // asd
-        PBRCapture* ProcessCube(TextureCube *capture, math::vec3 position, float radius);
-
-
+        // generate an irradiance and pre-filter map out of a cubemap texture
+        PBRCapture* ProcessCube(TextureCube *capture, bool prefilter = true);
+        
+        // retrieves the environment skylight 
         PBRCapture* GetSkyCapture();
-        PBRCapture* GetClosestCapture(math::vec3 position);
+        // retrieve all pushed irradiance probes
+        std::vector<PBRCapture*> GetIrradianceProbes(math::vec3 queryPos, float queryRadius);
 
-        void RenderCaptures();
+        // renders all reflection/irradiance probes for visualization/debugging.
+        void RenderProbes();
     };
 }
 

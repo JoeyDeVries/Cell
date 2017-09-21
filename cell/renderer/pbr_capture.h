@@ -14,11 +14,11 @@ namespace Cell
     */
     struct PBRCapture
     {
-        TextureCube *Irradiance;
-        TextureCube *Prefiltered;
+        TextureCube* Irradiance  = nullptr;
+        TextureCube* Prefiltered = nullptr;
 
         math::vec3 Position;
-        float Radius;
+        float      Radius;
     };
 }
 

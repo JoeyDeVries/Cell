@@ -15,7 +15,7 @@ uniform mat4 projection;
 
 void main()
 {
-    float radius = 0.5;
+    float radius = 0.75;
     float bias = 0.025;
     vec2 noiseScale = renderSize.xy * vec2(1.0 / 4.0);
     // vec2 noiseScale = vec2(1280.0/4.0, 720.0/4.0); 
@@ -56,7 +56,7 @@ void main()
         occlusion += (sampleDepth >= sample.z + bias ? 1.0 : 0.0) * rangeCheck;           
     }
     occlusion = 1.0 - (occlusion / float(sampleCount));
-    occlusion = pow(occlusion, 2.0);
+    occlusion = pow(occlusion, 3.0);
 
     FragColor = vec4(vec3(occlusion), 1.0);
     // FragColor = vec4(abs(kernel[9] * 5.0), 1.0);

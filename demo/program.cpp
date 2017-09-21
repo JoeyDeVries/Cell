@@ -127,17 +127,17 @@ int main(int argc, char *argv[])
     //thirdTorus->Scale   = math::vec3(0.65f);
     //sphereNode->Scale   = math::vec3(1.35f);
 
-    Cell::Background background;
+    Cell::Background* background = new Cell::Background;
     Cell::TextureCube cubemap;
     cubemap.DefaultInitialize(1024, 1024, GL_RGB, GL_UNSIGNED_BYTE);
   
     // - background
     Cell::PBRCapture *pbrEnv = renderer->GetSkypCature();
-    background.SetCubemap(pbrEnv->Prefiltered);
+    background->SetCubemap(pbrEnv->Prefiltered);
 	float lodLevel = 1.5f; 
-	background.Material->SetFloat("lodLevel", lodLevel);
+	background->Material->SetFloat("lodLevel", lodLevel);
 	float exposure = 1.0;
-	background.Material->SetFloat("Exposure", exposure);
+	background->Material->SetFloat("Exposure", exposure);
     matPbr->GetShader()->Use();
     matPbr->GetShader()->SetFloat("Exposure", exposure);
 
@@ -158,29 +158,92 @@ int main(int argc, char *argv[])
     dirLight.Intensity = 50.0f;
     renderer->AddLight(&dirLight);
 
-    Cell::DirectionalLight dirLight2;
-    dirLight2.Direction = math::vec3(0.5f, -0.9f, 0.0f);
-    dirLight2.Color = math::vec3(0.8f, 0.87f, 1.0f);
-    dirLight2.Intensity = 25.0f;
-    renderer->AddLight(&dirLight2);
+    //Cell::DirectionalLight dirLight2;
+    //dirLight2.Direction = math::vec3(0.5f, -0.9f, 0.0f);
+    //dirLight2.Color = math::vec3(0.8f, 0.87f, 1.0f);
+    //dirLight2.Intensity = 25.0f;
+    //renderer->AddLight(&dirLight2);
 
     Cell::PointLight light;
     light.Radius = 4.0;
     light.Position = math::vec3(0.0f, 1.0f, 0.0f);
     light.Color = math::vec3(1.0f, 0.25, 0.25f);
     light.Intensity = 50.0f;
-    light.RenderMesh = true;
+    //light.RenderMesh = true;
     renderer->AddLight(&light);
 
     Cell::PointLight light2;
     light2.Radius = 3.0;
     light2.Color = math::vec3(0.5f, 0.5f, 2.0f);
     light2.Intensity = 25.0f;
-    light2.RenderMesh = true;
+    //light2.RenderMesh = true;
     renderer->AddLight(&light2);
 
-    // bake reflection probes before rendering
-    renderer->BakeProbes();
+    // bake irradiance GI (with grid placement of probes)
+    {
+        // bottom floor - center
+        renderer->AddIrradianceProbe(math::vec3(  0.0f,  0.5f, -0.5f), 3.25);
+        renderer->AddIrradianceProbe(math::vec3(  3.0f,  0.5f, -0.5f), 3.25);
+        renderer->AddIrradianceProbe(math::vec3(  6.0f,  0.5f, -0.5f), 3.25);
+        renderer->AddIrradianceProbe(math::vec3(  8.5f,  0.5f, -0.5f), 3.25);
+        renderer->AddIrradianceProbe(math::vec3( 11.4f,  0.5f, -0.5f), 4.25);
+        renderer->AddIrradianceProbe(math::vec3( -3.0f,  0.5f, -0.5f), 3.25);
+        renderer->AddIrradianceProbe(math::vec3( -6.2f,  0.5f, -0.5f), 3.25);
+        renderer->AddIrradianceProbe(math::vec3( -9.5f,  0.5f, -0.5f), 3.25);
+        renderer->AddIrradianceProbe(math::vec3(-12.1f,  0.5f, -0.5f), 4.25);
+        // bottom floor - left wing
+        renderer->AddIrradianceProbe(math::vec3(  0.0f, 0.5f, 4.0f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3(  4.0f, 0.5f, 4.0f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3(  8.0f, 0.5f, 4.0f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3( 12.0f, 0.5f, 4.0f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3( -4.0f, 0.5f, 4.0f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3( -8.0f, 0.5f, 4.0f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3(-12.0f, 0.5f, 4.0f), 4.0);
+        // bottom floor - right wing
+        renderer->AddIrradianceProbe(math::vec3(  0.0f, 0.5f, -4.5f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3(  4.0f, 0.5f, -4.5f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3(  8.0f, 0.5f, -4.5f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3( 12.0f, 0.5f, -4.5f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3( -4.0f, 0.5f, -4.5f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3( -8.0f, 0.5f, -4.5f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3(-12.0f, 0.5f, -4.5f), 4.0);
+        // 1st floor - center wing
+        renderer->AddIrradianceProbe(math::vec3(  0.0f, 5.0f, -0.5f), 4.5);
+        renderer->AddIrradianceProbe(math::vec3(  4.0f, 5.0f, -0.5f), 4.5);
+        renderer->AddIrradianceProbe(math::vec3(  8.0f, 5.0f, -0.5f), 4.5);
+        renderer->AddIrradianceProbe(math::vec3( 12.0f, 5.0f, -0.5f), 4.5);
+        renderer->AddIrradianceProbe(math::vec3( -4.0f, 5.0f, -0.5f), 4.5);
+        renderer->AddIrradianceProbe(math::vec3( -8.0f, 5.0f, -0.5f), 4.5);
+        renderer->AddIrradianceProbe(math::vec3(-12.0f, 5.0f, -0.5f), 4.5);
+        // 1st floor - left wing
+        renderer->AddIrradianceProbe(math::vec3(  0.0f, 5.0f, 4.0), 4.0);
+        renderer->AddIrradianceProbe(math::vec3(  4.0f, 5.0f, 4.0), 4.0);
+        renderer->AddIrradianceProbe(math::vec3(  8.0f, 5.0f, 4.0), 4.0);
+        renderer->AddIrradianceProbe(math::vec3( 12.0f, 5.0f, 4.0), 4.0);
+        renderer->AddIrradianceProbe(math::vec3( -4.0f, 5.0f, 4.0), 4.0);
+        renderer->AddIrradianceProbe(math::vec3( -8.0f, 5.0f, 4.0), 4.0);
+        renderer->AddIrradianceProbe(math::vec3(-11.5f, 5.0f, 4.0), 4.0);
+        // 1st floor - right wing
+        renderer->AddIrradianceProbe(math::vec3(  0.0f, 5.0f, -4.5f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3(  4.0f, 5.0f, -4.5f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3(  8.0f, 5.0f, -4.5f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3( 12.0f, 5.0f, -4.5f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3( -4.0f, 5.0f, -4.5f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3( -8.0f, 5.0f, -4.5f), 4.0);
+        renderer->AddIrradianceProbe(math::vec3(-11.5f, 5.0f, -4.5f), 4.0);
+        // 2nd floor - center wing
+        renderer->AddIrradianceProbe(math::vec3(  0.0f, 9.5f, -0.5f), 4.5);
+        renderer->AddIrradianceProbe(math::vec3(  4.0f, 9.5f, -0.5f), 4.5);
+        renderer->AddIrradianceProbe(math::vec3(  8.0f, 9.5f, -0.5f), 4.5);
+        renderer->AddIrradianceProbe(math::vec3( 12.0f, 9.5f, -0.5f), 4.5);
+        renderer->AddIrradianceProbe(math::vec3( -4.0f, 9.5f, -0.5f), 4.5);
+        renderer->AddIrradianceProbe(math::vec3( -8.0f, 9.5f, -0.5f), 4.5);
+        renderer->AddIrradianceProbe(math::vec3(-11.5f, 9.5f, -0.5f), 4.5);
+
+        // bake before rendering
+        renderer->BakeProbes();
+    }
+  
 
     while (!glfwWindowShouldClose(window))
     {
@@ -214,6 +277,8 @@ int main(int argc, char *argv[])
             // update render logic
             camera.Update(deltaTime);
 
+            Log::Message("(" + std::to_string(camera.Position.x) + ", " + std::to_string(camera.Position.y) + ", " + std::to_string(camera.Position.z) + ")", LOG_DEBUG);
+
             // fill the renderer's command buffer with default test scene
            /* mainTorus->Rotation = math::vec4(math::vec3(1.0f, 0.0f, 0.0f), glfwGetTime());
             secondTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
@@ -223,9 +288,9 @@ int main(int argc, char *argv[])
             //light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 1.0f, 0.0f);
             light2.Position = math::vec3(sin(glfwGetTime() * 0.3f) * 1.5 + 3.0, 2.0f, cos(glfwGetTime() * 0.1f) * 5.0f);
 
-            dirLight.Direction.x = sin(glfwGetTime() * 0.05f) * 1.5;
+          /*  dirLight.Direction.x = sin(glfwGetTime() * 0.05f) * 1.5;
             dirLight.Direction.y = -(sin(glfwGetTime() * 0.1f) * 0.5 + 0.5) * 0.5 - 0.5;
-            dirLight.Direction.z = (cos(glfwGetTime() * 0.13f) * 0.5 + 0.5) * 0.5 + 0.5;
+            dirLight.Direction.z = (cos(glfwGetTime() * 0.13f) * 0.5 + 0.5) * 0.5 + 0.5;*/
         }
 
         {
@@ -233,7 +298,7 @@ int main(int argc, char *argv[])
             //renderer->PushRender(mainTorus);
             renderer->PushRender(test);
 
-            renderer->PushRender(&background);
+            renderer->PushRender(background);
 
          
         }
