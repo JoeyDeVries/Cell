@@ -54,10 +54,10 @@ namespace Cell
         }
         // gaussian blur shader
         {
-            m_GaussianRTHalf_H = new RenderTarget(512, 512, GL_HALF_FLOAT, 1, false); // TODO: 16-bit float? and resolution? make agnostic
-            m_GaussianRTQuarter_H = new RenderTarget(256, 256, GL_HALF_FLOAT, 1, false); 
-            m_GaussianRTEight_H = new RenderTarget(128, 128, GL_HALF_FLOAT, 1, false);
-            m_GaussianRTSixteenth_H  = new RenderTarget(64, 64, GL_HALF_FLOAT, 1, false);
+            m_GaussianRTHalf_H      = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, false); // TODO: 16-bit float? and resolution? make agnostic
+            m_GaussianRTQuarter_H   = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, false); 
+            m_GaussianRTEight_H     = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, false);
+            m_GaussianRTSixteenth_H = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, false);
 
             m_OnePassGaussianShader = Cell::Resources::LoadShader("gaussian blur", "shaders/screen_quad.vs", "shaders/post/blur_guassian.fs");
             m_OnePassGaussianShader->Use();
@@ -220,8 +220,8 @@ namespace Cell
         }
         // blur (only lower resolution) down-sampled textures (for glass refraction/ssr-glossy)
         {
-            blur(renderer, DownSampledEightOutput,     m_DownSampleBlurRTEight,     8);
-            blur(renderer, DownSampledSixteenthOutput, m_DownSampleBlurRTSixteenth, 8);
+            blur(renderer, DownSampledEightOutput,     m_DownSampleBlurRTEight,     4);
+            blur(renderer, DownSampledSixteenthOutput, m_DownSampleBlurRTSixteenth, 4);
         }
         // bloom
         if (Bloom)

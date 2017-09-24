@@ -9,8 +9,8 @@ out vec2 UV0;
 out vec3 FragPos;
 out mat3 TBN;
 
-uniform mat4 projection;
-uniform mat4 view;
+#include ../common/uniforms.glsl
+
 uniform mat4 model;
 
 float time;

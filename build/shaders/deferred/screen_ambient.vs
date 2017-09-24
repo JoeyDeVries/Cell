@@ -5,9 +5,7 @@ layout (location = 1) in vec2 aUV0;
 out vec2 TexCoords;
 out vec3 CamPos;
 
-uniform vec3 camPos;
-
-uniform mat4 view;
+#include ../common/uniforms.glsl
 
 void main()
 {

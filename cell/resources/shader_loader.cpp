@@ -21,8 +21,8 @@ namespace Cell
         // NOTE(Joey): retrieve directory (for relative paths in shader includes)
         std::string vsDirectory = vsPath.substr(0, vsPath.find_last_of("/\\"));
         std::string fsDirectory = fsPath.substr(0, fsPath.find_last_of("/\\"));
-        std::string vsSource = readShader(vsFile, name, vsDirectory);
-        std::string fsSource = readShader(fsFile, name, fsDirectory);
+        std::string vsSource = readShader(vsFile, name, vsPath);
+        std::string fsSource = readShader(fsFile, name, fsPath);
 
         // NOTE(Joey): now build the shader with the source code
         Shader shader(name, vsSource, fsSource, defines);
@@ -33,8 +33,9 @@ namespace Cell
         return shader;
     }
     // ------------------------------------------------------------------------
-    std::string ShaderLoader::readShader(std::ifstream &file, const std::string& name, std::string directory)
+    std::string ShaderLoader::readShader(std::ifstream &file, const std::string& name, std::string path)
     {
+        std::string directory = path.substr(0, path.find_last_of("/\\"));
         std::string source, line;
         while (std::getline(file, line))
         {
@@ -47,7 +48,7 @@ namespace Cell
                 if (includeFile.is_open())
                 {
                     // NOTE(Joey): we recursively read the shader file to support any shader include depth
-                    source += readShader(includeFile, name, directory);
+                    source += readShader(includeFile, name, includePath);
                 }
                 else
                 {

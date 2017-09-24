@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 core
 layout (location = 0) in vec3 aPos;
 
 out vec3 FragPos;
@@ -6,11 +6,10 @@ out vec4 ScreenPos;
 out vec3 CamPos;
 out vec3 ProbePos;
 
-uniform mat4 projection;
-uniform mat4 view;
+#include ../common/uniforms.glsl
+
 uniform mat4 model;
 
-uniform vec3 camPos;
 uniform vec3 probePos;
 
 void main()

@@ -9,6 +9,8 @@ in vec3 Normal;
 in vec3 CamPosView;
 in vec3 DirLightDirView;
 
+#include common/uniforms.glsl
+
 uniform sampler2D TexAlbedo;
 uniform sampler2D TexNormal;
 uniform sampler2D TexMetallic;

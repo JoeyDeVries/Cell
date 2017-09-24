@@ -8,6 +8,7 @@ in vec3 LightDir;
 #include ../common/constants.glsl
 #include ../common/brdf.glsl
 #include ../common/shadows.glsl
+#include ../common/uniforms.glsl
 
 uniform sampler2D gPositionMetallic;
 uniform sampler2D gNormalRoughness;
@@ -16,7 +17,6 @@ uniform sampler2D gAlbedoAO;
 uniform vec3 lightColor;
 
 uniform sampler2D lightShadowMap;
-uniform mat4 view;
 uniform mat4 lightShadowViewProjection;
 
 void main()

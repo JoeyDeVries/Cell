@@ -15,7 +15,6 @@ namespace Cell
 
     class PostProcessor
     {
-        friend Renderer;
     public:
         // resulting post-processor intermediate outputs
         Texture* DownSampledHalfOutput;
@@ -37,7 +36,7 @@ namespace Cell
         bool Bloom    = false;
         bool SSAO     = true;
         bool TXAA     = true;
-        bool SSR      = true;
+        bool SSR      = false;
 
         // ssao
         int SSAOKernelSize = 32;

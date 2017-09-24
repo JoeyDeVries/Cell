@@ -1,8 +1,8 @@
 #ifndef PBR_GLSL
 #define PBR_GLSL
 
-#include common/constants.glsl
-#include common/brdf.glsl
+#include ../common/constants.glsl
+#include ../common/brdf.glsl
 
 vec3 PBRAnalyticLighting(
     vec3 albedo,

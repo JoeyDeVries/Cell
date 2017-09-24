@@ -7,6 +7,7 @@ in vec3 CamPos;
 #include ../common/constants.glsl
 #include ../common/brdf.glsl
 #include ../common/reflections.glsl
+#include ../common/uniforms.glsl
 
 uniform samplerCube envIrradiance;
 uniform samplerCube envPrefilter;
@@ -16,11 +17,7 @@ uniform sampler2D gPositionMetallic;
 uniform sampler2D gNormalRoughness;
 uniform sampler2D gAlbedoAO;
 
-uniform vec3 camPos;
-
 uniform sampler2D SSAO;
-
-uniform mat4 view;
 
 void main()
 {

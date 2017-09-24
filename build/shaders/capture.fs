@@ -16,7 +16,6 @@ uniform sampler2D TexRoughness;
 
 uniform vec3 DirLight0_Col;
 
-// TODO: parse from proper directory in shader class
 #include pbr/pbr.glsl
 
 void main()

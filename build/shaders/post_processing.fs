@@ -23,9 +23,6 @@ uniform sampler2D TexBloom2;
 uniform sampler2D TexBloom3;
 uniform sampler2D TexBloom4;
 
-// ssao
-
-
 // ssr
 uniform sampler2D TexSSR;
 

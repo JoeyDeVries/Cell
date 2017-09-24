@@ -50,10 +50,15 @@ Feature List (complete:base-functionality)
 	1. Calculate diffuse integral and store into cubemap.
 	2. Prefilter environment map w/ integral and store into cubemap as diffuse integral.
 	3. Pre-calculate active BRDF in 2D LUT (approach by Unreal for split sum approximation).
+    4. Irradiance reflection probe(s): pre-calculate environment lighting approximation at any scene location.
 9. Post-processing
     1. HDR/Gamma/Tone-mapping
-    2. Vignette
-    3. SSAO 
+    2. Bloom
+    3. SSR
+    4. Vignette
+    5. SSAO 
+10. Optimization:
+    1. Store material-independent uniforms in UBO; together with barely changing shader parameters.    
 	
 Feature List (work-in-progress)
 ------
@@ -62,31 +67,23 @@ Feature List (work-in-progress)
 * Flexible OpenGL initialization.
 
 1. Add Camera functionality; add multiple camera variations: FPS, FlightSim, ArcBall.
-2. Configure Deferred rendering pipeline:
-	1. Set up light architecture; types of light, material interaction, volume calculation.
-	2. Fog.
-	3. Shadow Mapping (default, omni, CSM).
-	4. Per-object motion blur.
+2. Configure Deferred rendering pipeline:	
+	1. Fog.
+	2. Shadow Mapping (default, omni, CSM).
+	3. Per-object motion blur.
 3. Post-processing
-    1. Bloom
-    2. SSR
-    3. TXAA
+    1. TXAA
 		
 Feature List (todo)
 ------
 
 8. GUI
     1. IMGUI
-9. Functioning PBR render pipeline.
-	1. Reflection probes: pre-calculate environment lighting from cubemap and scene at any world location.
-	2. Interpolate between world-space reflection probes.
-    3. Neatly integrate PBR into Cell's different render paths.
 10. Optimization:
 	1. Per-object Frustum culling.
 	2. Spatial partitioning.
 	3. Portal rendering (overkill perhaps)?
     4. Cache GL state.
-    5. Store material-independent uniforms in UBO; together with barely changing shader parameters.    
 12. Skeletal animation:
 	1. Define Bone structure on top of current scene hierarchy system.
 	2. Load skeletal mesh from Assimp as skeletal hierarchy as well? Think of different design solutions that would work well in current environment.

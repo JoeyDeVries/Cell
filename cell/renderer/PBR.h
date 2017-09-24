@@ -39,7 +39,7 @@ namespace Cell
 
         // irradiance capture 
         Shader*   m_ProbeCaptureShader;
-        Material* m_ProbeCapture;
+        Shader*   m_ProbeCaptureBackgroundShader;
 
         // debug 
         Mesh*   m_ProbeDebugSphere;

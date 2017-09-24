@@ -6,10 +6,9 @@ out vec2 TexCoords;
 out vec3 CamPos;
 out vec3 LightDir;
 
-uniform vec3 camPos;
-uniform vec3 lightDir;
+#include ../common/uniforms.glsl
 
-uniform mat4 view;
+uniform vec3 lightDir;
 
 void main()
 {

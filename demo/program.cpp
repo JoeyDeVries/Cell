@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
     Cell::Material *customPostProcessing2 = renderer->CreatePostProcessingMaterial(postProcessing2);
 
     // test mesh loading
-    Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "nanosuit", "meshes/sponza/sponza.obj");
+    Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "sponza", "meshes/sponza/sponza.obj");
     test->Position = math::vec3(0.0, -1.0, 0.0);
     test->Scale = math::vec3(0.01f);
 
@@ -169,14 +169,14 @@ int main(int argc, char *argv[])
     light.Position = math::vec3(0.0f, 1.0f, 0.0f);
     light.Color = math::vec3(1.0f, 0.25, 0.25f);
     light.Intensity = 50.0f;
-    //light.RenderMesh = true;
+    light.RenderMesh = true;
     renderer->AddLight(&light);
 
     Cell::PointLight light2;
     light2.Radius = 3.0;
     light2.Color = math::vec3(0.5f, 0.5f, 2.0f);
     light2.Intensity = 25.0f;
-    //light2.RenderMesh = true;
+    light2.RenderMesh = true;
     renderer->AddLight(&light2);
 
     // bake irradiance GI (with grid placement of probes)
@@ -209,11 +209,11 @@ int main(int argc, char *argv[])
         renderer->AddIrradianceProbe(math::vec3(-12.0f, 0.5f, -4.5f), 4.0);
         // 1st floor - center wing
         renderer->AddIrradianceProbe(math::vec3(  0.0f, 5.0f, -0.5f), 4.5);
-        renderer->AddIrradianceProbe(math::vec3(  4.0f, 5.0f, -0.5f), 4.5);
+        renderer->AddIrradianceProbe(math::vec3(  4.0f, 5.0f, -0.5f), 4.0);
         renderer->AddIrradianceProbe(math::vec3(  8.0f, 5.0f, -0.5f), 4.5);
         renderer->AddIrradianceProbe(math::vec3( 12.0f, 5.0f, -0.5f), 4.5);
         renderer->AddIrradianceProbe(math::vec3( -4.0f, 5.0f, -0.5f), 4.5);
-        renderer->AddIrradianceProbe(math::vec3( -8.0f, 5.0f, -0.5f), 4.5);
+        renderer->AddIrradianceProbe(math::vec3( -8.0f, 5.0f, -0.5f), 4.0);
         renderer->AddIrradianceProbe(math::vec3(-12.0f, 5.0f, -0.5f), 4.5);
         // 1st floor - left wing
         renderer->AddIrradianceProbe(math::vec3(  0.0f, 5.0f, 4.0), 4.0);
@@ -297,17 +297,8 @@ int main(int argc, char *argv[])
             //CLOCK(PUSH);
             //renderer->PushRender(mainTorus);
             renderer->PushRender(test);
-
             renderer->PushRender(background);
-
-         
         }
-        {
-            //CLOCK(CUBEMAP);
-            // also generate dynamic cubemap from scene
-            //renderer.RenderToCubemap(mainTorus, &cubemap, math::vec3(0.0f, 8.0f, 0.0f), 0);
-        }
-
         {
             // push post-processing calls
             //renderer->PushPostProcessor(&customPostProcessing1);

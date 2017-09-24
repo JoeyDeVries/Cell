@@ -51,7 +51,9 @@ namespace Cell
         m_ProbeCaptureShader->SetInt("TexNormal", 1);
         m_ProbeCaptureShader->SetInt("TexMetallic", 2);
         m_ProbeCaptureShader->SetInt("TexRoughness", 3);
-        m_ProbeCapture = new Material(m_ProbeCaptureShader);
+        m_ProbeCaptureBackgroundShader = Resources::LoadShader("pbr:capture background", "shaders/capture_background.vs", "shaders/capture_background.fs");
+        m_ProbeCaptureBackgroundShader->Use();
+        m_ProbeCaptureBackgroundShader->SetInt("background", 0);
 
         // debug render
         m_ProbeDebugSphere = new Sphere(32, 32);
@@ -76,7 +78,7 @@ namespace Cell
             delete m_CaptureProbes[i]->Prefiltered;
             delete m_CaptureProbes[i];
         }
-        delete m_ProbeCapture;
+        //delete m_ProbeCapture;
         delete m_ProbeDebugSphere;
     }
     // --------------------------------------------------------------------------------------------

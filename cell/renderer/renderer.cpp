@@ -90,6 +90,12 @@ namespace Cell
         // pbr
         m_PBR = new PBR(this);
 
+        // ubo
+        glGenBuffers(1, &m_GlobalUBO);
+        glBindBuffer(GL_UNIFORM_BUFFER, m_GlobalUBO);
+        glBufferData(GL_UNIFORM_BUFFER, 272, nullptr, GL_STREAM_DRAW);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_GlobalUBO);
+
         // default PBR pre-compute (get a more default oriented HDR map for this)
         Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/alley.hdr");
         Cell::PBRCapture *envBridge = m_PBR->ProcessEquirectangular(hdrMap);
@@ -239,7 +245,9 @@ namespace Cell
         */
         m_CommandBuffer.Sort();
 
-        // NOTE(Joey); deferred here:
+        // update (global) uniform buffers
+        updateGlobalUBOs();
+
         std::vector<RenderCommand>& deferredRenderCommands = m_CommandBuffer.GetDeferredRenderCommands();
         // 1. Geometry buffer
         glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
@@ -254,7 +262,7 @@ namespace Cell
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         for (unsigned int i = 0; i < deferredRenderCommands.size(); ++i)
         {
-            renderDeferredCommand(&deferredRenderCommands[i], m_Camera);
+            renderDeferredCommand(&deferredRenderCommands[i], nullptr);
         }
 
         //attachments[0] = GL_NONE; // disable for next pass (shadow map generation)
@@ -329,7 +337,7 @@ namespace Cell
         glCullFace(GL_FRONT);
         for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
         {
-            //renderDeferredPointLight(*it);
+            renderDeferredPointLight(*it);
         }
         glCullFace(GL_BACK);
         glEnable(GL_CULL_FACE);
@@ -391,7 +399,7 @@ namespace Cell
             // terate over all the render commands and execute
             for (unsigned int i = 0; i < renderCommands.size(); ++i)
             {
-                renderCustomCommand(&renderCommands[i], m_Camera);
+                renderCustomCommand(&renderCommands[i], nullptr);
             }
         }
 
@@ -417,7 +425,7 @@ namespace Cell
                 math::scale(model, math::vec3((*it)->Radius));
                 command.Transform = model;
 
-                renderCustomCommand(&command, m_Camera);
+                renderCustomCommand(&command, nullptr);
                 glEnable(GL_CULL_FACE);
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
@@ -550,7 +558,10 @@ namespace Cell
                 }
                 else if (samplerUniforms.find("background") != samplerUniforms.end())
                 {   // we have a background scene node, add those as well
-                    commandBuffer.Push(node->Mesh, node->Material, node->GetTransform());
+                    materials.push_back(new Material(m_PBR->m_ProbeCaptureBackgroundShader));
+                    materials[materials.size() - 1]->SetTextureCube("background", samplerUniforms["background"].TextureCube, 0);
+                    materials[materials.size() - 1]->DepthCompare = node->Material->DepthCompare;
+                    commandBuffer.Push(node->Mesh, materials[materials.size() - 1], node->GetTransform());
                 }
             }
             else
@@ -583,30 +594,21 @@ namespace Cell
         }
     }
     // ------------------------------------------------------------------------
-    void Renderer::renderDeferredCommand(RenderCommand *command, Camera *camera)
+    void Renderer::renderDeferredCommand(RenderCommand* command, Camera* customCamera)
     {
         Material *material = command->Material;
         Mesh     *mesh     = command->Mesh;        
 
-        // TODO(Joey): only use shader and set per-shader specific uniforms
-        // (ViewProjection) if state requires change; otherwise ignore.
-        // TODO(Joey): replace w/ uniform buffer objects for 'known' 
-        // uniforms that are shared among material runs (like projection/
-        // view); do a similar setup for lighting.
-        // TODO(Joey): I've decided that the only lighting pass that is default
-        // supported will be the deferred pass, if other shaders want lighting
-        // information as well they'll have to add it themselves.
-        // NOTE(Joey): set default uniforms that are always configured 
-        // regardless of shader configuration (see them as a default set of
-        // shader uniform variables always there).
+        // default uniforms that are always configured regardless of shader configuration (see them 
+        // as a default set of shader uniform variables always there); with UBO
         material->GetShader()->Use();
-        if (camera)
+        if (customCamera)
         {
-            material->GetShader()->SetMatrix("projection", camera->Projection);
-            material->GetShader()->SetMatrix("view", camera->View);
-            material->GetShader()->SetMatrix("model", command->Transform);
-            material->GetShader()->SetVector("CamPos", camera->Position);
+            material->GetShader()->SetMatrix("projection", customCamera->Projection);
+            material->GetShader()->SetMatrix("view",       customCamera->View);
+            material->GetShader()->SetVector("CamPos",     customCamera->Position);
         }      
+        material->GetShader()->SetMatrix("model", command->Transform);
 
         // NOTE(Joey): bind/active uniform sampler/texture objects
         auto *samplers = material->GetSamplerUniforms();
@@ -670,7 +672,7 @@ namespace Cell
         glBindVertexArray(0); // NOTE(Joey): consider skipping this call without damaging the render pipeline
     }
     // ------------------------------------------------------------------------
-    void Renderer::renderCustomCommand(RenderCommand *command, Camera *camera)
+    void Renderer::renderCustomCommand(RenderCommand* command, Camera* customCamera)
     {
         Material *material = command->Material;
         Mesh     *mesh     = command->Mesh;
@@ -704,29 +706,20 @@ namespace Cell
         {
             glDisable(GL_CULL_FACE);
         }
-
-
-        // TODO(Joey): only use shader and set per-shader specific uniforms
-        // (ViewProjection) if state requires change; otherwise ignore.
-        // TODO(Joey): replace w/ uniform buffer objects for 'known' 
-        // uniforms that are shared among material runs (like projection/
-        // view); do a similar setup for lighting.
-        // TODO(Joey): I've decided that the only lighting pass that is default
-        // supported will be the deferred pass, if other shaders want lighting
-        // information as well they'll have to add it themselves.
-        // NOTE(Joey): set default uniforms that are always configured 
-        // regardless of shader configuration (see them as a default set of
-        // shader uniform variables always there).
+     
+        // default uniforms that are always configured regardless of shader configuration (see them 
+        // as a default set of shader uniform variables always there); with UBO
         material->GetShader()->Use();
-        if (camera)
+        if (customCamera) // pass custom camera specific uniform
         {
-            material->GetShader()->SetMatrix("projection", camera->Projection);
-            material->GetShader()->SetMatrix("view", camera->View);
-            material->GetShader()->SetMatrix("model", command->Transform);
-            material->GetShader()->SetVector("CamPos", camera->Position);
+            material->GetShader()->SetMatrix("projection", customCamera->Projection);
+            material->GetShader()->SetMatrix("view",       customCamera->View);
+            material->GetShader()->SetVector("CamPos",     customCamera->Position);
         }
-        // NOTE(Joey): lighting setup: also move to uniform buffer object in future
-        for (unsigned int i = 0; i < m_DirectionalLights.size() && i < 4; ++i) // NOTE(Joey): no more than 4 directional lights
+        material->GetShader()->SetMatrix("model", command->Transform);
+
+        // lighting setup: also move to uniform buffer object in future
+        for (unsigned int i = 0; i < m_DirectionalLights.size() && i < 4; ++i) // no more than 4 directional lights
         {
             std::string uniformName = "DirLight" + std::to_string(i) + "_Dir";
             if (material->GetShader()->HasUniform(uniformName))
@@ -735,7 +728,7 @@ namespace Cell
                 material->GetShader()->SetVector("DirLight" + std::to_string(i) + "_Col", m_DirectionalLights[i]->Color);
             }
             else
-                break; // NOTE(Joey): if DirLight2 doesn't exist we assume that DirLight3 and 4,5,6 also do not exist; stop searching
+                break; // if DirLight2 doesn't exist we assume that DirLight3 and 4,5,6 also do not exist; stop searching
         }
         for (unsigned int i = 0; i < m_PointLights.size() && i < 8; ++i) // NOTE(Joey): constrained to max 8 point lights for now in forward context
         {
@@ -746,10 +739,10 @@ namespace Cell
                 material->GetShader()->SetVector("PointLight" + std::to_string(i) + "_Col", m_PointLights[i]->Color);
             }
             else
-                break; // NOTE(Joey): if PointLight2 doesn't exist we assume that PointLight3 and 4,5,6 also don't exist; stop searching
+                break; // if PointLight2 doesn't exist we assume that PointLight3 and 4,5,6 also don't exist; stop searching
         }
 
-        // NOTE(Joey): bind/active uniform sampler/texture objects
+        // bind/active uniform sampler/texture objects
         auto *samplers = material->GetSamplerUniforms();
         for (auto it = samplers->begin(); it != samplers->end(); ++it)
         {
@@ -759,7 +752,7 @@ namespace Cell
                 it->second.Texture->Bind(it->second.Unit);
         }
 
-        // NOTE(Joey): set uniform state of material
+        // set uniform state of material
         auto *uniforms = material->GetUniforms();
         for (auto it = uniforms->begin(); it != uniforms->end(); ++it)
         {
@@ -806,13 +799,12 @@ namespace Cell
         math::vec3   position,
         unsigned int mipLevel)
     {
-        // NOTE(Joey): create a command buffer specifically for this operation (as to not conflict 
-        // with main command buffer)
+        // create a command buffer specifically for this operation (as to not conflict with main 
+        // command buffer)
         CommandBuffer commandBuffer;
         // TODO(Joey): code duplication! re-factor!
         commandBuffer.Push(scene->Mesh, scene->Material, scene->GetTransform());
-        // NOTE(Joey): originally a recursive function but transformed to 
-        // iterative version by maintaining a stack.
+        // recursive function transformed to iterative version by maintaining a stack
         std::stack<SceneNode*> childStack;
         for (unsigned int i = 0; i < scene->GetChildCount(); ++i)
             childStack.push(scene->GetChildByIndex(i));
@@ -871,10 +863,6 @@ namespace Cell
                 renderCustomCommand(&renderCommands[i], camera);
             }
         }
-        // reset state
-        // TODO: is this still necessary (global render targets managed at a higher level)?
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
     }
     // --------------------------------------------------------------------------------------------
     void Renderer::renderMesh(Mesh* mesh, Shader* shader)
@@ -892,7 +880,19 @@ namespace Cell
     // --------------------------------------------------------------------------------------------
     void Renderer::updateGlobalUBOs()
     {
-        // TODO(Joey): decide on std140 layout for global variables (do we split this on the deferred/forward/post pass?)
+        glBindBuffer(GL_UNIFORM_BUFFER, m_GlobalUBO);
+        // transformation matrices
+        glBufferSubData(GL_UNIFORM_BUFFER,   0, 64, &(m_Camera->Projection * m_Camera->View)[0][0]); // sizeof(math::mat4) = 64 bytes
+        glBufferSubData(GL_UNIFORM_BUFFER,  64, 64, &m_Camera->Projection[0][0]);
+        glBufferSubData(GL_UNIFORM_BUFFER, 128, 64, &m_Camera->View[0][0]);
+        glBufferSubData(GL_UNIFORM_BUFFER, 192, 64, &m_Camera->View[0][0]); // todo: make inv function in math library
+        // scene data
+        glBufferSubData(GL_UNIFORM_BUFFER, 256, 16, &m_Camera->Position[0]); // todo: make inv function in math library
+
+
+        // lighting
+
+
     }
     // --------------------------------------------------------------------------------------------
     RenderTarget* Renderer::getCurrentRenderTarget()
@@ -912,7 +912,6 @@ namespace Cell
         m_PBR->m_RenderTargetBRDFLUT->GetColorTexture(0)->Bind(5);
         m_PostProcessor->SSAOOutput->Bind(6);
 
-        //std::vector<PBRCapture*> irradianceProbes = m_PBR->GetIrradianceProbes(math::vec3(0.0f), 25.0f);
         auto irradianceProbes = m_PBR->m_CaptureProbes;
         for (int i = 0; i < irradianceProbes.size(); ++i)
         {
@@ -924,12 +923,13 @@ namespace Cell
             irradianceShader->SetVector("camPos", m_Camera->Position);
             irradianceShader->SetVector("probePos", probe->Position);
             irradianceShader->SetFloat("probeRadius", probe->Radius);
+            irradianceShader->SetInt("SSR", m_PostProcessor->SSR);
 
             math::mat4 model;
             math::translate(model, probe->Position);
             math::scale(model, math::vec3(probe->Radius));
-            irradianceShader->SetMatrix("projection", m_Camera->Projection);
-            irradianceShader->SetMatrix("view", m_Camera->View);
+            //irradianceShader->SetMatrix("projection", m_Camera->Projection);
+            //irradianceShader->SetMatrix("view", m_Camera->View);
             irradianceShader->SetMatrix("model", model);
 
             renderMesh(m_DeferredPointMesh, irradianceShader);
@@ -944,7 +944,7 @@ namespace Cell
         dirShader->SetVector("camPos", m_Camera->Position);
         dirShader->SetVector("lightDir", light->Direction);
         dirShader->SetVector("lightColor", math::normalize(light->Color) * light->Intensity); // TODO(Joey): enforce light normalization with light setter?
-        dirShader->SetMatrix("view", m_Camera->View);
+        //dirShader->SetMatrix("view", m_Camera->View);
 
         if (light->ShadowMapRT)
         {
@@ -968,8 +968,8 @@ namespace Cell
         math::mat4 model;
         math::translate(model, light->Position);
         math::scale(model, math::vec3(light->Radius));
-        pointShader->SetMatrix("projection", m_Camera->Projection);
-        pointShader->SetMatrix("view", m_Camera->View);
+        //pointShader->SetMatrix("projection", m_Camera->Projection);
+        //pointShader->SetMatrix("view", m_Camera->View);
         pointShader->SetMatrix("model", model);
 
         renderMesh(m_DeferredPointMesh, pointShader);    
