@@ -60,10 +60,10 @@ void main()
 	vec3 kS = F;
 	
 	// calculate specular global illumination contribution w/ Epic's split-sum approximation
-	const float MAX_REFLECTION_LOD = 5.0;
-    vec3 prefilteredColor = pow(textureLod(envPrefilter, invViewRot * R,  roughness * MAX_REFLECTION_LOD).rgb, vec3(2.2));
-    vec2 envBRDF          = texture(BRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
-    vec3 specular         = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+	// const float MAX_REFLECTION_LOD = 5.0;
+    // vec3 prefilteredColor = pow(textureLod(envPrefilter, invViewRot * R,  roughness * MAX_REFLECTION_LOD).rgb, vec3(2.2));
+    // vec2 envBRDF          = texture(BRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    // vec3 specular         = prefilteredColor * (F * envBRDF.x + envBRDF.y);
     
 	// for energy conservation, the diffuse and specular light can't
     // be above 1.0 (unless the surface emits light) so to preserve this
@@ -80,7 +80,8 @@ void main()
 	// combine contributions, note that we don't multiply by kS as kS equals
     // the Fresnel value and the specular value was already multipled by Fresnel
     // during the importance sampling.
-	vec3 color = (kD * diffuse + specular * 0.4) * ao * attenuation; 
+	// vec3 color = (kD * diffuse + specular * 0.4) * ao * attenuation; 
+	vec3 color = (kD * diffuse) * ao * attenuation; 
     
     FragColor.rgb = color;
     FragColor.a = 1.0;

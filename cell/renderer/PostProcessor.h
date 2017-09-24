@@ -34,7 +34,7 @@ namespace Cell
         // toggles
         bool Sepia    = false;
         bool Vignette = true;
-        bool Bloom    = true;
+        bool Bloom    = false;
         bool SSAO     = true;
         bool TXAA     = true;
         bool SSR      = true;
@@ -50,7 +50,6 @@ namespace Cell
         RenderTarget* m_SSAORenderTarget;
         Shader* m_SSAOShader;
         Shader* m_SSAOBlurShader;
-        //std::vector<math::vec3> m_SSAOKernel;
         Texture* m_SSAONoise;
         // bloom
         RenderTarget* m_BloomRenderTarget0;
@@ -71,13 +70,9 @@ namespace Cell
         RenderTarget* m_DownSampleBlurRTSixteenth;
         // blur
         RenderTarget* m_GaussianRTHalf_H; // to help with ping-ponging (note: do we want this to be a floating point framebuffer as well?)
-        //RenderTarget* m_GaussianRTHalf_V;
         RenderTarget* m_GaussianRTQuarter_H;
-        //RenderTarget* m_GaussianRTQuarter_V;
         RenderTarget* m_GaussianRTEight_H;
-        //RenderTarget* m_GaussianRTEight_V;
         RenderTarget* m_GaussianRTSixteenth_H;
-        //RenderTarget* m_GaussianRTSixteenth_V;
         Shader* m_OnePassGaussianShader;
         // ssr
         RenderTarget *m_SSRRT;

@@ -2,6 +2,7 @@
 
 #include "render_target.h"
 #include "renderer.h"
+#include "PBR.h"
 
 #include <random>
 
@@ -23,8 +24,11 @@ namespace Cell
             m_PostProcessShader = Cell::Resources::LoadShader("post process", "shaders/screen_quad.vs", "shaders/post_processing.fs");
             m_PostProcessShader->Use();
             m_PostProcessShader->SetInt("TexSrc", 0);
-            m_PostProcessShader->SetInt("TexBloom", 1);
-            m_PostProcessShader->SetInt("TexSSR", 2);
+            m_PostProcessShader->SetInt("TexBloom1", 1);
+            m_PostProcessShader->SetInt("TexBloom2", 2);
+            m_PostProcessShader->SetInt("TexBloom3", 3);
+            m_PostProcessShader->SetInt("TexBloom4", 4);
+            m_PostProcessShader->SetInt("TexSSR", 5);
         }
         // down sample
         {
@@ -51,13 +55,9 @@ namespace Cell
         // gaussian blur shader
         {
             m_GaussianRTHalf_H = new RenderTarget(512, 512, GL_HALF_FLOAT, 1, false); // TODO: 16-bit float? and resolution? make agnostic
-            //m_GaussianRT512_V = new RenderTarget(512, 512, GL_HALF_FLOAT, 1, false); // TODO: 16-bit float? and resolution? make agnostic
             m_GaussianRTQuarter_H = new RenderTarget(256, 256, GL_HALF_FLOAT, 1, false); 
-            //m_GaussianRT256_V = new RenderTarget(256, 256, GL_HALF_FLOAT, 1, false); 
             m_GaussianRTEight_H = new RenderTarget(128, 128, GL_HALF_FLOAT, 1, false);
-            //m_GaussianRT128_V = new RenderTarget(128, 128, GL_HALF_FLOAT, 1, false);
             m_GaussianRTSixteenth_H  = new RenderTarget(64, 64, GL_HALF_FLOAT, 1, false);
-            //m_GaussianRT64_V  = new RenderTarget(64, 64, GL_HALF_FLOAT, 1, false);
 
             m_OnePassGaussianShader = Cell::Resources::LoadShader("gaussian blur", "shaders/screen_quad.vs", "shaders/post/blur_guassian.fs");
             m_OnePassGaussianShader->Use();
@@ -124,7 +124,7 @@ namespace Cell
         }
         // SSR
         {
-            m_SSRRT = new RenderTarget(640, 360, GL_UNSIGNED_BYTE, 1, false);
+            m_SSRRT = new RenderTarget(1, 1, GL_UNSIGNED_BYTE, 1, false);
             SSROutput = m_SSRRT->GetColorTexture(0);
 
             m_SSRShader = Cell::Resources::LoadShader("ssr", "shaders/screen_quad.vs", "shaders/post/ssr.fs");
@@ -134,6 +134,9 @@ namespace Cell
             m_SSRShader->SetInt("gPositionMetallic", 2);
             m_SSRShader->SetInt("gNormalRoughness", 3);
             m_SSRShader->SetInt("gAlbedoAO", 4);
+            m_SSRShader->SetInt("envPrefilter", 5);
+            m_SSRShader->SetInt("BRDFLUT", 6);
+            m_SSRShader->SetInt("SSAO", 7);
         }
     }
     // --------------------------------------------------------------------------------------------
@@ -146,13 +149,9 @@ namespace Cell
         delete m_DownSampleBlurRTEight;
         delete m_DownSampleBlurRTSixteenth;
         delete m_GaussianRTHalf_H;
-        //delete m_GaussianRT512_V;
         delete m_GaussianRTQuarter_H;
-        //delete m_GaussianRT256_V;
         delete m_GaussianRTEight_H;
-        //delete m_GaussianRT128_V;
         delete m_GaussianRTSixteenth_H;
-        //delete m_GaussianRT64_V;
         delete m_SSAONoise;
         delete m_SSAORenderTarget;
         delete m_BloomRenderTarget0;
@@ -253,6 +252,9 @@ namespace Cell
             gBuffer->GetColorTexture(0)->Bind(2);
             gBuffer->GetColorTexture(1)->Bind(3);
             gBuffer->GetColorTexture(2)->Bind(4);
+            renderer->GetSkypCature()->Irradiance->Bind(5);
+            renderer->m_PBR->m_RenderTargetBRDFLUT->GetColorTexture(0)->Bind(6);
+            SSAOOutput->Bind(7);
 
             glBindFramebuffer(GL_FRAMEBUFFER, m_SSRRT->ID);
             glViewport(0, 0, m_SSRRT->Width, m_SSRRT->Height);
@@ -270,7 +272,10 @@ namespace Cell
         // bind input texture data
         source->Bind(0);
         BloomOutput1->Bind(1);
-        SSROutput->Bind(2);
+        BloomOutput2->Bind(2);
+        BloomOutput3->Bind(3);
+        BloomOutput4->Bind(4);
+        SSROutput->Bind(5);
 
         // set settings 
         // TODO(Joey): only update settings when changed
@@ -311,17 +316,14 @@ namespace Cell
         else if (dst->Width == m_GaussianRTQuarter_H->Width)
         {
             rtHorizontal = m_GaussianRTQuarter_H;
-            //rtVertical = m_GaussianRTQuarter_V;
         } 
         else if (dst->Width == m_GaussianRTEight_H->Width)
         {
             rtHorizontal = m_GaussianRTEight_H;
-            //rtVertical = m_GaussianRTEight_V;
         }
         else 
         {
             rtHorizontal = m_GaussianRTSixteenth_H;
-            //rtVertical = m_GaussianRTSixteenth_V;
         }
         // use destination as vertical render target of ping-pong algorithm
         rtVertical = dst; 

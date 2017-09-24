@@ -16,10 +16,12 @@ namespace Cell
     class PBRCapture;
     class SceneNode;
     class Shader;
+    class PostProcessor;
 
     class PBR
     {
         friend Renderer;
+        friend PostProcessor;
     private:
         Renderer* m_Renderer;
 

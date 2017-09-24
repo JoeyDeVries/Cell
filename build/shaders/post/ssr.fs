@@ -13,7 +13,9 @@ uniform sampler2D gAlbedoAO;
 uniform sampler2D screenColor;
 uniform sampler2D screenColorBlur;
 
-uniform samplerCube envSpecular;
+uniform sampler2D SSAO;
+
+uniform samplerCube envPrefilter;
 uniform sampler2D BRDFLUT;
 
 uniform mat4 projection;
@@ -21,8 +23,8 @@ uniform mat4 view;
 
 const float step = 0.1;
 const float minRayStep = 0.1;
-const float maxSteps = 30;
-const int numBinarySearchSteps = 5;
+const float maxSteps = 60;
+const int numBinarySearchSteps = 10;
 
 vec3 binarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth);
 vec4 rayMarch(vec3 dir, inout vec3 hitCoord, out float dDepth);
@@ -32,6 +34,7 @@ void main()
     vec4 normalRoughness  = texture(gNormalRoughness, TexCoords);
     vec4 positionMetallic = texture(gPositionMetallic, TexCoords);
     vec4 albedoAO         = texture(gAlbedoAO, TexCoords);
+    float ao              = clamp(texture(SSAO, TexCoords).r, 0.0, 1.0);
     
     vec3 albedo     = albedoAO.rgb;
     vec3 viewPos    = positionMetallic.xyz;
@@ -50,24 +53,31 @@ void main()
  
     vec4 coords = rayMarch(R * max(minRayStep, -viewPos.z), hitPos, dDepth);
     vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5, 0.5) - coords.xy));
+    float error = coords.w; // error as alpha, blend skylight based on error
     float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
-
+    
     vec3 F0 = vec3(0.04); 
 	F0 = mix(F0, albedo, metallic);
-    vec3 F   = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    vec3 F   = FresnelSchlick(max(dot(N, V), 0.0), F0);
     
     vec3 SSRSmooth = texture(screenColor, coords.xy).rgb;
     vec3 SSRRough  = texture(screenColorBlur, coords.xy).rgb;   
-    vec3 SSR = mix(SSRSmooth, SSRRough, roughness) * clamp(screenEdgefactor, 0.0, 0.9) * F;     
+    vec3 SSR = mix(SSRSmooth, SSRRough, roughness) * clamp(screenEdgefactor, 0.0, 0.9);
+    error *= clamp(screenEdgefactor, 0.0, 0.9);
     
-    float backfacingFactor = 1.0 - smoothstep(-0.5, 0.0, R.z);
+    float backfacingFactor = 1.0 - smoothstep(-1.0, -0.8, R.z);
     SSR *= backfacingFactor;
+    error *= backfacingFactor;
     
-    float error = coords.z; // error as alpha, blend skylight based on error
+    mat3 invViewRot = mat3(transpose(view));
+    const float MAX_REFLECTION_LOD = 5.0;
+    vec3 prefilteredColor = pow(textureLod(envPrefilter, invViewRot * R,  roughness * MAX_REFLECTION_LOD).rgb, vec3(2.2));
+    vec2 envBRDF          = texture(BRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    vec3 specular         = prefilteredColor * (F * envBRDF.x + envBRDF.y);        
     
-    FragColor = vec4(SSR , error);
-    // FragColor = vec4(SSRRough, error);
-    // FragColor = vec4(texture(screenColorBlur, TexCoords).rgb, error);
+    SSR = mix(SSR, specular, max(1.0 - error, 0.0));
+    SSR *= ao;
+    FragColor = vec4(SSR, 1.0);
 }
 
 vec3 binarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth)
@@ -127,11 +137,12 @@ vec4 rayMarch(vec3 dir, inout vec3 hitCoord, out float dDepth)
         {
             if(dDepth <= 0.0)
             {   
+                error = 0.0;
                 vec4 Result;
                 Result = vec4(binarySearch(dir, hitCoord, dDepth), 1.0);
-                error = 0.0;
                 return Result;
             }
+
         }
         
         steps++;

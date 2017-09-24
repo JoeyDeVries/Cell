@@ -18,9 +18,13 @@ const vec3 sepiaColor = vec3(1.2, 1.0, 0.8);
 // vignette
 
 // bloom
-uniform sampler2D TexBloom;
+uniform sampler2D TexBloom1;
+uniform sampler2D TexBloom2;
+uniform sampler2D TexBloom3;
+uniform sampler2D TexBloom4;
 
 // ssao
+
 
 // ssr
 uniform sampler2D TexSSR;
@@ -32,10 +36,15 @@ void main()
        
     if(Bloom)
     {
-        const float strength = 3.0;
-        vec3 bloom = texture(TexBloom, TexCoords).rgb;
-        bloom *= strength;
-        // color += bloom;
+        const float strength = 1.0;
+        vec3 bloom1 = texture(TexBloom1, TexCoords).rgb * strength;
+        vec3 bloom2 = texture(TexBloom1, TexCoords).rgb * strength;
+        vec3 bloom3 = texture(TexBloom1, TexCoords).rgb * strength;
+        vec3 bloom4 = texture(TexBloom1, TexCoords).rgb * strength;
+        color += bloom1;
+        color += bloom2;
+        color += bloom3;
+        color += bloom4;
     }
     
     if(SSR)
