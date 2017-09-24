@@ -8,10 +8,10 @@ uniform sampler2D HDRScene;
 void main()
 {
     vec3 hdrColor = texture(HDRScene, TexCoords).rgb;
-    float grayscale = dot(hdrColor, vec3(0.299, 0.587, 0.114));
-    hdrColor = smoothstep(1.0, 4.0, grayscale) * hdrColor;
+    // float grayscale = dot(hdrColor, vec3(0.299, 0.587, 0.114));
+    // hdrColor = smoothstep(1.0, 4.0, grayscale) * hdrColor;
     
-    FragColor.rgb = hdrColor;
+    // FragColor.rgb = hdrColor;
     /* NOTE(Joey):
     
       Usually we render the bloom effect above a certain threshold (like all pixels that have 
@@ -31,6 +31,6 @@ void main()
       to little effect on most scenes.
     
     */
-    // FragColor.rgb = 0.1 * hdrColor;
+    FragColor.rgb = 0.1 * hdrColor;
     FragColor.a = 1.0;
 }

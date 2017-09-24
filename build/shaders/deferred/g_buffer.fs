@@ -19,14 +19,16 @@ void main()
     gPositionMetallic.rgb = FragPos;
     gPositionMetallic.a = texture(TexMetallic, UV0).r;
     // also store the per-fragment (bump-)normals into the gbuffer
+    float roughness = texture(TexRoughness, UV0).r;
     vec3 N = texture(TexNormal, UV0).rgb;    
     N = normalize(N * 2.0 - 1.0);
+    // N = mix(N, vec3(0.0, 0.0, 1.0), pow(roughness, 0.5)); // smooth normal based on roughness (to reduce specular aliasing)
     // N.x *= 2.0;
     // N.y *= 2.0;
     N = normalize(TBN * N);  
     // N = TBN[2];
     gNormalRoughness.rgb = normalize(N);
-    gNormalRoughness.a = texture(TexRoughness, UV0).r;
+    gNormalRoughness.a = roughness;
     // and the diffuse per-fragment color
     gAlbedoAO.rgb = texture(TexAlbedo, UV0).rgb;
     gAlbedoAO.a = texture(TexAO, UV0).r;

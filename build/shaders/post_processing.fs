@@ -10,18 +10,20 @@ uniform int Vignette;
 uniform int Sepia;
 uniform int Bloom;
 uniform int SSAO;
+uniform int SSR;
 
-// settings: sepia
+// sepia
 const vec3 sepiaColor = vec3(1.2, 1.0, 0.8);
 
-// settings: vignette
+// vignette
 
-// settings: bloom
+// bloom
 uniform sampler2D TexBloom;
 
-// settings: ssao
+// ssao
 
-
+// ssr
+uniform sampler2D TexSSR;
 
 void main()
 {
@@ -33,7 +35,13 @@ void main()
         const float strength = 3.0;
         vec3 bloom = texture(TexBloom, TexCoords).rgb;
         bloom *= strength;
-        color += bloom;
+        // color += bloom;
+    }
+    
+    if(SSR)
+    {
+        vec3 ssrColor = texture(TexSSR, TexCoords).rgb;
+        color += ssrColor;
     }
     
     // HDR tonemapping

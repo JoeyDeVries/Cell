@@ -66,7 +66,7 @@ namespace Cell
 
         m_CustomTarget = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, true);
         m_PostProcessTarget1 = new RenderTarget(1, 1, GL_UNSIGNED_BYTE, 1, false);
-        m_PostProcessor = new PostProcessor();
+        m_PostProcessor = new PostProcessor(this);
 
         // lights
         m_DebugLightMesh = new Sphere(16, 16);
@@ -103,6 +103,8 @@ namespace Cell
 
         m_CustomTarget->Resize(width, height);
         m_PostProcessTarget1->Resize(width, height);
+        
+        m_PostProcessor->UpdateRenderSize(width, height);
     }
     // ------------------------------------------------------------------------
     math::vec2 Renderer::GetRenderSize()
@@ -394,7 +396,7 @@ namespace Cell
         }
 
         // 6. post-processing stage after all lighting calculations 
-        m_PostProcessor->ProcessPostLighting(this, m_CustomTarget, m_Camera);
+        m_PostProcessor->ProcessPostLighting(this, m_GBuffer, m_CustomTarget, m_Camera);
 
         // 7. render (debug) visuals
         glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
@@ -420,7 +422,7 @@ namespace Cell
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
         }
-        m_PBR->RenderProbes();
+        //m_PBR->RenderProbes();
 
         // 8. custom post-processing pass
         std::vector<RenderCommand>& postProcessingCommands = m_CommandBuffer.GetPostProcessingRenderCommands();
@@ -436,7 +438,7 @@ namespace Cell
         // 9. final post-processing steps, blitting to default framebuffer
         m_PostProcessor->Blit(this, postProcessingCommands.size() % 2 == 0 ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0));
 
-        //Blit(m_PostProcessor->BloomOutput, nullptr);
+        //Blit(m_PostProcessor->BlurredEightOutput, nullptr);
         //Blit(m_ShadowRenderTargets[0]->GetColorTexture(0), nullptr);
 
 
