@@ -14,8 +14,6 @@ out vec3 DirLightDirView;
 
 uniform mat4 model;
 
-uniform vec3 DirLight0_Dir;
-
 void main()
 {
 	TexCoords = texCoords;
@@ -23,7 +21,7 @@ void main()
 	Normal    = mat3(view * model) * normal;
     
     CamPosView      = vec3(view * vec4(camPos, 1.0));
-    DirLightDirView = vec3(view * vec4(DirLight0_Dir, 0.0));
+    DirLightDirView = vec3(view * vec4(dirLight0_Dir, 0.0));
 	
 	gl_Position =  projection * vec4(FragPos, 1.0);
 }

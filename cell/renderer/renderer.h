@@ -123,10 +123,8 @@ namespace Cell
         void        AddIrradianceProbe(math::vec3 position, float radius);
         void        BakeProbes(SceneNode* scene = nullptr);
     private:
-        // renderer-specific logic for rendering a 'default' deferred command.
-        void renderDeferredCommand(RenderCommand *command, Camera* customCamera);
         // renderer-specific logic for rendering a custom (forward-pass) command
-        void renderCustomCommand(RenderCommand *command, Camera* customCamera);
+        void renderCustomCommand(RenderCommand *command, Camera* customCamera, bool updateGLSettings = true);
         // renderer-specific logic for rendering a list of commands to a target cubemap
         void renderToCubemap(SceneNode* scene, TextureCube* target, math::vec3 position = math::vec3(0.0f), unsigned int mipLevel = 0);
         void renderToCubemap(std::vector<RenderCommand>& renderCommands, TextureCube* target, math::vec3 position = math::vec3(0.0f), unsigned int mipLevel = 0);

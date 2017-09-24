@@ -17,8 +17,6 @@ uniform sampler2D TexMetallic;
 uniform sampler2D TexRoughness;
 uniform sampler2D TexAO;
 
-uniform vec3 DirLight0_Col;
-
 #include pbr/pbr.glsl
 
 void main()
@@ -30,7 +28,7 @@ void main()
     
     vec3 color = PBRAnalyticLighting(
         albedo.rgb, normal, metallic, roughness, CamPosView,
-        FragPos, vec4(DirLightDirView, 0.0), DirLight0_Col, 0.0
+        FragPos, vec4(DirLightDirView, 0.0), dirLight0_Col, 0.0
     );
                       
     #ifdef ALPHA_DISCARD

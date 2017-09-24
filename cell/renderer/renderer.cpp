@@ -93,7 +93,7 @@ namespace Cell
         // ubo
         glGenBuffers(1, &m_GlobalUBO);
         glBindBuffer(GL_UNIFORM_BUFFER, m_GlobalUBO);
-        glBufferData(GL_UNIFORM_BUFFER, 272, nullptr, GL_STREAM_DRAW);
+        glBufferData(GL_UNIFORM_BUFFER, 656, nullptr, GL_STREAM_DRAW);
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_GlobalUBO);
 
         // default PBR pre-compute (get a more default oriented HDR map for this)
@@ -262,7 +262,7 @@ namespace Cell
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         for (unsigned int i = 0; i < deferredRenderCommands.size(); ++i)
         {
-            renderDeferredCommand(&deferredRenderCommands[i], nullptr);
+            renderCustomCommand(&deferredRenderCommands[i], nullptr, false);
         }
 
         //attachments[0] = GL_NONE; // disable for next pass (shadow map generation)
@@ -592,87 +592,9 @@ namespace Cell
         {
             delete materials[i];
         }
-    }
+    }  
     // ------------------------------------------------------------------------
-    void Renderer::renderDeferredCommand(RenderCommand* command, Camera* customCamera)
-    {
-        Material *material = command->Material;
-        Mesh     *mesh     = command->Mesh;        
-
-        // default uniforms that are always configured regardless of shader configuration (see them 
-        // as a default set of shader uniform variables always there); with UBO
-        material->GetShader()->Use();
-        if (customCamera)
-        {
-            material->GetShader()->SetMatrix("projection", customCamera->Projection);
-            material->GetShader()->SetMatrix("view",       customCamera->View);
-            material->GetShader()->SetVector("CamPos",     customCamera->Position);
-        }      
-        material->GetShader()->SetMatrix("model", command->Transform);
-
-        // NOTE(Joey): bind/active uniform sampler/texture objects
-        auto *samplers = material->GetSamplerUniforms();
-        for (auto it = samplers->begin(); it != samplers->end(); ++it)
-        {
-            if (it->second.Type == SHADER_TYPE_SAMPLERCUBE)
-                it->second.TextureCube->Bind(it->second.Unit);
-            else
-                it->second.Texture->Bind(it->second.Unit);
-        }
-
-        // NOTE(Joey): set uniform state of material
-        auto *uniforms = material->GetUniforms();
-        for (auto it = uniforms->begin(); it != uniforms->end(); ++it)
-        {
-            switch (it->second.Type)
-            {
-            case SHADER_TYPE_BOOL:
-                material->GetShader()->SetBool(it->first, it->second.Bool);
-                break;
-            case SHADER_TYPE_INT:
-                material->GetShader()->SetInt(it->first, it->second.Int);
-                break;
-            case SHADER_TYPE_FLOAT:
-                material->GetShader()->SetFloat(it->first, it->second.Float);
-                break;
-            case SHADER_TYPE_VEC2:
-                material->GetShader()->SetVector(it->first, it->second.Vec2);
-                break;
-            case SHADER_TYPE_VEC3:
-                material->GetShader()->SetVector(it->first, it->second.Vec3);
-                break;
-            case SHADER_TYPE_VEC4:
-                material->GetShader()->SetVector(it->first, it->second.Vec4);
-                break;
-            case SHADER_TYPE_MAT2:
-                material->GetShader()->SetMatrix(it->first, it->second.Mat2);
-                break;
-            case SHADER_TYPE_MAT3:
-                material->GetShader()->SetMatrix(it->first, it->second.Mat3);
-                break;
-            case SHADER_TYPE_MAT4:
-                material->GetShader()->SetMatrix(it->first, it->second.Mat4);
-                break;
-            default:
-                Log::Message("Unrecognized Uniform type set.", LOG_ERROR);
-                break;
-            }
-        }
-
-        // NOTE(Joey): bind OpenGL render state
-        glBindVertexArray(mesh->m_VAO);
-        if (mesh->Indices.size() > 0)
-        {
-            glDrawElements(mesh->Topology == TRIANGLE_STRIP ? GL_TRIANGLE_STRIP : GL_TRIANGLES, mesh->Indices.size(), GL_UNSIGNED_INT, 0);
-        }
-        else
-        {
-            glDrawArrays(mesh->Topology == TRIANGLE_STRIP ? GL_TRIANGLE_STRIP : GL_TRIANGLES, 0, mesh->Positions.size());
-        }
-        glBindVertexArray(0); // NOTE(Joey): consider skipping this call without damaging the render pipeline
-    }
-    // ------------------------------------------------------------------------
-    void Renderer::renderCustomCommand(RenderCommand* command, Camera* customCamera)
+    void Renderer::renderCustomCommand(RenderCommand* command, Camera* customCamera, bool updateGLSettings)
     {
         Material *material = command->Material;
         Mesh     *mesh     = command->Mesh;
@@ -680,31 +602,34 @@ namespace Cell
         // NOTE(Joey): set global GL state based on material
         // TODO(Joey): only change these if different value, and sort by major state changes
         //             write a state cache.
-        glDepthFunc(material->DepthCompare);
-        if (material->DepthTest)
+        if (updateGLSettings)
         {
-            glEnable(GL_DEPTH_TEST);
-        }
-        else
-        {
-            glDisable(GL_DEPTH_TEST);
-        }
-        if (material->Blend)
-        {
-            glEnable(GL_BLEND);
-            glBlendFunc(material->BlendSrc, material->BlendDst);
-        }
-        else
-        {
-            glDisable(GL_BLEND);
-        }
-        if (material->Cull)
-        {
-            glEnable(GL_CULL_FACE);
-        }
-        else
-        {
-            glDisable(GL_CULL_FACE);
+            glDepthFunc(material->DepthCompare);
+            if (material->DepthTest)
+            {
+                glEnable(GL_DEPTH_TEST);
+            }
+            else
+            {
+                glDisable(GL_DEPTH_TEST);
+            }
+            if (material->Blend)
+            {
+                glEnable(GL_BLEND);
+                glBlendFunc(material->BlendSrc, material->BlendDst);
+            }
+            else
+            {
+                glDisable(GL_BLEND);
+            }
+            if (material->Cull)
+            {
+                glEnable(GL_CULL_FACE);
+            }
+            else
+            {
+                glDisable(GL_CULL_FACE);
+            }
         }
      
         // default uniforms that are always configured regardless of shader configuration (see them 
@@ -716,31 +641,7 @@ namespace Cell
             material->GetShader()->SetMatrix("view",       customCamera->View);
             material->GetShader()->SetVector("CamPos",     customCamera->Position);
         }
-        material->GetShader()->SetMatrix("model", command->Transform);
-
-        // lighting setup: also move to uniform buffer object in future
-        for (unsigned int i = 0; i < m_DirectionalLights.size() && i < 4; ++i) // no more than 4 directional lights
-        {
-            std::string uniformName = "DirLight" + std::to_string(i) + "_Dir";
-            if (material->GetShader()->HasUniform(uniformName))
-            {
-                material->GetShader()->SetVector(uniformName, m_DirectionalLights[i]->Direction);
-                material->GetShader()->SetVector("DirLight" + std::to_string(i) + "_Col", m_DirectionalLights[i]->Color);
-            }
-            else
-                break; // if DirLight2 doesn't exist we assume that DirLight3 and 4,5,6 also do not exist; stop searching
-        }
-        for (unsigned int i = 0; i < m_PointLights.size() && i < 8; ++i) // NOTE(Joey): constrained to max 8 point lights for now in forward context
-        {
-            std::string uniformName = "PointLight" + std::to_string(i) + "_Pos";
-            if (material->GetShader()->HasUniform(uniformName))
-            {
-                material->GetShader()->SetVector(uniformName, m_PointLights[i]->Position);
-                material->GetShader()->SetVector("PointLight" + std::to_string(i) + "_Col", m_PointLights[i]->Color);
-            }
-            else
-                break; // if PointLight2 doesn't exist we assume that PointLight3 and 4,5,6 also don't exist; stop searching
-        }
+        material->GetShader()->SetMatrix("model", command->Transform);     
 
         // bind/active uniform sampler/texture objects
         auto *samplers = material->GetSamplerUniforms();
@@ -882,17 +783,24 @@ namespace Cell
     {
         glBindBuffer(GL_UNIFORM_BUFFER, m_GlobalUBO);
         // transformation matrices
-        glBufferSubData(GL_UNIFORM_BUFFER,   0, 64, &(m_Camera->Projection * m_Camera->View)[0][0]); // sizeof(math::mat4) = 64 bytes
-        glBufferSubData(GL_UNIFORM_BUFFER,  64, 64, &m_Camera->Projection[0][0]);
-        glBufferSubData(GL_UNIFORM_BUFFER, 128, 64, &m_Camera->View[0][0]);
-        glBufferSubData(GL_UNIFORM_BUFFER, 192, 64, &m_Camera->View[0][0]); // todo: make inv function in math library
+        glBufferSubData(GL_UNIFORM_BUFFER,   0, sizeof(math::mat4), &(m_Camera->Projection * m_Camera->View)[0][0]); // sizeof(math::mat4) = 64 bytes
+        glBufferSubData(GL_UNIFORM_BUFFER,  64, sizeof(math::mat4), &m_Camera->Projection[0][0]);
+        glBufferSubData(GL_UNIFORM_BUFFER, 128, sizeof(math::mat4), &m_Camera->View[0][0]);
+        glBufferSubData(GL_UNIFORM_BUFFER, 192, sizeof(math::mat4), &m_Camera->View[0][0]); // todo: make inv function in math library
         // scene data
-        glBufferSubData(GL_UNIFORM_BUFFER, 256, 16, &m_Camera->Position[0]); // todo: make inv function in math library
-
-
+        glBufferSubData(GL_UNIFORM_BUFFER, 256, sizeof(math::vec4), &m_Camera->Position[0]); // todo: make inv function in math library
         // lighting
-
-
+        unsigned int stride = 2 * sizeof(math::vec4);
+        for (unsigned int i = 0; i < m_DirectionalLights.size() && i < 4; ++i) // no more than 4 directional lights
+        {
+            glBufferSubData(GL_UNIFORM_BUFFER, 272 + i * stride,                      sizeof(math::vec4), &m_DirectionalLights[i]->Direction[0]);
+            glBufferSubData(GL_UNIFORM_BUFFER, 272 + i * stride + sizeof(math::vec4), sizeof(math::vec4), &m_DirectionalLights[i]->Color[0]);
+        }
+        for (unsigned int i = 0; i < m_PointLights.size() && i < 8; ++i) // NOTE(Joey): constrained to max 8 point lights for now in forward context
+        {
+            glBufferSubData(GL_UNIFORM_BUFFER, 400 + i * stride,                      sizeof(math::vec4), &m_PointLights[i]->Position[0]);
+            glBufferSubData(GL_UNIFORM_BUFFER, 400 + i * stride + sizeof(math::vec4), sizeof(math::vec4), &m_PointLights[i]->Color[0]);
+        }
     }
     // --------------------------------------------------------------------------------------------
     RenderTarget* Renderer::getCurrentRenderTarget()
