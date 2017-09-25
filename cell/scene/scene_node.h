@@ -29,27 +29,27 @@ namespace Cell
     public:
         // NOTE(Joey): each node contains relevant render state
         Mesh        *Mesh;
-        // TODO(Joey): name Mesh and Material differently than their types.
+        // TODO(Joey): name Mesh and Material differently than their types
         Material    *Material;
 
-        math::vec3 Position = math::vec3(0.0f);
-        //math::quat Rotation; // TODO(Joey): implement quaternions in math library
-        math::vec4 Rotation; // NOTE(Joey): axis-angle for now; test w/ quaternions soon!
-        math::vec3 Scale = math::vec3(1.0f);
+        
 
 
     private:
         std::vector<SceneNode*> m_Children;
         SceneNode *m_Parent;
 
-        // NOTE(Joey): per-node transform (w/ parent-child relationship)
-        math::mat4  m_Transform;
+        // per-node transform (w/ parent-child relationship)
+        math::mat4 m_Transform;
+        math::mat4 m_PrevTransform;
+        math::vec3 m_Position = math::vec3(0.0f);
+        math::vec4 m_Rotation; // axis-angle for now; test w/ quaternions soon!
+        math::vec3 m_Scale = math::vec3(1.0f);
 
-        // NOTE(Joey): mark the current node's tranform as dirty if it needs to be
-        // re-calculated this frame.
+        // mark the current node's tranform as dirty if it needs to be re-calculated this frame
         bool m_Dirty;
 
-        // NOTE(Joey): each node is uniquely identified by a 32-bit incrementing unsigned integer.
+        // each node is uniquely identified by a 32-bit incrementing unsigned integer
         unsigned int m_ID;
 
         static unsigned int CounterID;
@@ -57,10 +57,17 @@ namespace Cell
         SceneNode(unsigned int id);
         ~SceneNode();
 
-        // NOTE(Joey): scene management
-        unsigned int GetID();
+        // scene node transform
+        void SetPosition(math::vec3 position);
+        void SetRotation(math::vec4 rotation);
+        void SetScale(math::vec3 scale);
+        void SetScale(float scale);
+        math::vec3 GetPosition();
+        math::vec4 GetRotation();
+        math::vec3 GetScale();
 
-        // NOTE(Joey): child management
+        // scene graph 
+        unsigned int GetID();
         void AddChild(SceneNode *node);
         void RemoveChild(unsigned int id); // TODO(Joey): think of proper way to unqiuely idetnfiy child nodes (w/ incrementing node ID or stringed hash ID?)
         std::vector<SceneNode*> GetChildren();
@@ -69,14 +76,13 @@ namespace Cell
         SceneNode              *GetChildByIndex(unsigned int index);
         SceneNode              *GetParent();
 
-        // NOTE(Joey): returns the transform of the current node combined with
-        // its parent(s)' transform.
+        // returns the transform of the current node combined with its parent(s)' transform.
         math::mat4 GetTransform();
+        math::mat4 GetPrevTransform();
 
-        // NOTE(Joey): re-calculates this node and its children's
-        // transform components if its parent or the node itself
-        // is dirty.
-        //void UpdateTransform();
+        // re-calculates this node and its children's transform components if its parent or the 
+        // node itself is dirty.
+        void UpdateTransform(bool updatePrevTransform = false);
     };
 }
 #endif

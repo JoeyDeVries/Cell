@@ -43,7 +43,7 @@ namespace Cell
         ~CommandBuffer(); 
             
         // pushes render state relevant to a single render call to the command buffer.
-        void Push(Mesh *mesh, Material *material, math::mat4 transform, RenderTarget *target = nullptr);
+        void Push(Mesh *mesh, Material *material, math::mat4 transform = math::mat4(), math::mat4 prevTransform = math::mat4(), RenderTarget *target = nullptr);
 
         // clears the command buffer; usually done after issuing all the stored render commands.
         void Clear();

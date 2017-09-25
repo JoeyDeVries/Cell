@@ -19,12 +19,13 @@ namespace Cell
         Clear();
     }
     // ------------------------------------------------------------------------
-    void CommandBuffer::Push(Mesh *mesh, Material *material, math::mat4 transform, RenderTarget *target)
+    void CommandBuffer::Push(Mesh* mesh, Material* material, math::mat4 transform, math::mat4 prevTransform, RenderTarget* target)
     {
         RenderCommand command = {};
-        command.Mesh      = mesh;
-        command.Material  = material;
-        command.Transform = transform;
+        command.Mesh          = mesh;
+        command.Material      = material;
+        command.Transform     = transform;
+        command.PrevTransform = prevTransform;
 
         // if material requires alpha support, add it to alpha render commands for later rendering.
       /*  if (material->Blend)

@@ -106,7 +106,7 @@ namespace Cell
         Material* CreateCustomMaterial(Shader* shader);         // these have the custom flag set (will be rendered in forward pass)
         Material* CreatePostProcessingMaterial(Shader* shader); // these have the post-processing flag set (will be rendered after deferred/forward pass)
 
-        void PushRender(Mesh* mesh, Material* material, math::mat4 transform = math::mat4());
+        void PushRender(Mesh* mesh, Material* material, math::mat4 transform = math::mat4(), math::mat4 prevFrameTransform = math::mat4());
         void PushRender(SceneNode* node);
         void PushPostProcessor(Material* postProcessor);
 

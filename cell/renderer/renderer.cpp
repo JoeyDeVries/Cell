@@ -73,7 +73,7 @@ namespace Cell
         m_DeferredPointMesh = new Sphere(16, 16);
 
         // deferred renderer
-        m_GBuffer = new RenderTarget(1, 1, GL_HALF_FLOAT, 3, true);
+        m_GBuffer = new RenderTarget(1, 1, GL_HALF_FLOAT, 4, true);
 
         // materials
         m_MaterialLibrary = new MaterialLibrary(m_GBuffer);
@@ -106,6 +106,8 @@ namespace Cell
     {
         m_RenderSize.x = width;
         m_RenderSize.y = height;
+
+        m_GBuffer->Resize(width, height);
 
         m_CustomTarget->Resize(width, height);
         m_PostProcessTarget1->Resize(width, height);
@@ -156,63 +158,45 @@ namespace Cell
         return m_MaterialLibrary->CreatePostProcessingMaterial(shader);
     }
     // ------------------------------------------------------------------------
-    void Renderer::PushRender(Mesh *mesh, Material *material, math::mat4 transform)
+    void Renderer::PushRender(Mesh* mesh, Material* material, math::mat4 transform, math::mat4 prevFrameTransform)
     {
         // get current render target
-        RenderTarget *target = getCurrentRenderTarget();
+        RenderTarget* target = getCurrentRenderTarget();
         // don't render right away but push to the command buffer for later rendering.
-        m_CommandBuffer.Push(mesh, material, transform, target);
+        m_CommandBuffer.Push(mesh, material, transform, prevFrameTransform, target);
     }
     // ------------------------------------------------------------------------
-    void Renderer::PushRender(SceneNode *node)
+    void Renderer::PushRender(SceneNode* node)
     {
-        // get current render target
-        RenderTarget *target = getCurrentRenderTarget();
-        // NOTE(Joey): traverse through all the scene nodes and for each node:
-        // push its render state to the command buffer together with a 
-        // calculated transform matrix.
-        // But only push the first command if it has a mesh/material, otherwise it's likely a 
-        // container scene node.
-        if (node->Mesh) 
-        {
-            m_CommandBuffer.Push(node->Mesh, node->Material, node->GetTransform(), target);
-        }
-        else
-        {
-            // do make sure we do always update the parent's transform.
-            // TODO: this needs to go!
-            node->GetTransform();
-        }
+        // update transform(s) before pushing node to render command buffer
+        node->UpdateTransform(true);
 
-        // NOTE(Joey): originally a recursive function but transformed to 
-        // iterative version by maintaining a stack.
-        std::stack<SceneNode*> childStack;
+        // get current render target
+        RenderTarget* target = getCurrentRenderTarget();
+        // traverse through all the scene nodes and for each node: push its render state to the 
+        // command buffer together with a calculated transform matrix.
+        std::stack<SceneNode*> nodeStack;
+        nodeStack.push(node);
         for (unsigned int i = 0; i < node->GetChildCount(); ++i)
-            childStack.push(node->GetChildByIndex(i));
-        while (!childStack.empty())
+            nodeStack.push(node->GetChildByIndex(i));
+        while (!nodeStack.empty())
         {
-            SceneNode *child = childStack.top();
-            childStack.pop();
-            // NOTE(Joey): again, only push render command if the child isn't a container node.
-            if (child->Mesh)
+            SceneNode* node = nodeStack.top();
+            nodeStack.pop();
+            // only push render command if the child isn't a container node.
+            if (node->Mesh)
             {
-                m_CommandBuffer.Push(child->Mesh, child->Material, child->GetTransform(), target);
+                m_CommandBuffer.Push(node->Mesh, node->Material, node->GetTransform(), node->GetPrevTransform(), target);
             }
-            else
-            {
-                // do make sure we do always update the parent's transform.
-                // TODO: this needs to go!
-                node->GetTransform();
-            }
-            for(unsigned int i = 0; i < child->GetChildCount(); ++i)
-                childStack.push(child->GetChildByIndex(i));
+            for(unsigned int i = 0; i < node->GetChildCount(); ++i)
+                nodeStack.push(node->GetChildByIndex(i));
         }
     }
     // ------------------------------------------------------------------------
     void Renderer::PushPostProcessor(Material *postProcessor)
     {
         // we only care about the material, mesh as NDC quad is pre-defined.
-        m_CommandBuffer.Push(nullptr, postProcessor, math::mat4());
+        m_CommandBuffer.Push(nullptr, postProcessor);
     }
     // ------------------------------------------------------------------------
     void Renderer::AddLight(DirectionalLight *light)
@@ -252,13 +236,8 @@ namespace Cell
         // 1. Geometry buffer
         glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
         glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer->ID);
-        unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-        glDrawBuffers(3, attachments);
-        if (m_GBuffer->Width != m_RenderSize.x || m_GBuffer->Height != m_RenderSize.y)
-        {
-            m_GBuffer->Resize(m_RenderSize.x, m_RenderSize.y);
-        }
-        m_Camera->SetPerspective(m_Camera->FOV, m_RenderSize.x / m_RenderSize.y, 0.1, 100.0f);
+        unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+        glDrawBuffers(4, attachments);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         for (unsigned int i = 0; i < deferredRenderCommands.size(); ++i)
         {
@@ -268,7 +247,8 @@ namespace Cell
         //attachments[0] = GL_NONE; // disable for next pass (shadow map generation)
         attachments[1] = GL_NONE;
         attachments[2] = GL_NONE;
-        glDrawBuffers(3, attachments);
+        attachments[3] = GL_NONE;
+        glDrawBuffers(4, attachments);
 
         // 1.5. render all shadow casters to light shadow buffers
         glCullFace(GL_FRONT);
@@ -300,7 +280,7 @@ namespace Cell
         }
         glCullFace(GL_BACK);
         attachments[0] = GL_COLOR_ATTACHMENT0;
-        glDrawBuffers(3, attachments);
+        glDrawBuffers(4, attachments);
 
         // 2. do post-processing steps before lighting stage (e.g. SSAO)
         m_PostProcessor->ProcessPreLighting(this, m_GBuffer, m_Camera);
@@ -641,7 +621,8 @@ namespace Cell
             material->GetShader()->SetMatrix("view",       customCamera->View);
             material->GetShader()->SetVector("CamPos",     customCamera->Position);
         }
-        material->GetShader()->SetMatrix("model", command->Transform);     
+        material->GetShader()->SetMatrix("model", command->Transform);
+        material->GetShader()->SetMatrix("prevModel", command->Transform);
 
         // bind/active uniform sampler/texture objects
         auto *samplers = material->GetSamplerUniforms();

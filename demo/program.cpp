@@ -149,8 +149,8 @@ int main(int argc, char *argv[])
 
     // test mesh loading
     Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "sponza", "meshes/sponza/sponza.obj");
-    test->Position = math::vec3(0.0, -1.0, 0.0);
-    test->Scale = math::vec3(0.01f);
+    test->SetPosition(math::vec3(0.0, -1.0, 0.0));
+    test->SetScale(0.01f);
 
     Cell::DirectionalLight dirLight;
     dirLight.Direction = math::vec3(0.2f, -1.0f, 0.25f);

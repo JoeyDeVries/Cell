@@ -2,6 +2,7 @@
 layout (location = 0) out vec4 gPositionMetallic;
 layout (location = 1) out vec4 gNormalRoughness;
 layout (location = 2) out vec4 gAlbedoAO;
+layout (location = 3) out vec4 gMotion; // TODO: for ease of use with development; package g-buffer properties (linear depth instead of position, normal as xz pair etc.)
 
 in vec2 UV0;
 in vec3 FragPos;

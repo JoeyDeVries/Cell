@@ -15,9 +15,10 @@ namespace Cell
     */
     struct RenderCommand
     {
-        math::mat4  Transform;
-        Mesh       *Mesh;
-        Material   *Material;
+        math::mat4 Transform;
+        math::mat4 PrevTransform;
+        Mesh*      Mesh;
+        Material*  Material;
     };
 }
 
