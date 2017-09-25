@@ -17,7 +17,7 @@ void main()
     FragPos = vec3(view * model * vec4(aPos, 1.0));
     ScreenPos = projection * vec4(FragPos, 1.0);
     
-    CamPos = vec3(view * vec4(camPos, 1.0));
+    CamPos = vec3(view * vec4(camPos.xyz, 1.0));
     LightPos = vec3(view * vec4(lightPos, 1.0));
     
 	gl_Position = ScreenPos;

@@ -20,8 +20,8 @@ void main()
 	FragPos   = vec3(view * model * vec4(pos, 1.0f));
 	Normal    = mat3(view * model) * normal;
     
-    CamPosView      = vec3(view * vec4(camPos, 1.0));
-    DirLightDirView = vec3(view * vec4(dirLight0_Dir, 0.0));
+    CamPosView      = vec3(view * vec4(camPos.xyz, 1.0));
+    DirLightDirView = vec3(view * vec4(dirLight0_Dir.xyz, 0.0));
 	
 	gl_Position =  projection * vec4(FragPos, 1.0);
 }

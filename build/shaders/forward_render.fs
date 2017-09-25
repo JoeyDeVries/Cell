@@ -28,7 +28,7 @@ void main()
     
     vec3 color = PBRAnalyticLighting(
         albedo.rgb, normal, metallic, roughness, CamPosView,
-        FragPos, vec4(DirLightDirView, 0.0), dirLight0_Col, 0.0
+        FragPos, vec4(DirLightDirView, 0.0), dirLight0_Col.rgb, 0.0
     );
                       
     #ifdef ALPHA_DISCARD

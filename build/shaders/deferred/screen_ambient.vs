@@ -12,5 +12,5 @@ void main()
 	TexCoords = aUV0;
 	gl_Position = vec4(aPos, 1.0);
     
-    CamPos = vec3(view * vec4(camPos, 1.0));
+    CamPos = vec3(view * vec4(camPos.xyz, 1.0));
 }

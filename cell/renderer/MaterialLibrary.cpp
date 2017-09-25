@@ -138,10 +138,6 @@ namespace Cell
         deferredIrradianceShader->SetInt("envPrefilter", 4);
         deferredIrradianceShader->SetInt("BRDFLUT", 5);
         deferredIrradianceShader->SetInt("SSAO", 6);
-  /*      deferredAmbientShader->SetInt("probe1Irradiance", 7);
-        deferredAmbientShader->SetInt("probe1Prefilter", 8);
-        deferredAmbientShader->SetInt("probe2Irradiance", 9);
-        deferredAmbientShader->SetInt("probe2Prefilter", 10);*/
         deferredDirectionalShader->Use();
         deferredDirectionalShader->SetInt("gPositionMetallic", 0);
         deferredDirectionalShader->SetInt("gNormalRoughness", 1);
