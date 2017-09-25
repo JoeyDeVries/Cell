@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <math/linear_algebra/vector.h>
+#include <math/linear_algebra/matrix.h>
 
 namespace Cell
 {
@@ -39,7 +40,7 @@ namespace Cell
         bool SSR      = false;
 
         // ssao
-        int SSAOKernelSize = 32;
+        int SSAOKernelSize = 32;      
     private:
         // global post-process state
         Shader*       m_PostProcessShader;

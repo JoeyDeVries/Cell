@@ -285,7 +285,7 @@ namespace Cell
         m_PostProcessShader->SetBool("Bloom", Bloom);
         m_PostProcessShader->SetBool("SSR", SSR);
 
-        renderer->renderMesh(renderer->m_NDCPlane, m_PostProcessShader);
+        renderer->renderMesh(renderer->m_NDCPlane, m_PostProcessShader);               
     }
     // --------------------------------------------------------------------------------------------
     Texture* PostProcessor::downsample(Renderer* renderer, Texture* src, RenderTarget* dst)

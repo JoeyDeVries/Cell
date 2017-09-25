@@ -6,6 +6,7 @@ layout (std140, binding = 0) uniform Global
 {
     // trtansformations
     mat4 viewProjection;
+    mat4 prevViewProjection;
     mat4 projection;
     mat4 view;
     mat4 invViewz;

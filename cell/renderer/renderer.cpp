@@ -93,7 +93,7 @@ namespace Cell
         // ubo
         glGenBuffers(1, &m_GlobalUBO);
         glBindBuffer(GL_UNIFORM_BUFFER, m_GlobalUBO);
-        glBufferData(GL_UNIFORM_BUFFER, 656, nullptr, GL_STREAM_DRAW);
+        glBufferData(GL_UNIFORM_BUFFER, 720, nullptr, GL_STREAM_DRAW);
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_GlobalUBO);
 
         // default PBR pre-compute (get a more default oriented HDR map for this)
@@ -409,8 +409,8 @@ namespace Cell
                 glEnable(GL_CULL_FACE);
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
+            //m_PBR->RenderProbes();
         }
-        //m_PBR->RenderProbes();
 
         // 8. custom post-processing pass
         std::vector<RenderCommand>& postProcessingCommands = m_CommandBuffer.GetPostProcessingRenderCommands();
@@ -426,10 +426,11 @@ namespace Cell
         // 9. final post-processing steps, blitting to default framebuffer
         m_PostProcessor->Blit(this, postProcessingCommands.size() % 2 == 0 ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0));
 
-        //Blit(m_PostProcessor->BlurredEightOutput, nullptr);
+        //Blit(m_GBuffer->GetColorTexture(3), nullptr);
         //Blit(m_ShadowRenderTargets[0]->GetColorTexture(0), nullptr);
 
-
+        // store view projection as previous view projection for next frame's motion blur
+        m_PrevViewProjection = m_Camera->Projection * m_Camera->View;
 
         // clear the command buffer s.t. the next frame/call can start from an empty slate again.
         m_CommandBuffer.Clear();
@@ -622,7 +623,7 @@ namespace Cell
             material->GetShader()->SetVector("CamPos",     customCamera->Position);
         }
         material->GetShader()->SetMatrix("model", command->Transform);
-        material->GetShader()->SetMatrix("prevModel", command->Transform);
+        material->GetShader()->SetMatrix("prevModel", command->PrevTransform);
 
         // bind/active uniform sampler/texture objects
         auto *samplers = material->GetSamplerUniforms();
@@ -764,23 +765,25 @@ namespace Cell
     {
         glBindBuffer(GL_UNIFORM_BUFFER, m_GlobalUBO);
         // transformation matrices
+        Log::Message("size: " + sizeof(math::mat4), LOG_DEBUG);
         glBufferSubData(GL_UNIFORM_BUFFER,   0, sizeof(math::mat4), &(m_Camera->Projection * m_Camera->View)[0][0]); // sizeof(math::mat4) = 64 bytes
-        glBufferSubData(GL_UNIFORM_BUFFER,  64, sizeof(math::mat4), &m_Camera->Projection[0][0]);
-        glBufferSubData(GL_UNIFORM_BUFFER, 128, sizeof(math::mat4), &m_Camera->View[0][0]);
-        glBufferSubData(GL_UNIFORM_BUFFER, 192, sizeof(math::mat4), &m_Camera->View[0][0]); // todo: make inv function in math library
+        glBufferSubData(GL_UNIFORM_BUFFER,  64, sizeof(math::mat4), &m_PrevViewProjection[0][0]); 
+        glBufferSubData(GL_UNIFORM_BUFFER, 128, sizeof(math::mat4), &m_Camera->Projection[0][0]);
+        glBufferSubData(GL_UNIFORM_BUFFER, 192, sizeof(math::mat4), &m_Camera->View[0][0]);
+        glBufferSubData(GL_UNIFORM_BUFFER, 256, sizeof(math::mat4), &m_Camera->View[0][0]); // todo: make inv function in math library
         // scene data
-        glBufferSubData(GL_UNIFORM_BUFFER, 256, sizeof(math::vec4), &m_Camera->Position[0]); // todo: make inv function in math library
+        glBufferSubData(GL_UNIFORM_BUFFER, 320, sizeof(math::vec4), &m_Camera->Position[0]); // todo: make inv function in math library
         // lighting
         unsigned int stride = 2 * sizeof(math::vec4);
         for (unsigned int i = 0; i < m_DirectionalLights.size() && i < 4; ++i) // no more than 4 directional lights
         {
-            glBufferSubData(GL_UNIFORM_BUFFER, 272 + i * stride,                      sizeof(math::vec4), &m_DirectionalLights[i]->Direction[0]);
-            glBufferSubData(GL_UNIFORM_BUFFER, 272 + i * stride + sizeof(math::vec4), sizeof(math::vec4), &m_DirectionalLights[i]->Color[0]);
+            glBufferSubData(GL_UNIFORM_BUFFER, 336 + i * stride,                      sizeof(math::vec4), &m_DirectionalLights[i]->Direction[0]);
+            glBufferSubData(GL_UNIFORM_BUFFER, 336 + i * stride + sizeof(math::vec4), sizeof(math::vec4), &m_DirectionalLights[i]->Color[0]);
         }
         for (unsigned int i = 0; i < m_PointLights.size() && i < 8; ++i) // NOTE(Joey): constrained to max 8 point lights for now in forward context
         {
-            glBufferSubData(GL_UNIFORM_BUFFER, 400 + i * stride,                      sizeof(math::vec4), &m_PointLights[i]->Position[0]);
-            glBufferSubData(GL_UNIFORM_BUFFER, 400 + i * stride + sizeof(math::vec4), sizeof(math::vec4), &m_PointLights[i]->Color[0]);
+            glBufferSubData(GL_UNIFORM_BUFFER, 464 + i * stride,                      sizeof(math::vec4), &m_PointLights[i]->Position[0]);
+            glBufferSubData(GL_UNIFORM_BUFFER, 464 + i * stride + sizeof(math::vec4), sizeof(math::vec4), &m_PointLights[i]->Color[0]);
         }
     }
     // --------------------------------------------------------------------------------------------
