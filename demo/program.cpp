@@ -111,21 +111,21 @@ int main(int argc, char *argv[])
     camera.SetPerspective(math::Deg2Rad(60.0f), renderer->GetRenderSize().x / renderer->GetRenderSize().y ,0.1f, 100.0f);
 
     // scene setup
-    //Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, matPbr);
-    //Cell::SceneNode *secondTorus = Cell::Scene::MakeSceneNode(&torus, matPbr);
-    //Cell::SceneNode *thirdTorus  = Cell::Scene::MakeSceneNode(&torus, matPbr);
-    //Cell::SceneNode *sphereNode  = Cell::Scene::MakeSceneNode(&sphere, matPbrGlass);
+    Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, matPbr);
+    Cell::SceneNode *secondTorus = Cell::Scene::MakeSceneNode(&torus, matPbr);
+    Cell::SceneNode *thirdTorus  = Cell::Scene::MakeSceneNode(&torus, matPbr);
+    Cell::SceneNode *sphereNode  = Cell::Scene::MakeSceneNode(&sphere, matPbrGlass);
 
-    //mainTorus->AddChild(secondTorus);
-    //secondTorus->AddChild(thirdTorus);
-    ////thirdTorus->AddChild(sphereNode);
+    mainTorus->AddChild(secondTorus);
+    secondTorus->AddChild(thirdTorus);
+    thirdTorus->AddChild(sphereNode);
 
-    //mainTorus->Scale    = math::vec3(3.0f);
-    //mainTorus->Position = math::vec3(0.0f, 2.5f, 0.0f);
-    //secondTorus->Scale  = math::vec3(0.65f);
-    //secondTorus->Rotation = math::vec4(0.0, 1.0, 0.0, math::Deg2Rad(90.0));
-    //thirdTorus->Scale   = math::vec3(0.65f);
-    //sphereNode->Scale   = math::vec3(1.35f);
+    mainTorus->SetScale(1.0f);
+    mainTorus->SetPosition(math::vec3(0.0f, 2.5f, 0.0f));
+    secondTorus->SetScale(0.65f);
+    secondTorus->SetRotation(math::vec4(0.0, 1.0, 0.0, math::Deg2Rad(90.0)));
+    thirdTorus->SetScale(0.65f);
+    sphereNode->SetScale(1.35f);
 
     Cell::Background* background = new Cell::Background;
     Cell::TextureCube cubemap;
@@ -280,10 +280,10 @@ int main(int argc, char *argv[])
             //Log::Message("(" + std::to_string(camera.Position.x) + ", " + std::to_string(camera.Position.y) + ", " + std::to_string(camera.Position.z) + ")", LOG_DEBUG);
 
             // fill the renderer's command buffer with default test scene
-           /* mainTorus->Rotation = math::vec4(math::vec3(1.0f, 0.0f, 0.0f), glfwGetTime());
-            secondTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
-            thirdTorus->Rotation = math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
-            sphereNode->Rotation = math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime());*/
+            mainTorus->SetRotation(math::vec4(math::vec3(1.0f, 0.0f, 0.0f), glfwGetTime() * 2.0));
+            secondTorus->SetRotation(math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 3.0));
+            thirdTorus->SetRotation(math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 4.0));
+            sphereNode->SetRotation(math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime()));
 
             //light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 1.0f, 0.0f);
             light2.Position = math::vec3(sin(glfwGetTime() * 0.3f) * 1.5 + 3.0, 2.0f, cos(glfwGetTime() * 0.1f) * 5.0f);
@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
 
         {
             //CLOCK(PUSH);
-            //renderer->PushRender(mainTorus);
+            renderer->PushRender(mainTorus);
             renderer->PushRender(test);
             renderer->PushRender(background);
         }

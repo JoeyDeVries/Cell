@@ -765,7 +765,6 @@ namespace Cell
     {
         glBindBuffer(GL_UNIFORM_BUFFER, m_GlobalUBO);
         // transformation matrices
-        Log::Message("size: " + sizeof(math::mat4), LOG_DEBUG);
         glBufferSubData(GL_UNIFORM_BUFFER,   0, sizeof(math::mat4), &(m_Camera->Projection * m_Camera->View)[0][0]); // sizeof(math::mat4) = 64 bytes
         glBufferSubData(GL_UNIFORM_BUFFER,  64, sizeof(math::mat4), &m_PrevViewProjection[0][0]); 
         glBufferSubData(GL_UNIFORM_BUFFER, 128, sizeof(math::mat4), &m_Camera->Projection[0][0]);

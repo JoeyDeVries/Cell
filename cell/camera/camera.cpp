@@ -49,7 +49,7 @@ namespace Cell
         }
         else
         {
-            return Frustum.Top.Distance;
+            return Frustum.Top.D;
         }
     }
     // ------------------------------------------------------------------------
@@ -61,7 +61,7 @@ namespace Cell
         }
         else
         {
-            return Frustum.Near.Distance;
+            return Frustum.Near.D;
         }
     }
 

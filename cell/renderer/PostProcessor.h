@@ -38,6 +38,7 @@ namespace Cell
         bool SSAO     = true;
         bool TXAA     = true;
         bool SSR      = false;
+        bool MotionBlur      = true;
 
         // ssao
         int SSAOKernelSize = 32;      

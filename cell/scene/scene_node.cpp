@@ -158,31 +158,46 @@ namespace Cell
     // --------------------------------------------------------------------------------------------
     void SceneNode::UpdateTransform(bool updatePrevTransform)
     {
+        // if specified, store current transform as prev transform (for calculating motion vectors)
+        if (updatePrevTransform)
+        {
+            m_PrevTransform = m_Transform;     
+  /*          if (!m_Dirty)
+            {
+                for (int i = 0; i < m_Children.size(); ++i)
+                {
+                    m_Children[i]->UpdateTransform(true);
+                }
+            }*/
+        }
         // we only do this if the node itself or its parent is flagged as dirty
         if (m_Dirty)
         {
             // first scale, then rotate, then translation
             m_Transform = math::translate(m_Position);
+            m_Transform = math::scale(m_Transform, m_Scale); // TODO: order is off here for some reason, figure out why
             m_Transform = math::rotate(m_Transform, m_Rotation.xyz, m_Rotation.w);
-            m_Transform = math::scale(m_Transform, m_Scale);
             if (m_Parent)
             {
                 m_Transform = m_Parent->m_Transform * m_Transform;
             }
             // if this node is flagged as dirty, also be sure to update its children as they have 
             // now become invalid as well
-            for (int i = 0; i < m_Children.size(); ++i)
-            {
-                SceneNode* child = m_Children[i];
-                child->m_Dirty = true;
-                child->UpdateTransform();
-            }
-            m_Dirty = false;
+            //for (int i = 0; i < m_Children.size(); ++i)
+            //{
+            //    //SceneNode* child = m_Children[i];
+            //    child->m_Dirty = true;
+            //    child->UpdateTransform(updatePrevTransform);
+            //}           
         }
-        // if specified, store current transform as prev transform (for calculating motion vectors)
-        if (updatePrevTransform)
+        for (int i = 0; i < m_Children.size(); ++i)
         {
-            m_PrevTransform = m_Transform;
+            if (m_Dirty)
+            {
+                m_Children[i]->m_Dirty = true;
+            }
+            m_Children[i]->UpdateTransform(updatePrevTransform);
         }
+        m_Dirty = false;
     }
 }

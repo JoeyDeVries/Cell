@@ -1,14 +1,22 @@
 #ifndef CELL_CAMERA_FRUSTUM_H
 #define CELL_CAMERA_FRUSTUM_H
 
-#include <math/math.h>
+#include <math/linear_algebra/vector.h>
+#include <math/linear_algebra/operation.h>
 
 namespace Cell
 {
+    class Camera;
+
     struct FrustumPlane
     {
         math::vec3 Normal;
-        float      Distance;
+        float      D;
+
+        float Distance(math::vec3 point)
+        {
+            return math::dot(Normal, point) + D;
+        }
     };
 
 
@@ -20,7 +28,6 @@ namespace Cell
     class CameraFrustum
     {
     public:
-        // NOTE(Joey): order: left, right, top, bottom, near, far
         union
         {
             FrustumPlane Planes[6];
@@ -38,8 +45,11 @@ namespace Cell
     public:
         CameraFrustum() { } // NOTE(Joey): why do I need to define a constructor here? (otherwise I get deleted constructor error) LOOK IT UP!
 
+        void Update(Camera* camera);
+
         bool Intersect(math::vec3 point);
         bool Intersect(math::vec3 point, float radius);
+        bool Intersect(math::vec3 boxMin, math::vec3 boxMax);
     };
 }
 #endif

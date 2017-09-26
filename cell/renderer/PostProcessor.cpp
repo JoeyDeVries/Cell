@@ -29,6 +29,7 @@ namespace Cell
             m_PostProcessShader->SetInt("TexBloom3", 3);
             m_PostProcessShader->SetInt("TexBloom4", 4);
             m_PostProcessShader->SetInt("TexSSR", 5);
+            m_PostProcessShader->SetInt("gMotion", 6);
         }
         // down sample
         {
@@ -276,6 +277,7 @@ namespace Cell
         BloomOutput3->Bind(3);
         BloomOutput4->Bind(4);
         SSROutput->Bind(5);
+        renderer->m_GBuffer->GetColorTexture(3)->Bind(6);
 
         // set settings 
         // TODO(Joey): only update settings when changed
@@ -284,6 +286,10 @@ namespace Cell
         m_PostProcessShader->SetBool("Vignette", Vignette);
         m_PostProcessShader->SetBool("Bloom", Bloom);
         m_PostProcessShader->SetBool("SSR", SSR);
+        // motion blur
+        m_PostProcessShader->SetBool("MotionBlur", MotionBlur);
+        m_PostProcessShader->SetFloat("MotionScale", 2.0f);
+        m_PostProcessShader->SetInt("MotionSamples", 16);
 
         renderer->renderMesh(renderer->m_NDCPlane, m_PostProcessShader);               
     }
