@@ -162,13 +162,6 @@ namespace Cell
         if (updatePrevTransform)
         {
             m_PrevTransform = m_Transform;     
-  /*          if (!m_Dirty)
-            {
-                for (int i = 0; i < m_Children.size(); ++i)
-                {
-                    m_Children[i]->UpdateTransform(true);
-                }
-            }*/
         }
         // we only do this if the node itself or its parent is flagged as dirty
         if (m_Dirty)
@@ -180,15 +173,7 @@ namespace Cell
             if (m_Parent)
             {
                 m_Transform = m_Parent->m_Transform * m_Transform;
-            }
-            // if this node is flagged as dirty, also be sure to update its children as they have 
-            // now become invalid as well
-            //for (int i = 0; i < m_Children.size(); ++i)
-            //{
-            //    //SceneNode* child = m_Children[i];
-            //    child->m_Dirty = true;
-            //    child->UpdateTransform(updatePrevTransform);
-            //}           
+            }        
         }
         for (int i = 0; i < m_Children.size(); ++i)
         {

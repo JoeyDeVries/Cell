@@ -19,21 +19,25 @@ namespace Cell
     // ------------------------------------------------------------------------
     void Camera::Update(float dt)
     {
-
+        Frustum.Update(this);
     }
     // ------------------------------------------------------------------------
     void Camera::SetPerspective(float fov, float aspect, float near, float far)
     {
         Perspective = true;
         Projection = math::perspective(fov, aspect, near, far);
-        FOV = fov;
+        FOV    = fov;
         Aspect = aspect;
+        Near   = near;
+        Far    = far;
     }
     // ------------------------------------------------------------------------
     void Camera::SetOrthographic(float left, float right, float top, float bottom, float near, float far)
     {
         Perspective = false;
         Projection = math::orthographic(left, right, top, bottom, near, far);
+        Near = near;
+        Far  = far;
     }
     // ------------------------------------------------------------------------
     void Camera::UpdateView()

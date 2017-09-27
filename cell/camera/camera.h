@@ -41,6 +41,8 @@ namespace Cell
 
         float FOV;
         float Aspect;
+        float Near;
+        float Far;
         bool  Perspective;
 
         CameraFrustum Frustum;
