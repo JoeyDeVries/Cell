@@ -426,7 +426,7 @@ namespace Cell
         // 9. final post-processing steps, blitting to default framebuffer
         m_PostProcessor->Blit(this, postProcessingCommands.size() % 2 == 0 ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0));
 
-        //Blit(m_GBuffer->GetColorTexture(3), nullptr);
+        //Blit(m_PostProcessor->SSROutput, nullptr);
         //Blit(m_ShadowRenderTargets[0]->GetColorTexture(0), nullptr);
 
         // store view projection as previous view projection for next frame's motion blur

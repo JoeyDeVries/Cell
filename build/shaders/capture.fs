@@ -6,15 +6,12 @@ in vec2 TexCoords;
 in vec3 FragPos;
 in vec3 Normal;
 
-in vec3 CamPosView;
-in vec3 DirLightDirView;
+#include common/uniforms.glsl
 
 uniform sampler2D TexAlbedo;
 uniform sampler2D TexNormal;
 uniform sampler2D TexMetallic;
 uniform sampler2D TexRoughness;
-
-uniform vec3 DirLight0_Col;
 
 #include pbr/pbr.glsl
 
@@ -26,8 +23,8 @@ void main()
     float roughness = texture(TexRoughness, TexCoords).r;
     
     vec3 color = PBRAnalyticLighting(
-        albedo, normal, metallic, roughness, CamPosView,
-        FragPos, vec4(DirLightDirView, 0.0), DirLight0_Col, 0.0
+        albedo, normal, metallic, roughness, camPos.xyz,
+        FragPos, vec4(dirLight0_Dir.xyz, 0.0), dirLight0_Col.rgb, 0.0
     );
     
     FragColor = vec4(albedo * 0.4 + color * 0.6, 1.0);

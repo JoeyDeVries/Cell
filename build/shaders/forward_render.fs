@@ -6,9 +6,6 @@ in vec2 TexCoords;
 in vec3 FragPos;
 in vec3 Normal;
 
-in vec3 CamPosView;
-in vec3 DirLightDirView;
-
 #include common/uniforms.glsl
 
 uniform sampler2D TexAlbedo;
@@ -27,8 +24,8 @@ void main()
     float roughness = texture(TexRoughness, TexCoords).r;
     
     vec3 color = PBRAnalyticLighting(
-        albedo.rgb, normal, metallic, roughness, CamPosView,
-        FragPos, vec4(DirLightDirView, 0.0), dirLight0_Col.rgb, 0.0
+        albedo.rgb, normal, metallic, roughness, camPos.xyz,
+        FragPos, vec4(dirLight0_Dir.xyz, 0.0), dirLight0_Col.rgb, 0.0
     );
                       
     #ifdef ALPHA_DISCARD

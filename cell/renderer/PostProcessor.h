@@ -32,13 +32,13 @@ namespace Cell
         Texture* SSROutput;
 
         // toggles
-        bool Sepia    = false;
-        bool Vignette = true;
-        bool Bloom    = false;
-        bool SSAO     = true;
-        bool TXAA     = true;
-        bool SSR      = false;
-        bool MotionBlur      = true;
+        bool Sepia      = false;
+        bool Vignette   = true;
+        bool Bloom      = false;
+        bool SSAO       = true;
+        bool TXAA       = true;
+        bool SSR        = false;
+        bool MotionBlur = true;
 
         // ssao
         int SSAOKernelSize = 32;      

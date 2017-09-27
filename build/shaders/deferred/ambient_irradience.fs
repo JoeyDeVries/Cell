@@ -19,6 +19,7 @@ uniform samplerCube envPrefilter;
 uniform sampler2D   BRDFLUT;
 uniform sampler2D   SSAO;
 
+uniform vec3 probePos;
 uniform float probeRadius;
 
 uniform int SSR;
@@ -32,7 +33,7 @@ void main()
     vec4 positionMetallic = texture(gPositionMetallic, uv);
     float ao              = texture(SSAO, uv).r;
     
-    vec3 viewPos    = positionMetallic.xyz;
+    vec3 worldPos   = positionMetallic.xyz;
     vec3 albedo     = albedoAO.rgb;
     vec3 normal     = normalRoughness.rgb;
     float roughness = normalRoughness.a;
@@ -41,18 +42,13 @@ void main()
        
     // lighting input
     vec3 N = normalize(normal);
-    vec3 V = normalize(-viewPos); // view-space camera is (0, 0, 0): (0, 0, 0) - viewPos = -viewPos
-    vec3 L = normalize(ProbePos - viewPos);
+    vec3 V = normalize(camPos.xyz - worldPos); 
+    vec3 L = normalize(probePos - worldPos);
     vec3 H = normalize(V + L);     
     vec3 R = reflect(-V, N); 
     
-    // space transforms
-    mat4 invView = inverse(view); 
-    mat3 invViewRot = mat3(invView);
-    vec3 worldPos = vec3(invView * vec4(viewPos, 1.0));
-	                        
     // calculate light radiance    
-    float attenuation = pow(max(1.0 - length(viewPos - ProbePos) / probeRadius, 0.0), 2.0);
+    float attenuation = pow(max(1.0 - length(worldPos - probePos) / probeRadius, 0.0), 2.0);
         
     // cook-torrance brdf
     vec3 F0 = vec3(0.04); // base reflectance at incident angle for non-metallic (dia-conductor) surfaces 
@@ -65,7 +61,7 @@ void main()
     if(SSR == 0)
     {
         const float MAX_REFLECTION_LOD = 5.0;
-        vec3 prefilteredColor = pow(textureLod(envPrefilter, invViewRot * R,  roughness * MAX_REFLECTION_LOD).rgb, vec3(2.2));
+        vec3 prefilteredColor = pow(textureLod(envPrefilter, R,  roughness * MAX_REFLECTION_LOD).rgb, vec3(2.2));
         vec2 envBRDF          = texture(BRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
         specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
     }
@@ -79,7 +75,7 @@ void main()
     // no diffuse light).
 	kD *= 1.0 - metallic;	
 	// directly obtain irradiance from irradiance environment map
-	vec3 irradiance = texture(envIrradiance, invViewRot * N).rgb;
+	vec3 irradiance = texture(envIrradiance, N).rgb;
 	vec3 diffuse = albedo * irradiance;
 	
 	// combine contributions, note that we don't multiply by kS as kS equals

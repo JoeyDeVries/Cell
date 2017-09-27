@@ -2,8 +2,6 @@
 out vec4 FragColor;
 
 in vec2 TexCoords;
-in vec3 CamPos;
-in vec3 LightDir;
 
 #include ../common/constants.glsl
 #include ../common/brdf.glsl
@@ -14,6 +12,7 @@ uniform sampler2D gPositionMetallic;
 uniform sampler2D gNormalRoughness;
 uniform sampler2D gAlbedoAO;
 
+uniform vec3 lightDir;
 uniform vec3 lightColor;
 
 uniform sampler2D lightShadowMap;
@@ -25,7 +24,7 @@ void main()
     vec4 normalRoughness = texture(gNormalRoughness, TexCoords);
     vec4 positionMetallic = texture(gPositionMetallic, TexCoords);
     
-    vec3 viewPos    = positionMetallic.xyz;
+    vec3 worldPos   = positionMetallic.xyz;
     vec3 albedo     = albedoAO.rgb;
     vec3 normal     = normalRoughness.rgb;
     float roughness = normalRoughness.a;
@@ -33,8 +32,8 @@ void main()
        
     // lighting input
     vec3 N = normalize(normal);
-    vec3 V = normalize(-viewPos); // view-space camera is (0, 0, 0): (0, 0, 0) - viewPos = -viewPos
-    vec3 L = normalize(-LightDir);
+    vec3 V = normalize(camPos.xyz - worldPos); // view-space camera is (0, 0, 0): (0, 0, 0) - viewPos = -viewPos
+    vec3 L = normalize(-lightDir);
     vec3 H = normalize(V + L);     
 	              
     vec3 F0 = vec3(0.04); 
@@ -44,8 +43,6 @@ void main()
     vec3 radiance = lightColor;        
     
     // light shadow
-    mat4 invView = inverse(view); // TODO: send inverse from CPU (or go to world-space)
-    vec3 worldPos = vec3(invView * vec4(viewPos, 1.0)); // this is getting annoying, back to world-space?
     vec4 fragPosLightSpace = lightShadowViewProjection * vec4(worldPos, 1.0);
     float shadow = ShadowFactor(lightShadowMap, fragPosLightSpace, N, L);
     

@@ -125,7 +125,7 @@ namespace Cell
         }
         // SSR
         {
-            m_SSRRT = new RenderTarget(1, 1, GL_UNSIGNED_BYTE, 1, false);
+            m_SSRRT = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, false);
             SSROutput = m_SSRRT->GetColorTexture(0);
 
             m_SSRShader = Cell::Resources::LoadShader("ssr", "shaders/screen_quad.vs", "shaders/post/ssr.fs");

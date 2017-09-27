@@ -7,9 +7,6 @@ out vec2 TexCoords;
 out vec3 FragPos;
 out vec3 Normal;
 
-out vec3 CamPosView;
-out vec3 DirLightDirView;
-
 #include common/uniforms.glsl
 
 uniform mat4 model;
@@ -17,11 +14,8 @@ uniform mat4 model;
 void main()
 {
 	TexCoords = texCoords;
-	FragPos   = vec3(view * model * vec4(pos, 1.0f));
-	Normal    = mat3(view * model) * normal;
+	FragPos   = vec3(model * vec4(pos, 1.0));
+	Normal    = mat3(model) * normal;
     
-    CamPosView      = vec3(view * vec4(camPos.xyz, 1.0));
-    DirLightDirView = vec3(view * vec4(dirLight0_Dir.xyz, 0.0));
-	
-	gl_Position =  projection * vec4(FragPos, 1.0);
+	gl_Position =  projection * view * vec4(FragPos, 1.0);
 }

@@ -37,11 +37,10 @@ void main()
     float ao              = clamp(texture(SSAO, TexCoords).r, 0.0, 1.0);
     
     vec3 albedo     = albedoAO.rgb;
-    vec3 viewPos    = positionMetallic.xyz;
-    vec3 normal     = normalRoughness.rgb;
+    vec3 viewPos    = (view * vec4(positionMetallic.xyz, 1.0)).xyz;
+    vec3 normal     = mat3(view) * normalRoughness.rgb;
     float roughness = normalRoughness.a;
     float metallic  = positionMetallic.a;
-    // roughness = 0.0;
        
     // lighting input
     vec3 N = normalize(normal);
@@ -93,7 +92,7 @@ vec3 binarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth)
         projectedCoord.xy /= projectedCoord.w;
         projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
  
-        depth = texture(gPositionMetallic, projectedCoord.xy).z;
+        depth = (view * vec4(texture(gPositionMetallic, projectedCoord.xy).xyz, 1.0)).z;
         dDepth = hitCoord.z - depth;
 
         dir *= 0.5;
@@ -127,7 +126,7 @@ vec4 rayMarch(vec3 dir, inout vec3 hitCoord, out float dDepth)
         projectedCoord.xy /= projectedCoord.w;
         projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
  
-        depth = texture(gPositionMetallic, projectedCoord.xy).z;
+        depth = (view * vec4(texture(gPositionMetallic, projectedCoord.xy).xyz, 1.0)).z;
         if(depth > 1000.0)
             continue;
  

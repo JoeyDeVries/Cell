@@ -2,7 +2,6 @@
 out vec4 FragColor;
 
 in vec2 TexCoords;
-in vec3 CamPos;
 
 #include ../common/constants.glsl
 #include ../common/brdf.glsl
@@ -27,26 +26,17 @@ void main()
     vec4 positionMetallic = texture(gPositionMetallic, TexCoords);
     float ao              = texture(SSAO, TexCoords).r;
     
-    vec3 viewPos    = positionMetallic.xyz;
+    vec3 worldPos   = positionMetallic.xyz;
     vec3 albedo     = albedoAO.rgb;
     vec3 normal     = normalRoughness.rgb;
     float roughness = normalRoughness.a;
     float metallic  = positionMetallic.a;
-    // metallic = 1.0;
-    // roughness *= 0.5;
     
     // lighting data
     vec3 N = normalize(normal);
-    vec3 V = normalize(-viewPos); // view-space camera is (0, 0, 0): (0, 0, 0) - viewPos = -viewPos
+    vec3 V = normalize(camPos.xyz - worldPos); 
 	vec3 R = reflect(-V, N); 
 	
-    // get the inverse view matrix for transforming view dir vectors to world dir vectors for 
-    // sampling the prefilter and irradiance env. map (cubemap sampling requires world space).
-    // TODO: get these from CPU
-    mat4 invView = inverse(view); 
-    mat3 invViewRot = mat3(invView);
-    vec3 worldPos = vec3(invView * vec4(viewPos, 1.0));
-    
 	// calculate color/reflectance at normal incidence
     // if dia-electric (like plastic) use F0 as 0.04 and
     // if it's a metal, use their albedo color as F0 (metallic workflow)
@@ -59,8 +49,7 @@ void main()
 	
 	// calculate specular global illumination contribution w/ Epic's split-sum approximation
 	const float MAX_REFLECTION_LOD = 5.0;
-    // vec3 prefilteredColor = pow(getEnvironmentReflection(worldPos, invViewRot * N, camPos, roughness * MAX_REFLECTION_LOD), vec3(2.2));
-    vec3 prefilteredColor = pow(textureLod(envPrefilter, invViewRot * R,  roughness * MAX_REFLECTION_LOD).rgb, vec3(2.2));
+    vec3 prefilteredColor = pow(textureLod(envPrefilter, R,  roughness * MAX_REFLECTION_LOD).rgb, vec3(2.2));
     vec2 envBRDF          = texture(BRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
     vec3 specular         = prefilteredColor * (F * envBRDF.x + envBRDF.y);
     
@@ -73,8 +62,7 @@ void main()
     // no diffuse light).
 	kD *= 1.0 - metallic;	
 	// directly obtain irradiance from irradiance environment map
-    // vec3 irradiance = getEnvironmentIrradiance(worldPos, invViewRot * N, camPos).rgb;
-	vec3 irradiance = texture(envIrradiance, invViewRot * N).rgb;
+	vec3 irradiance = texture(envIrradiance, N).rgb;
 	vec3 diffuse = albedo * irradiance;
 	
 	// combine contributions, note that we don't multiply by kS as kS equals
