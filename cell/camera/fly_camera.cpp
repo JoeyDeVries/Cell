@@ -11,12 +11,14 @@ namespace Cell
     {
         Yaw = -90.0f;
 
+        Forward = forward;
         m_WorldUp = Up;
         m_TargetPosition = position;
     }
     // ------------------------------------------------------------------------
     void FlyCamera::Update(float dt)
     {
+        Camera::Update(dt);
         // NOTE(Joey): slowly interpolate to target position each frame given some damping factor.
         // This gives smooth camera movement that fades out the closer we are to our target.
         Position = math::lerp(Position, m_TargetPosition, math::clamp01(dt * Damping));

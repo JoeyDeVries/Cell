@@ -15,8 +15,8 @@ namespace Cell
 
         void SetNormalD(math::vec3 normal, math::vec3 point)
         {
-            Normal = normal;
-            D = -math::dot(normal, point);
+            Normal = math::normalize(normal);
+            D      = -math::dot(Normal, point);
         }
 
         float Distance(math::vec3 point)

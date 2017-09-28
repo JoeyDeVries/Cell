@@ -17,7 +17,7 @@ void keyFunc(GLFWwindow *window, int key, int scancode, int action, int mods);
 void mousePosFunc(GLFWwindow *window, double xpos, double ypos);
 
 Cell::Renderer *renderer;
-Cell::FlyCamera camera(math::vec3(0.0f, 1.0f, 0.0f), math::vec3(1.0f, 0.0f, 0.0f));
+Cell::FlyCamera camera(math::vec3(0.0f, 1.0f, 0.0f), math::vec3(0.0f, 0.0f, -1.0f));
 float deltaTime     = 0.0f;
 float lastFrameTime = 0.0f;
 bool keysPressed[1024];
@@ -276,6 +276,8 @@ int main(int argc, char *argv[])
 
             // update render logic
             camera.Update(deltaTime);
+
+            Log::Message(camera.Frustum.Intersect(light2.Position, light2.Radius) ? "truezz" : "falsezz", LOG_DEBUG);
 
             //Log::Message("(" + std::to_string(camera.Position.x) + ", " + std::to_string(camera.Position.y) + ", " + std::to_string(camera.Position.z) + ")", LOG_DEBUG);
 

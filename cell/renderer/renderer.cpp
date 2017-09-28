@@ -317,7 +317,11 @@ namespace Cell
         glCullFace(GL_FRONT);
         for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
         {
-            renderDeferredPointLight(*it);
+            // only render point lights if within frustum
+            if (m_Camera->Frustum.Intersect((*it)->Position, (*it)->Radius))
+            {
+                renderDeferredPointLight(*it);
+            }
         }
         glCullFace(GL_BACK);
         glEnable(GL_CULL_FACE);
@@ -807,23 +811,27 @@ namespace Cell
         for (int i = 0; i < irradianceProbes.size(); ++i)
         {
             PBRCapture* probe = irradianceProbes[i];
-            probe->Irradiance->Bind(3);
+            // only render probe if within frustum
+            if (m_Camera->Frustum.Intersect(probe->Position, probe->Radius))
+            {
+                probe->Irradiance->Bind(3);
 
-            Shader* irradianceShader = m_MaterialLibrary->deferredIrradianceShader;
-            irradianceShader->Use();
-            irradianceShader->SetVector("camPos", m_Camera->Position);
-            irradianceShader->SetVector("probePos", probe->Position);
-            irradianceShader->SetFloat("probeRadius", probe->Radius);
-            irradianceShader->SetInt("SSR", m_PostProcessor->SSR);
+                Shader* irradianceShader = m_MaterialLibrary->deferredIrradianceShader;
+                irradianceShader->Use();
+                irradianceShader->SetVector("camPos", m_Camera->Position);
+                irradianceShader->SetVector("probePos", probe->Position);
+                irradianceShader->SetFloat("probeRadius", probe->Radius);
+                irradianceShader->SetInt("SSR", m_PostProcessor->SSR);
 
-            math::mat4 model;
-            math::translate(model, probe->Position);
-            math::scale(model, math::vec3(probe->Radius));
-            //irradianceShader->SetMatrix("projection", m_Camera->Projection);
-            //irradianceShader->SetMatrix("view", m_Camera->View);
-            irradianceShader->SetMatrix("model", model);
+                math::mat4 model;
+                math::translate(model, probe->Position);
+                math::scale(model, math::vec3(probe->Radius));
+                //irradianceShader->SetMatrix("projection", m_Camera->Projection);
+                //irradianceShader->SetMatrix("view", m_Camera->View);
+                irradianceShader->SetMatrix("model", model);
 
-            renderMesh(m_DeferredPointMesh, irradianceShader);
+                renderMesh(m_DeferredPointMesh, irradianceShader);
+            }
         }
     }
     // --------------------------------------------------------------------------------------------

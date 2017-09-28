@@ -11,24 +11,24 @@ namespace Cell
         float nearHeight = tan * camera->Near;
         float nearWidth  = nearHeight * camera->Aspect;
         float farHeight  = tan * camera->Far;
-        float farWidth   = tan * camera->Near;
+        float farWidth   = farHeight * camera->Aspect;
 
-        math::vec3 nearCenter = camera->Forward * camera->Near;
-        math::vec3 farCenter  = camera->Forward * camera->Far;
+        math::vec3 nearCenter = camera->Position + camera->Forward * camera->Near;
+        math::vec3 farCenter  = camera->Position + camera->Forward * camera->Far;
 
         math::vec3 v;
         // left plane
-        v = (nearCenter - camera->Right * 0.5f) - camera->Position;
-        Left.SetNormalD(math::cross(v, math::vec3::UP), camera->Position);
+        v = (nearCenter - camera->Right * nearWidth * 0.5f) - camera->Position;
+        Left.SetNormalD(math::cross(math::normalize(v), camera->Up), nearCenter - camera->Right * nearWidth * 0.5f);
         // right plane
-        v = (nearCenter + camera->Right * 0.5f) - camera->Position;
-        Right.SetNormalD(math::cross(math::vec3::UP, v), camera->Position);
+        v = (nearCenter + camera->Right * nearWidth  * 0.5f) - camera->Position;
+        Right.SetNormalD(math::cross(camera->Up, math::normalize(v)), nearCenter + camera->Right * nearWidth * 0.5f);
         // top plane
-        v = (nearCenter + camera->Up * 0.5f) - camera->Position;
-        Top.SetNormalD(math::cross(v, math::vec3::RIGHT), camera->Position);
+        v = (nearCenter + camera->Up * nearHeight * 0.5f) - camera->Position;
+        Top.SetNormalD(math::cross(math::normalize(v), camera->Right), nearCenter + camera->Up * nearHeight * 0.5f);
         // bottom plane
-        v = (nearCenter - camera->Up * 0.5f) - camera->Position;
-        Bottom.SetNormalD(math::cross(math::vec3::RIGHT, v), camera->Position);
+        v = (nearCenter - camera->Up * nearHeight * 0.5f) - camera->Position;
+        Bottom.SetNormalD(math::cross(camera->Right, math::normalize(v)), nearCenter - camera->Up * nearHeight * 0.5f);
         // near plane
         Near.SetNormalD(camera->Forward, nearCenter);
         // far plane
@@ -39,7 +39,7 @@ namespace Cell
     {
         for (int i = 0; i < 6; ++i)
         {
-            if (Planes[i].Distance(point) > 0)
+            if (Planes[i].Distance(point) < 0)
             {
                 return false;
             }
@@ -51,7 +51,7 @@ namespace Cell
     {
         for (int i = 0; i < 6; ++i)
         {
-            if (Planes[i].Distance(point) > radius)
+            if (Planes[i].Distance(point) < -radius)
             {
                 return false;
             }

@@ -46,6 +46,7 @@ Feature List (complete:base-functionality)
     4. Environment lighting.
 	5. Environment reflection support.
     6. Number of lights optimization.
+    7. Per-object motion blur.
 8. Functioning PBR render pipeline.
 	1. Calculate diffuse integral and store into cubemap.
 	2. Prefilter environment map w/ integral and store into cubemap as diffuse integral.
@@ -58,7 +59,8 @@ Feature List (complete:base-functionality)
     4. Vignette
     5. SSAO 
 10. Optimization:
-    1. Store material-independent uniforms in UBO; together with barely changing shader parameters.    
+    1. Store material-independent uniforms in UBO; together with barely changing shader parameters.   
+	2. Per-object Frustum culling.    
 	
 Feature List (work-in-progress)
 ------
@@ -70,20 +72,16 @@ Feature List (work-in-progress)
 2. Configure Deferred rendering pipeline:	
 	1. Fog.
 	2. Shadow Mapping (default, omni, CSM).
-	3. Per-object motion blur.
-3. Post-processing
-    1. TXAA
+8. GUI
+    1. IMGUI
 		
 Feature List (todo)
 ------
 
-8. GUI
-    1. IMGUI
 10. Optimization:
-	1. Per-object Frustum culling.
-	2. Spatial partitioning.
-	3. Portal rendering (overkill perhaps)?
-    4. Cache GL state.
+	1. Spatial partitioning.
+	2. Portal rendering (overkill perhaps)?
+    3. Cache GL state.
 12. Skeletal animation:
 	1. Define Bone structure on top of current scene hierarchy system.
 	2. Load skeletal mesh from Assimp as skeletal hierarchy as well? Think of different design solutions that would work well in current environment.
