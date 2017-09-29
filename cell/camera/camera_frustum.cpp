@@ -76,7 +76,7 @@ namespace Cell
             {
                 positive.z = boxMax.z;
             }
-            if(Planes[i].Distance(positive) > 0)
+            if(Planes[i].Distance(positive) < 0)
             {
                 return false;
             }

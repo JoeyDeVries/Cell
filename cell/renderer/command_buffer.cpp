@@ -1,5 +1,7 @@
 #include "command_buffer.h"
 
+#include "renderer.h"
+#include "../camera/camera.h"
 #include "../shading/material.h"
 #include "../mesh/mesh.h"
 
@@ -9,9 +11,9 @@
 namespace Cell
 {
     // ------------------------------------------------------------------------
-    CommandBuffer::CommandBuffer()
+    CommandBuffer::CommandBuffer(Renderer* renderer)
     {
-
+        m_Renderer = renderer;
     }
     // ------------------------------------------------------------------------
     CommandBuffer::~CommandBuffer()
@@ -19,13 +21,15 @@ namespace Cell
         Clear();
     }
     // ------------------------------------------------------------------------
-    void CommandBuffer::Push(Mesh* mesh, Material* material, math::mat4 transform, math::mat4 prevTransform, RenderTarget* target)
+    void CommandBuffer::Push(Mesh* mesh, Material* material, math::mat4 transform, math::mat4 prevTransform, math::vec3 boxMin, math::vec3 boxMax, RenderTarget* target)
     {
         RenderCommand command = {};
         command.Mesh          = mesh;
         command.Material      = material;
         command.Transform     = transform;
         command.PrevTransform = prevTransform;
+        command.BoxMin        = boxMin;
+        command.BoxMax        = boxMax;
 
         // if material requires alpha support, add it to alpha render commands for later rendering.
       /*  if (material->Blend)
@@ -120,22 +124,74 @@ namespace Cell
         }
     }
     // ------------------------------------------------------------------------
-    std::vector<RenderCommand>& CommandBuffer::GetDeferredRenderCommands()
+    std::vector<RenderCommand> CommandBuffer::GetDeferredRenderCommands(bool cull)
     {
-        return m_DeferredRenderCommands;
+        if (cull)
+        {
+            std::vector<RenderCommand> commands;
+            for (auto it = m_DeferredRenderCommands.begin(); it != m_DeferredRenderCommands.end(); ++it)
+            {
+                RenderCommand command = *it;
+                math::vec3 boxMinWorld = (command.Transform * math::vec4(command.BoxMin, 1.0f)).xyz;
+                math::vec3 boxMaxWorld = (command.Transform * math::vec4(command.BoxMax, 1.0f)).xyz;
+                if (m_Renderer->GetCamera()->Frustum.Intersect(boxMinWorld, boxMaxWorld)) {
+                    commands.push_back(command);
+                }
+            }
+            return commands;
+        }
+        else
+        {
+            return m_DeferredRenderCommands;
+        }
     }
     // ------------------------------------------------------------------------
-    std::vector<RenderCommand>& CommandBuffer::GetCustomRenderCommands(RenderTarget *target)
+    std::vector<RenderCommand> CommandBuffer::GetCustomRenderCommands(RenderTarget *target, bool cull)
     {
-        return m_CustomRenderCommands[target];
+        // only cull when on main/null render target
+        if (target == nullptr && cull)
+        {
+            std::vector<RenderCommand> commands;
+            for (auto it = m_CustomRenderCommands[target].begin(); it != m_CustomRenderCommands[target].end(); ++it)
+            {
+                RenderCommand command = *it;
+                math::vec3 boxMinWorld = (command.Transform * math::vec4(command.BoxMin, 1.0f)).xyz;
+                math::vec3 boxMaxWorld = (command.Transform * math::vec4(command.BoxMax, 1.0f)).xyz;
+                if (m_Renderer->GetCamera()->Frustum.Intersect(boxMinWorld, boxMaxWorld)) {
+                    commands.push_back(command);
+                }
+            }
+            return commands;
+        }
+        else
+        {
+            return m_CustomRenderCommands[target];
+        }
     }
     // ------------------------------------------------------------------------
-    std::vector<RenderCommand>& CommandBuffer::GetAlphaRenderCommands()
+    std::vector<RenderCommand> CommandBuffer::GetAlphaRenderCommands(bool cull)
     {
-        return m_AlpharenderCommands;
+        if (cull)
+        {
+            std::vector<RenderCommand> commands;
+            for (auto it = m_AlpharenderCommands.begin(); it != m_AlpharenderCommands.end(); ++it)
+            {
+                RenderCommand command = *it;
+                math::vec3 boxMinWorld = (command.Transform * math::vec4(command.BoxMin, 1.0f)).xyz;
+                math::vec3 boxMaxWorld = (command.Transform * math::vec4(command.BoxMax, 1.0f)).xyz;
+                if (m_Renderer->GetCamera()->Frustum.Intersect(boxMinWorld, boxMaxWorld)) {
+                    commands.push_back(command);
+                }
+            }
+            return commands;
+        }
+        else
+        {
+            return m_AlpharenderCommands;
+        }
     }
     // ------------------------------------------------------------------------
-    std::vector<RenderCommand>& CommandBuffer::GetPostProcessingRenderCommands()
+    std::vector<RenderCommand> CommandBuffer::GetPostProcessingRenderCommands()
     {
         return m_PostProcessingRenderCommands;
     }

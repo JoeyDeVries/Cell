@@ -32,6 +32,8 @@ namespace Cell
     // ------------------------------------------------------------------------
     Renderer::~Renderer()
     {       
+        delete m_CommandBuffer;
+
         delete m_NDCPlane;
 
         delete m_MaterialLibrary;
@@ -58,7 +60,9 @@ namespace Cell
     // ------------------------------------------------------------------------
     void Renderer::Init(GLADloadproc loadProcFunc)
     {
-        // NOTE(Joey): initialize render items
+        // initialize render items
+        m_CommandBuffer = new CommandBuffer(this);
+
         // TODO(Joey): do we want to abstract this or not? as it is very specific.
         m_NDCPlane = new Quad;
         glGenFramebuffers(1, &m_FramebufferCubemap);
@@ -163,7 +167,7 @@ namespace Cell
         // get current render target
         RenderTarget* target = getCurrentRenderTarget();
         // don't render right away but push to the command buffer for later rendering.
-        m_CommandBuffer.Push(mesh, material, transform, prevFrameTransform, target);
+        m_CommandBuffer->Push(mesh, material, transform, prevFrameTransform, math::vec3(-99999.0f), math::vec3(99999.0f), target);
     }
     // ------------------------------------------------------------------------
     void Renderer::PushRender(SceneNode* node)
@@ -186,7 +190,7 @@ namespace Cell
             // only push render command if the child isn't a container node.
             if (node->Mesh)
             {
-                m_CommandBuffer.Push(node->Mesh, node->Material, node->GetTransform(), node->GetPrevTransform(), target);
+                 m_CommandBuffer->Push(node->Mesh, node->Material, node->GetTransform(), node->GetPrevTransform(), node->BoxMin, node->BoxMax, target);
             }
             for(unsigned int i = 0; i < node->GetChildCount(); ++i)
                 nodeStack.push(node->GetChildByIndex(i));
@@ -196,7 +200,7 @@ namespace Cell
     void Renderer::PushPostProcessor(Material *postProcessor)
     {
         // we only care about the material, mesh as NDC quad is pre-defined.
-        m_CommandBuffer.Push(nullptr, postProcessor);
+        m_CommandBuffer->Push(nullptr, postProcessor);
     }
     // ------------------------------------------------------------------------
     void Renderer::AddLight(DirectionalLight *light)
@@ -227,12 +231,12 @@ namespace Cell
             post-processing shaders (before/after HDR-tonemap/gamma-correct?).
 
         */
-        m_CommandBuffer.Sort();
+        m_CommandBuffer->Sort();
 
         // update (global) uniform buffers
         updateGlobalUBOs();
 
-        std::vector<RenderCommand>& deferredRenderCommands = m_CommandBuffer.GetDeferredRenderCommands();
+        std::vector<RenderCommand> deferredRenderCommands = m_CommandBuffer->GetDeferredRenderCommands(true);
         // 1. Geometry buffer
         glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
         glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer->ID);
@@ -252,7 +256,7 @@ namespace Cell
 
         // 1.5. render all shadow casters to light shadow buffers
         glCullFace(GL_FRONT);
-        std::vector<RenderCommand> shadowRenderCommands = m_CommandBuffer.GetShadowCastRenderCommands();
+        std::vector<RenderCommand> shadowRenderCommands = m_CommandBuffer->GetShadowCastRenderCommands();
         m_ShadowViewProjections.clear();
 
         unsigned int shadowRtIndex = 0;
@@ -378,7 +382,7 @@ namespace Cell
             }
 
             // sort all render commands and retrieve the sorted array
-            std::vector<RenderCommand>& renderCommands = m_CommandBuffer.GetCustomRenderCommands(renderTarget);
+            std::vector<RenderCommand> renderCommands = m_CommandBuffer->GetCustomRenderCommands(renderTarget);
 
             // terate over all the render commands and execute
             for (unsigned int i = 0; i < renderCommands.size(); ++i)
@@ -417,7 +421,7 @@ namespace Cell
         }
 
         // 8. custom post-processing pass
-        std::vector<RenderCommand>& postProcessingCommands = m_CommandBuffer.GetPostProcessingRenderCommands();
+        std::vector<RenderCommand> postProcessingCommands = m_CommandBuffer->GetPostProcessingRenderCommands();
         for (unsigned int i = 0; i < postProcessingCommands.size(); ++i)
         {
             // NOTE(Joey): ping-pong between render textures
@@ -437,7 +441,7 @@ namespace Cell
         m_PrevViewProjection = m_Camera->Projection * m_Camera->View;
 
         // clear the command buffer s.t. the next frame/call can start from an empty slate again.
-        m_CommandBuffer.Clear();
+        m_CommandBuffer->Clear();
 
         // clear render state
         m_RenderTargetsCustom.clear();
@@ -510,7 +514,7 @@ namespace Cell
             scene = Scene::Root;
         }
         // build a command list of nodes within the reflection probe's capture box/radius.
-        CommandBuffer commandBuffer;
+        CommandBuffer commandBuffer(this);
         std::vector<Material*> materials;
      
         // originally a recursive function but transformed to iterative version
@@ -688,7 +692,7 @@ namespace Cell
     {
         // create a command buffer specifically for this operation (as to not conflict with main 
         // command buffer)
-        CommandBuffer commandBuffer;
+        CommandBuffer commandBuffer(this);
         // TODO(Joey): code duplication! re-factor!
         commandBuffer.Push(scene->Mesh, scene->Material, scene->GetTransform());
         // recursive function transformed to iterative version by maintaining a stack

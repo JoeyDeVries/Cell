@@ -27,14 +27,13 @@ namespace Cell
     class SceneNode
     {
     public:
-        // NOTE(Joey): each node contains relevant render state
-        Mesh        *Mesh;
-        // TODO(Joey): name Mesh and Material differently than their types
-        Material    *Material;
+        // each node contains relevant render state
+        Mesh*     Mesh;
+        Material* Material;
 
-        
-
-
+        // bounding box 
+        math::vec3 BoxMin = math::vec3(-99999.0f);
+        math::vec3 BoxMax = math::vec3( 99999.0f);
     private:
         std::vector<SceneNode*> m_Children;
         SceneNode *m_Parent;

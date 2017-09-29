@@ -47,7 +47,7 @@ namespace Cell
         friend PBR;
     private:
         // render state
-        CommandBuffer m_CommandBuffer;
+        CommandBuffer* m_CommandBuffer;
         math::vec2 m_RenderSize;
 
         // lighting

@@ -120,10 +120,6 @@ namespace Cell
         return m_Parent;
     }
     // --------------------------------------------------------------------------------------------
-    // NOTE(Joey): calculates the transform from its position, scale and 
-    // rotation property. As the renderer generates the final transforms only 
-    // once while filling the command buffer it is okay to calculate this on 
-    // the spot (no dirty flags required).
     math::mat4 SceneNode::GetTransform()
     {
         if (m_Dirty)
@@ -131,29 +127,11 @@ namespace Cell
             UpdateTransform(false);
         }
         return m_Transform;
-        //m_Transform = math::translate(m_Position);
-        //m_Transform = math::scale(m_Transform, m_Scale);
-        //m_Transform = math::rotate(m_Transform, m_Rotation.xyz, m_Rotation.w);
-
-        // multiply parent transform with current transform.
-        //if(m_Parent)
-            //m_Transform = m_Parent->m_Transform * m_Transform; // note that we don't call GetTransform() as the parent's tranform should already be calculated; THIS IS RISKY! Think of better solution!
-
-        //return m_Transform;
     }
     // --------------------------------------------------------------------------------------------
     math::mat4 SceneNode::GetPrevTransform()
     {
         return m_PrevTransform;
-        //m_Transform = math::translate(m_Position);
-        //m_Transform = math::scale(m_Transform, m_Scale);
-        //m_Transform = math::rotate(m_Transform, m_Rotation.xyz, m_Rotation.w);
-
-        // multiply parent transform with current transform.
-        //if(m_Parent)
-        //m_Transform = m_Parent->m_Transform * m_Transform; // note that we don't call GetTransform() as the parent's tranform should already be calculated; THIS IS RISKY! Think of better solution!
-
-        //return m_Transform;
     }
     // --------------------------------------------------------------------------------------------
     void SceneNode::UpdateTransform(bool updatePrevTransform)

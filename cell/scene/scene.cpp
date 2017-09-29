@@ -78,24 +78,27 @@ namespace Cell
 
         newNode->Mesh     = node->Mesh;
         newNode->Material = node->Material;
+        newNode->BoxMin   = node->BoxMin;
+        newNode->BoxMax   = node->BoxMax;
 
-        // NOTE(Joey): traverse through the list of children and add them correspondingly
-        std::stack<SceneNode*> childStack;
+        //  traverse through the list of children and add them correspondingly
+        std::stack<SceneNode*> nodeStack;
         for (unsigned int i = 0; i < node->GetChildCount(); ++i)
-            childStack.push(node->GetChildByIndex(i));
-        while (!childStack.empty())
+            nodeStack.push(node->GetChildByIndex(i));
+        while (!nodeStack.empty())
         {
-            SceneNode *child = childStack.top();
-            childStack.pop();
-            // NOTE(Joey): similarly, create new SceneNode for each child and push to global scene
-            // node memory list.
-            SceneNode *newChild = new SceneNode(Scene::CounterID++);
+            SceneNode* child = nodeStack.top();
+            nodeStack.pop();
+            // similarly, create SceneNode for each child and push to scene node memory list.
+            SceneNode* newChild = new SceneNode(Scene::CounterID++);
             newChild->Mesh     = child->Mesh;
             newChild->Material = child->Material;
+            newChild->BoxMin   = child->BoxMin;
+            newChild->BoxMax   = child->BoxMax;
             newNode->AddChild(newChild);
 
             for (unsigned int i = 0; i < child->GetChildCount(); ++i)
-                childStack.push(child->GetChildByIndex(i));
+                nodeStack.push(child->GetChildByIndex(i));
         }
 
         Root->AddChild(newNode);

@@ -46,25 +46,26 @@ namespace Cell
         return MeshLoader::processNode(renderer, scene->mRootNode, scene, directory, setDefaultMaterial);
     }
     // ------------------------------------------------------------------------
-    SceneNode* MeshLoader::processNode(Renderer *renderer, aiNode *aNode, const aiScene *aScene, std::string directory, bool setDefaultMaterial)
+    SceneNode* MeshLoader::processNode(Renderer* renderer, aiNode* aNode, const aiScene* aScene, std::string directory, bool setDefaultMaterial)
     {
-        // NOTE(Joey): note that we allocate memory ourselves and pass memory responsibility to 
-        // calling resource manager. The resource manager is responsible for holding the scene
-        // node pointer and deleting where appropriate.
-        SceneNode *node = new SceneNode(0);
+        // note that we allocate memory ourselves and pass memory responsibility to calling 
+        // resource manager. The resource manager is responsible for holding the scene node 
+        // pointer and deleting where appropriate.
+        SceneNode* node = new SceneNode(0);
 
         for (unsigned int i = 0; i < aNode->mNumMeshes; ++i)
         {
-            aiMesh     *assimpMesh = aScene->mMeshes[aNode->mMeshes[i]];
-            aiMaterial *assimpMat  = aScene->mMaterials[assimpMesh->mMaterialIndex];
-            Mesh       *mesh       = MeshLoader::parseMesh(assimpMesh, aScene);
-            Material   *material   = nullptr;
+            math::vec3 boxMin, boxMax;
+            aiMesh*     assimpMesh = aScene->mMeshes[aNode->mMeshes[i]];
+            aiMaterial* assimpMat  = aScene->mMaterials[assimpMesh->mMaterialIndex];
+            Mesh*       mesh       = MeshLoader::parseMesh(assimpMesh, aScene, boxMin, boxMax);
+            Material*   material   = nullptr;
             if (setDefaultMaterial)
             {
                 material = MeshLoader::parseMaterial(renderer, assimpMat, aScene, directory);
             }
 
-            // NOTE(Joey): if we only have one mesh, this node itself contains the mesh/material.
+            // if we only have one mesh, this node itself contains the mesh/material.
             if (aNode->mNumMeshes == 1)
             {
                 node->Mesh = mesh;
@@ -72,18 +73,22 @@ namespace Cell
                 {
                     node->Material = material;
                 }
+                node->BoxMin = boxMin;
+                node->BoxMax = boxMax;
             }
-            // NOTE(Joey): otherwise, the meshes are considered on equal depth of its children
+            // otherwise, the meshes are considered on equal depth of its children
             else
             {
                 SceneNode* child = new SceneNode(0);
                 child->Mesh = mesh;
                 child->Material = material;
+                child->BoxMin = boxMin;
+                child->BoxMax = boxMax;
                 node->AddChild(child);
             }
         }
 
-        // NOTE(Joey): also recursively parse this node's children 
+        // also recursively parse this node's children 
         for (unsigned int i = 0; i < aNode->mNumChildren; ++i)
         {
             node->AddChild(MeshLoader::processNode(renderer, aNode->mChildren[i], aScene, directory, setDefaultMaterial));
@@ -92,7 +97,7 @@ namespace Cell
         return node;
     }
     // ------------------------------------------------------------------------
-    Mesh* MeshLoader::parseMesh(aiMesh *aMesh, const aiScene *aScene)
+    Mesh* MeshLoader::parseMesh(aiMesh* aMesh, const aiScene* aScene, math::vec3& out_Min, math::vec3& out_Max)
     {
         std::vector<math::vec3> positions;
         std::vector<math::vec2> uv;
@@ -109,33 +114,38 @@ namespace Cell
             tangents.resize(aMesh->mNumVertices);
             bitangents.resize(aMesh->mNumVertices);
         }
-        // NOTE(Joey): we assume a constant of 3 vertex indices per face as we always triangulate
-        // in Assimp's post-processing step; otherwise you'll want transform this to a more 
-        // flexible scheme.
+        // we assume a constant of 3 vertex indices per face as we always triangulate in Assimp's
+        // post-processing step; otherwise you'll want transform this to a more  flexible scheme.
         indices.resize(aMesh->mNumFaces * 3);
+
+        // store min/max point in local coordinates for calculating approximate bounding box.
+        math::vec3 pMin( 99999.0);
+        math::vec3 pMax(-99999.0);
         
         for (unsigned int i = 0; i < aMesh->mNumVertices; ++i)
         {
-            positions[i] = math::vec3(aMesh->mVertices[i].x, aMesh->mVertices[i].y, 
-                                      aMesh->mVertices[i].z);
-            normals[i] = math::vec3(aMesh->mNormals[i].x, aMesh->mNormals[i].y,
-                                    aMesh->mNormals[i].z);
+            positions[i] = math::vec3(aMesh->mVertices[i].x, aMesh->mVertices[i].y, aMesh->mVertices[i].z);
+            normals[i] = math::vec3(aMesh->mNormals[i].x, aMesh->mNormals[i].y, aMesh->mNormals[i].z);
             if (aMesh->mTextureCoords[0])
             {
                 uv[i] = math::vec2(aMesh->mTextureCoords[0][i].x, aMesh->mTextureCoords[0][i].y);
-               
+
             }
             if (aMesh->mTangents)
             {
-                tangents[i] = math::vec3(aMesh->mTangents[i].x, aMesh->mTangents[i].y,
-                    aMesh->mTangents[i].z);
-                bitangents[i] = math::vec3(aMesh->mBitangents[i].x, aMesh->mBitangents[i].y,
-                    aMesh->mBitangents[i].z);
+                tangents[i] = math::vec3(aMesh->mTangents[i].x, aMesh->mTangents[i].y, aMesh->mTangents[i].z);
+                bitangents[i] = math::vec3(aMesh->mBitangents[i].x, aMesh->mBitangents[i].y, aMesh->mBitangents[i].z);
             }
+            if (positions[i].x < pMin.x) pMin.x = positions[i].x;
+            if (positions[i].y < pMin.y) pMin.y = positions[i].y;
+            if (positions[i].z < pMin.z) pMin.z = positions[i].z;
+            if (positions[i].x > pMax.x) pMax.x = positions[i].x;
+            if (positions[i].y > pMax.y) pMax.y = positions[i].y;
+            if (positions[i].z > pMax.z) pMax.z = positions[i].z;
         }
         for (unsigned int f = 0; f < aMesh->mNumFaces; ++f)
         {
-            // NOTE(Joey): we know we're always working with triangles due to TRIANGULATE option.
+            // we know we're always working with triangles due to TRIANGULATE option.
             for (unsigned int i = 0; i < 3; ++i) 
             {
                 indices[f * 3 + i] = aMesh->mFaces[f].mIndices[i];
@@ -152,17 +162,24 @@ namespace Cell
         mesh->Topology = TRIANGLES;
         mesh->Finalize(true);
 
-        // NOTE(Joey): store newly generated mesh in globally stored mesh store for clean memory
-        // de-allocation when a clean is required.
+        out_Min.x = pMin.x;
+        out_Min.y = pMin.y;
+        out_Min.z = pMin.z;
+        out_Max.x = pMax.x;
+        out_Max.y = pMax.y;
+        out_Max.z = pMax.z;
+
+        // store newly generated mesh in globally stored mesh store for memory de-allocation when 
+        // a clean is required.
         MeshLoader::meshStore.push_back(mesh);
 
         return mesh;
     }
     // ------------------------------------------------------------------------
-    Material *MeshLoader::parseMaterial(Renderer *renderer, aiMaterial *aMaterial, const aiScene *aScene, std::string directory)
+    Material *MeshLoader::parseMaterial(Renderer* renderer, aiMaterial* aMaterial, const aiScene* aScene, std::string directory)
     {
-        // NOTE(Joey): create a unique default material for each loaded mesh.     
-        Material *material;
+        // create a unique default material for each loaded mesh.     
+        Material* material;
         // check if diffuse texture has alpha, if so: make alpha blend material; 
         aiString file;
         aMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &file);
@@ -198,17 +215,16 @@ namespace Cell
         */
         if (aMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0)
         {
-            // NOTE(Joey): we only load the first of the list of diffuse textures, we don't really
-            // care about meshes with multiple diffuse layers; same holds for other texture types.
+            // we only load the first of the list of diffuse textures, we don't really care about 
+            // meshes with multiple diffuse layers; same holds for other texture types.
             aiString file;
             aMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &file);
             std::string fileName = MeshLoader::processPath(&file, directory);
-            // NOTE(Joey): we name the texture the same as the filename as to reduce naming 
-            // conflicts while still only loading unique textures.
-            Texture *texture = Resources::LoadTexture(fileName, fileName, GL_TEXTURE_2D, alpha ? GL_RGBA : GL_RGB, true);
+            // we name the texture the same as the filename as to reduce naming conflicts while 
+            // still only loading unique textures.
+            Texture* texture = Resources::LoadTexture(fileName, fileName, GL_TEXTURE_2D, alpha ? GL_RGBA : GL_RGB, true);
             if (texture)
             {
-                //texture->SetWrapMode(GL_REPEAT, true);
                 material->SetTexture("TexAlbedo", texture, 3);
             }
         }
@@ -218,10 +234,9 @@ namespace Cell
             aMaterial->GetTexture(aiTextureType_DISPLACEMENT, 0, &file);
             std::string fileName = MeshLoader::processPath(&file, directory);
 
-            Texture *texture = Resources::LoadTexture(fileName, fileName);
+            Texture* texture = Resources::LoadTexture(fileName, fileName);
             if (texture)
             {
-                //texture->SetWrapMode(GL_REPEAT, true);
                 material->SetTexture("TexNormal", texture, 4);
             }
         }
@@ -231,10 +246,9 @@ namespace Cell
             aMaterial->GetTexture(aiTextureType_SPECULAR, 0, &file);
             std::string fileName = MeshLoader::processPath(&file, directory);
 
-            Texture *texture = Resources::LoadTexture(fileName, fileName);
+            Texture* texture = Resources::LoadTexture(fileName, fileName);
             if (texture)
             {
-                //texture->SetWrapMode(GL_REPEAT, true);
                 material->SetTexture("TexMetallic", texture, 5);
             }
         }
@@ -244,10 +258,9 @@ namespace Cell
             aMaterial->GetTexture(aiTextureType_SHININESS, 0, &file);
             std::string fileName = MeshLoader::processPath(&file, directory);
           
-            Texture *texture = Resources::LoadTexture(fileName, fileName);
+            Texture* texture = Resources::LoadTexture(fileName, fileName);
             if (texture)
             {
-                //texture->SetWrapMode(GL_REPEAT, true);
                 material->SetTexture("TexRoughness", texture, 6);
             }
         }
@@ -257,10 +270,9 @@ namespace Cell
             aMaterial->GetTexture(aiTextureType_AMBIENT, 0, &file);
             std::string fileName = MeshLoader::processPath(&file, directory);
          
-            Texture *texture = Resources::LoadTexture(fileName, fileName);
+            Texture* texture = Resources::LoadTexture(fileName, fileName);
             if (texture)
             {
-                //texture->SetWrapMode(GL_REPEAT, true);
                 material->SetTexture("TexAO", texture, 7);
             }
         }     
@@ -271,8 +283,8 @@ namespace Cell
     std::string MeshLoader::processPath(aiString *aPath, std::string directory)
     {
         std::string path = std::string(aPath->C_Str());
-        // NOTE(Joey): parse path directly if path contains "/" indicating it is an absolute path; 
-        // otherwise parse as relative.
+        // parse path directly if path contains "/" indicating it is an absolute path;  otherwise 
+        // parse as relative.
         if(path.find("/") == std::string::npos) 
             path = directory + "/" + path;
         return path;

@@ -128,8 +128,6 @@ int main(int argc, char *argv[])
     sphereNode->SetScale(1.35f);
 
     Cell::Background* background = new Cell::Background;
-    Cell::TextureCube cubemap;
-    cubemap.DefaultInitialize(1024, 1024, GL_RGB, GL_UNSIGNED_BYTE);
   
     // - background
     Cell::PBRCapture *pbrEnv = renderer->GetSkypCature();
@@ -157,12 +155,6 @@ int main(int argc, char *argv[])
     dirLight.Color = math::vec3(1.0f, 0.89f, 0.7f);
     dirLight.Intensity = 50.0f;
     renderer->AddLight(&dirLight);
-
-    //Cell::DirectionalLight dirLight2;
-    //dirLight2.Direction = math::vec3(0.5f, -0.9f, 0.0f);
-    //dirLight2.Color = math::vec3(0.8f, 0.87f, 1.0f);
-    //dirLight2.Intensity = 25.0f;
-    //renderer->AddLight(&dirLight2);
 
     Cell::PointLight light;
     light.Radius = 4.0;
@@ -256,11 +248,6 @@ int main(int argc, char *argv[])
 
         {
             //CLOCK(UPDATE);
-            // TODO(Joey): do we need to pass input to Cell?
-            // TODO(Joey): replace by input manager that maps any window input to a 
-            // custom defined format; don't think we want this, we'd probably still
-            // want to control the camera somewhat from outside the renderer; same
-            // with changing material parameters.
             if (keysPressed[GLFW_KEY_W] || keysPressed[GLFW_KEY_UP])
                 camera.InputKey(deltaTime, Cell::CAMERA_FORWARD);
             if (keysPressed[GLFW_KEY_S] || keysPressed[GLFW_KEY_DOWN])
@@ -287,7 +274,6 @@ int main(int argc, char *argv[])
             thirdTorus->SetRotation(math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 4.0));
             sphereNode->SetRotation(math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime()));
 
-            //light.Position = math::vec3(sin(glfwGetTime() * 0.5f) * 10.0, 1.0f, 0.0f);
             light2.Position = math::vec3(sin(glfwGetTime() * 0.3f) * 1.5 + 3.0, 2.0f, cos(glfwGetTime() * 0.1f) * 5.0f);
 
           /*  dirLight.Direction.x = sin(glfwGetTime() * 0.05f) * 1.5;
@@ -316,7 +302,7 @@ int main(int argc, char *argv[])
         glfwSwapBuffers(window);
     }
 
-    // NOTE(Joey): clean up Cell
+    // clean up Cell
     Cell::Clean();
 
     glfwTerminate();
@@ -354,7 +340,7 @@ void mousePosFunc(GLFWwindow *window, double xpos, double ypos)
     }
 
     float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos;  // Reversed since y-coordinates go from bottom to left
+    float yoffset = lastY - ypos;  // reversed since y-coordinates go from bottom to left
 
     lastX = xpos;
     lastY = ypos;

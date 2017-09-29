@@ -17,23 +17,20 @@ namespace Cell
         Scene::Root->AddChild(this);
 
         m_Shader  = Resources::LoadShader("background", "shaders/background.vs", "shaders/background.fs");
-        //m_CubeMap = Resources::LoadTextureCube("yokohama", "textures/backgrounds/yokohama/");
         Material  = new Cell::Material(m_Shader);
         Mesh      = new Cell::Cube;
+        BoxMin    = math::vec3(-99999.0);
+        BoxMax    = math::vec3( 99999.0);
 
 
         // default material configuration
-        //Material->SetShader(m_Shader);
-        //Material->SetTextureCube("background", m_CubeMap, 0);
         Material->SetFloat("Exposure", 1.0f);
-
         Material->DepthCompare = GL_LEQUAL;
     }
     // ------------------------------------------------------------------------
     Background::~Background()
     {
-        /*delete Material;
-        delete Mesh;*/
+
     }
     // ------------------------------------------------------------------------
     void Background::SetCubemap(TextureCube *cubemap)

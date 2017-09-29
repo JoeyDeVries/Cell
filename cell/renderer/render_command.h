@@ -19,6 +19,8 @@ namespace Cell
         math::mat4 PrevTransform;
         Mesh*      Mesh;
         Material*  Material;
+        math::vec3 BoxMin;
+        math::vec3 BoxMax;
     };
 }
 
