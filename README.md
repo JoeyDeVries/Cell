@@ -61,6 +61,7 @@ Feature List (complete:base-functionality)
 10. Optimization:
     1. Store material-independent uniforms in UBO; together with barely changing shader parameters.   
 	2. Per-object Frustum culling.    
+    3. Cache GL state.
 	
 Feature List (work-in-progress)
 ------
@@ -77,11 +78,6 @@ Feature List (work-in-progress)
 		
 Feature List (todo)
 ------
-
-10. Optimization:
-	1. Spatial partitioning.
-	2. Portal rendering (overkill perhaps)?
-    3. Cache GL state.
 12. Skeletal animation:
 	1. Define Bone structure on top of current scene hierarchy system.
 	2. Load skeletal mesh from Assimp as skeletal hierarchy as well? Think of different design solutions that would work well in current environment.

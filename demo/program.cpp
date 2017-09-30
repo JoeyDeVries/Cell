@@ -88,19 +88,6 @@ int main(int argc, char *argv[])
         renderer->SetCamera(&camera);
     Log::Message("Render system initialized", LOG_INIT);
 
-    // configure default OpenGL state
-    Log::Message("Configuring OpenGL", LOG_INIT);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-
-        glEnable(GL_MULTISAMPLE);
-
-        glViewport(0, 0, width, height);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    Log::Message("OpenGL configured", LOG_INIT);
-
-
     // basic shapes
     Cell::Plane plane(16, 16);
     Cell::Sphere sphere(64, 64);

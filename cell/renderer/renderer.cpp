@@ -63,6 +63,14 @@ namespace Cell
         // initialize render items
         m_CommandBuffer = new CommandBuffer(this);
 
+        // configure default OpenGL state
+        m_GLCache.SetDepthTest(true);
+        m_GLCache.SetCull(true);
+        glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+        glViewport(0.0f, 0.0f, m_RenderSize.x, m_RenderSize.y);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
         // TODO(Joey): do we want to abstract this or not? as it is very specific.
         m_NDCPlane = new Quad;
         glGenFramebuffers(1, &m_FramebufferCubemap);
@@ -255,7 +263,7 @@ namespace Cell
         glDrawBuffers(4, attachments);
 
         // 1.5. render all shadow casters to light shadow buffers
-        glCullFace(GL_FRONT);
+        m_GLCache.SetCullFace(GL_FRONT);
         std::vector<RenderCommand> shadowRenderCommands = m_CommandBuffer->GetShadowCastRenderCommands();
         m_ShadowViewProjections.clear();
 
@@ -282,7 +290,7 @@ namespace Cell
                 ++shadowRtIndex;
             }
         }
-        glCullFace(GL_BACK);
+        m_GLCache.SetCullFace(GL_BACK);
         attachments[0] = GL_COLOR_ATTACHMENT0;
         glDrawBuffers(4, attachments);
 
@@ -295,9 +303,9 @@ namespace Cell
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         // 3. Render deferred shader for each light (full quad for directional, spheres for point lights)
-        glDisable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);
+        m_GLCache.SetDepthTest(false);
+        m_GLCache.SetBlend(true);
+        m_GLCache.SetBlendFunc(GL_ONE, GL_ONE);
 
         // bind gbuffer
         m_GBuffer->GetColorTexture(0)->Bind(0);
@@ -305,11 +313,9 @@ namespace Cell
         m_GBuffer->GetColorTexture(2)->Bind(2);
         
         // ambient lighting
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_FRONT);
+        m_GLCache.SetCullFace(GL_FRONT);
         renderDeferredAmbient();
-        glCullFace(GL_BACK);
-        glEnable(GL_CULL_FACE);
+        m_GLCache.SetCullFace(GL_BACK);
 
         // directional lights
         for (auto it = m_DirectionalLights.begin(); it != m_DirectionalLights.end(); ++it)
@@ -317,8 +323,7 @@ namespace Cell
             renderDeferredDirLight(*it);
         }
         // point lights
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_FRONT);
+        m_GLCache.SetCullFace(GL_FRONT);
         for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
         {
             // only render point lights if within frustum
@@ -327,12 +332,11 @@ namespace Cell
                 renderDeferredPointLight(*it);
             }
         }
-        glCullFace(GL_BACK);
-        glEnable(GL_CULL_FACE);
+        m_GLCache.SetCullFace(GL_BACK);
 
-        glEnable(GL_DEPTH_TEST);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDisable(GL_BLEND);
+        m_GLCache.SetDepthTest(true);
+        m_GLCache.SetBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        m_GLCache.SetBlend(false);
 
         // 4. blit depth buffer to default for forward rendering
         glBindFramebuffer(GL_READ_FRAMEBUFFER, m_GBuffer->ID);
@@ -404,7 +408,7 @@ namespace Cell
                 m_MaterialLibrary->debugLightMaterial->SetVector("lightColor", (*it)->Color);
 
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-                glDisable(GL_CULL_FACE);
+                m_GLCache.SetCullFace(false);
                 RenderCommand command;
                 command.Material = m_MaterialLibrary->debugLightMaterial;
                 command.Mesh = m_DebugLightMesh;
@@ -414,7 +418,7 @@ namespace Cell
                 command.Transform = model;
 
                 renderCustomCommand(&command, nullptr);
-                glEnable(GL_CULL_FACE);
+                m_GLCache.SetCullFace(true);
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
             //m_PBR->RenderProbes();
@@ -593,32 +597,14 @@ namespace Cell
         //             write a state cache.
         if (updateGLSettings)
         {
-            glDepthFunc(material->DepthCompare);
-            if (material->DepthTest)
+            m_GLCache.SetDepthFunc(material->DepthCompare);
+            m_GLCache.SetDepthTest(material->DepthTest);
+            m_GLCache.SetBlend(material->Blend);
+            if(material->Blend)
             {
-                glEnable(GL_DEPTH_TEST);
+                m_GLCache.SetBlendFunc(material->BlendSrc, material->BlendDst);
             }
-            else
-            {
-                glDisable(GL_DEPTH_TEST);
-            }
-            if (material->Blend)
-            {
-                glEnable(GL_BLEND);
-                glBlendFunc(material->BlendSrc, material->BlendDst);
-            }
-            else
-            {
-                glDisable(GL_BLEND);
-            }
-            if (material->Cull)
-            {
-                glEnable(GL_CULL_FACE);
-            }
-            else
-            {
-                glDisable(GL_CULL_FACE);
-            }
+            m_GLCache.SetCullFace(material->Cull);
         }
      
         // default uniforms that are always configured regardless of shader configuration (see them 
@@ -830,8 +816,6 @@ namespace Cell
                 math::mat4 model;
                 math::translate(model, probe->Position);
                 math::scale(model, math::vec3(probe->Radius));
-                //irradianceShader->SetMatrix("projection", m_Camera->Projection);
-                //irradianceShader->SetMatrix("view", m_Camera->View);
                 irradianceShader->SetMatrix("model", model);
 
                 renderMesh(m_DeferredPointMesh, irradianceShader);
@@ -847,7 +831,6 @@ namespace Cell
         dirShader->SetVector("camPos", m_Camera->Position);
         dirShader->SetVector("lightDir", light->Direction);
         dirShader->SetVector("lightColor", math::normalize(light->Color) * light->Intensity); // TODO(Joey): enforce light normalization with light setter?
-        //dirShader->SetMatrix("view", m_Camera->View);
 
         if (light->ShadowMapRT)
         {
@@ -871,8 +854,6 @@ namespace Cell
         math::mat4 model;
         math::translate(model, light->Position);
         math::scale(model, math::vec3(light->Radius));
-        //pointShader->SetMatrix("projection", m_Camera->Projection);
-        //pointShader->SetMatrix("view", m_Camera->View);
         pointShader->SetMatrix("model", model);
 
         renderMesh(m_DeferredPointMesh, pointShader);    

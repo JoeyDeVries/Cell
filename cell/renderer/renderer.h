@@ -8,6 +8,7 @@
 #include "../mesh/quad.h"
 #include "command_buffer.h"
 #include "pbr_capture.h"
+#include "gl_cache.h"
 
 #include "../glad/glad.h"
 
@@ -48,7 +49,8 @@ namespace Cell
     private:
         // render state
         CommandBuffer* m_CommandBuffer;
-        math::vec2 m_RenderSize;
+        GLCache        m_GLCache;
+        math::vec2     m_RenderSize;
 
         // lighting
         std::vector<DirectionalLight*> m_DirectionalLights;
