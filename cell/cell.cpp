@@ -127,9 +127,6 @@ namespace Cell
 
     void RenderGUI()
     {
-      
-        // 1. Show a simple window
-        // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets appears in a window automatically called "Debug"
         {
             static float f = 0.0f;
             ImGui::Text("Hello, world!");
@@ -140,7 +137,6 @@ namespace Cell
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         }
 
-        // 2. Show another simple window, this time using an explicit Begin/End pair
         if (show_test_window)
         {
             ImGui::Begin("Another Window", &show_another_window);
@@ -148,7 +144,6 @@ namespace Cell
             ImGui::End();
         }
 
-        // 3. Show the ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
         if (show_another_window)
         {
             ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver);
@@ -351,42 +346,6 @@ namespace Cell
         glScissor(last_scissor_box[0], last_scissor_box[1], (GLsizei)last_scissor_box[2], (GLsizei)last_scissor_box[3]);
     }
 
-    //static const char* ImGui_ImplGlfwGL3_GetClipboardText(void* user_data)
-    //{
-    //    return glfwGetClipboardString((GLFWwindow*)user_data);
-    //}
-
-    //static void ImGui_ImplGlfwGL3_SetClipboardText(void* user_data, const char* text)
-    //{
-    //    glfwSetClipboardString((GLFWwindow*)user_data, text);
-    //}
-
-    //void ImGui_ImplGlfwGL3_MouseButtonCallback(GLFWwindow*, int button, int action, int /*mods*/)
-    //{
-    //    if (action == GLFW_PRESS && button >= 0 && button < 3)
-    //        g_MousePressed[button] = true;
-    //}
-
-    //void ImGui_ImplGlfwGL3_ScrollCallback(GLFWwindow*, double /*xoffset*/, double yoffset)
-    //{
-    //    g_MouseWheel += (float)yoffset; // Use fractional mouse wheel, 1.0 unit 5 lines.
-    //}
-
-    //void ImGui_ImplGlfwGL3_KeyCallback(GLFWwindow*, int key, int, int action, int mods)
-    //{
-    //    ImGuiIO& io = ImGui::GetIO();
-    //    if (action == GLFW_PRESS)
-    //        io.KeysDown[key] = true;
-    //    if (action == GLFW_RELEASE)
-    //        io.KeysDown[key] = false;
-
-    //    (void)mods; // Modifiers are not reliable across systems
-    //    io.KeyCtrl = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
-    //    io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
-    //    io.KeyAlt = io.KeysDown[GLFW_KEY_LEFT_ALT] || io.KeysDown[GLFW_KEY_RIGHT_ALT];
-    //    io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];
-    //}
-
     void ImGui_ImplGlfwGL3_CharCallback(GLFWwindow*, unsigned int c)
     {
         ImGuiIO& io = ImGui::GetIO();
@@ -497,7 +456,7 @@ namespace Cell
         return true;
     }
 
-    void    ImGui_ImplGlfwGL3_InvalidateDeviceObjects()
+    void ImGui_ImplGlfwGL3_InvalidateDeviceObjects()
     {
         if (g_VaoHandle) glDeleteVertexArrays(1, &g_VaoHandle);
         if (g_VboHandle) glDeleteBuffers(1, &g_VboHandle);
@@ -523,7 +482,7 @@ namespace Cell
         }
     }
 
-    bool    ImGui_ImplGlfwGL3_Init(GLFWwindow* window, bool install_callbacks)
+    bool ImGui_ImplGlfwGL3_Init(GLFWwindow* window, bool install_callbacks)
     {
         g_Window = window;
 
@@ -549,18 +508,9 @@ namespace Cell
         io.KeyMap[ImGuiKey_Z] = GLFW_KEY_Z;
 
         io.RenderDrawListsFn = ImGui_ImplGlfwGL3_RenderDrawLists;       // Alternatively you can set this to NULL and call ImGui::GetDrawData() after ImGui::Render() to get the same ImDrawData pointer.
-        //io.SetClipboardTextFn = ImGui_ImplGlfwGL3_SetClipboardText;
-        //io.GetClipboardTextFn = ImGui_ImplGlfwGL3_GetClipboardText;
-        //io.ClipboardUserData = g_Window;
-#ifdef _WIN32
-        //io.ImeWindowHandle = glfwGetWin32Window(g_Window);
-#endif
 
         if (install_callbacks)
         {
-           /* glfwSetMouseButtonCallback(window, ImGui_ImplGlfwGL3_MouseButtonCallback);
-            glfwSetScrollCallback(window, ImGui_ImplGlfwGL3_ScrollCallback);
-            glfwSetKeyCallback(window, ImGui_ImplGlfwGL3_KeyCallback);*/
             glfwSetCharCallback(window, ImGui_ImplGlfwGL3_CharCallback);
         }
 

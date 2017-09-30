@@ -96,6 +96,12 @@ namespace Cell
         for (int i = 0; i < 4; ++i) // allow up to a total of 4 dir/spot shadow casters
         {
             RenderTarget *rt = new RenderTarget(2048, 2048, GL_UNSIGNED_BYTE, 1, true);
+            rt->m_DepthStencil.Bind();
+            rt->m_DepthStencil.SetFilterMin(GL_NEAREST);
+            rt->m_DepthStencil.SetFilterMax(GL_NEAREST);
+            rt->m_DepthStencil.SetWrapMode(GL_CLAMP_TO_BORDER);
+            float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
             m_ShadowRenderTargets.push_back(rt);
         }
        
@@ -221,31 +227,36 @@ namespace Cell
         m_PointLights.push_back(light);
     }
     // ------------------------------------------------------------------------
-    // TODO(Joey): pass camera to RenderPushedCommands? Think it makes sense.
     void Renderer::RenderPushedCommands()
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         /* NOTE(Joey): 
         
-          - First we do the default light/render passes as the deferred pass here.
-          - Then we do the forward 'custom' rendering pass where developers can
-            write their own shaders and render stuff as they want, not sacrifcing
-            flexibility; this also includes custom render targets.
-          - Then the alpha blended rendering pass.
-          - Then we do post-processing, one can supply their own post-processing
-            materials by setting the 'post-processing' flag of the material.
-            Each material flagged as post-processing will run after the default
-            post-processing shaders (before/after HDR-tonemap/gamma-correct?).
+          General outline of all the render steps/passes:
+          - 1. First we render all pushed geometry to the GBuffer.
+          - 2. We then render all shadow casting geometry to the shadow buffer.
+          - 3. Pre-lighting post-processing steps.
+          - 4. Deferred lighting pass (ambient, directional, point).
+          - 5. Process deferred data s.t. forward pass is neatly integrated with deferred pass.
+          - 6. Then we do the forward 'custom' rendering pass where developers can write their 
+               own shaders and render stuff as they want, not sacrifcing flexibility; this 
+               includes custom render targets.
+          - 7. Then we render all alpha blended materials last.
+          - 8. Then we do post-processing, one can supply their own post-processing materials 
+               by setting the 'post-processing' flag of the material.
+               Each material flagged as post-processing will run after the default post-processing 
+               shaders (before/after HDR-tonemap/gamma-correct).
 
         */
+        // sort all pushed render commands by heavy state-switches e.g. shader switches.
         m_CommandBuffer->Sort();
 
         // update (global) uniform buffers
         updateGlobalUBOs();
 
-        std::vector<RenderCommand> deferredRenderCommands = m_CommandBuffer->GetDeferredRenderCommands(true);
         // 1. Geometry buffer
+        std::vector<RenderCommand> deferredRenderCommands = m_CommandBuffer->GetDeferredRenderCommands(true);
         glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
         glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer->ID);
         unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
@@ -262,7 +273,7 @@ namespace Cell
         attachments[3] = GL_NONE;
         glDrawBuffers(4, attachments);
 
-        // 1.5. render all shadow casters to light shadow buffers
+        // 2. render all shadow casters to light shadow buffers
         m_GLCache.SetCullFace(GL_FRONT);
         std::vector<RenderCommand> shadowRenderCommands = m_CommandBuffer->GetShadowCastRenderCommands();
         m_ShadowViewProjections.clear();
@@ -294,15 +305,14 @@ namespace Cell
         attachments[0] = GL_COLOR_ATTACHMENT0;
         glDrawBuffers(4, attachments);
 
-        // 2. do post-processing steps before lighting stage (e.g. SSAO)
+        // 3. do post-processing steps before lighting stage (e.g. SSAO)
         m_PostProcessor->ProcessPreLighting(this, m_GBuffer, m_Camera);
-
 
         glBindFramebuffer(GL_FRAMEBUFFER, m_CustomTarget->ID);
         glViewport(0, 0, m_CustomTarget->Width, m_CustomTarget->Height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        // 3. Render deferred shader for each light (full quad for directional, spheres for point lights)
+        // 4. Render deferred shader for each light (full quad for directional, spheres for point lights)
         m_GLCache.SetDepthTest(false);
         m_GLCache.SetBlend(true);
         m_GLCache.SetBlendFunc(GL_ONE, GL_ONE);
@@ -313,9 +323,7 @@ namespace Cell
         m_GBuffer->GetColorTexture(2)->Bind(2);
         
         // ambient lighting
-        m_GLCache.SetCullFace(GL_FRONT);
         renderDeferredAmbient();
-        m_GLCache.SetCullFace(GL_BACK);
 
         // directional lights
         for (auto it = m_DirectionalLights.begin(); it != m_DirectionalLights.end(); ++it)
@@ -338,26 +346,17 @@ namespace Cell
         m_GLCache.SetBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         m_GLCache.SetBlend(false);
 
-        // 4. blit depth buffer to default for forward rendering
+        // 5. blit depth buffer to default for forward rendering
         glBindFramebuffer(GL_READ_FRAMEBUFFER, m_GBuffer->ID);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_CustomTarget->ID); // write to default framebuffer
         glBlitFramebuffer(
             0, 0, m_GBuffer->Width, m_GBuffer->Height, 0, 0, m_RenderSize.x, m_RenderSize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST
         );
 
-        // 5. custom forward render pass 
-
-        // NOTE(Joey): push default render target to the end of the render
-        // target buffer s.t. we always render the default buffer last.
-        // TODO(Joey): check if this is a practical approach, to make this
-        // assumption and otherwise configure order of targets within
-        // render commands.
+        // 6. custom forward render pass 
+        // push default render target to the end of the render target buffer s.t. we always render 
+        // the default buffer last.
         m_RenderTargetsCustom.push_back(nullptr);
-
-        // TODO(Joey): note that if no render target is specified, the default 
-        // nullptr renderTarget SHOULD be in there; make sure to check this is
-        // always the case! If it isn't, there should be 0 render commands 
-        // pushed.
         for (unsigned int targetIndex = 0; targetIndex < m_RenderTargetsCustom.size(); ++targetIndex)
         {
             RenderTarget *renderTarget = m_RenderTargetsCustom[targetIndex];
@@ -377,8 +376,8 @@ namespace Cell
             }
             else
             {
-                // NOTE(Joey): don't render to default framebuffer, but to custom target framebuffer
-                // which we'll use for post-processing.
+                // don't render to default framebuffer, but to custom target framebuffer which 
+                // we'll use for post-processing.
                 glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
                 glBindFramebuffer(GL_FRAMEBUFFER, m_CustomTarget->ID);
                 m_Camera->SetPerspective(m_Camera->FOV, m_RenderSize.x / m_RenderSize.y, 0.1, 
@@ -395,10 +394,17 @@ namespace Cell
             }
         }
 
-        // 6. post-processing stage after all lighting calculations 
+        // 7. alpha material pass
+        std::vector<RenderCommand> alphaRenderCommands = m_CommandBuffer->GetAlphaRenderCommands(true);
+        for (unsigned int i = 0; i < alphaRenderCommands.size(); ++i)
+        {
+            renderCustomCommand(&alphaRenderCommands[i], nullptr);
+        }
+
+        // 8. post-processing stage after all lighting calculations 
         m_PostProcessor->ProcessPostLighting(this, m_GBuffer, m_CustomTarget, m_Camera);
 
-        // 7. render (debug) visuals
+        // 9. render (debug) visuals
         glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
         glBindFramebuffer(GL_FRAMEBUFFER, m_CustomTarget->ID);
         for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
@@ -424,18 +430,18 @@ namespace Cell
             //m_PBR->RenderProbes();
         }
 
-        // 8. custom post-processing pass
+        // 10. custom post-processing pass
         std::vector<RenderCommand> postProcessingCommands = m_CommandBuffer->GetPostProcessingRenderCommands();
         for (unsigned int i = 0; i < postProcessingCommands.size(); ++i)
         {
-            // NOTE(Joey): ping-pong between render textures
+            // ping-pong between render textures
             bool even = i % 2 == 0;
             Blit(even ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0),
                  even ? m_PostProcessTarget1 : m_CustomTarget, 
                  postProcessingCommands[i].Material);
         }
 
-        // 9. final post-processing steps, blitting to default framebuffer
+        // 11. final post-processing steps, blitting to default framebuffer
         m_PostProcessor->Blit(this, postProcessingCommands.size() % 2 == 0 ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0));
 
         //Blit(m_PostProcessor->SSROutput, nullptr);
@@ -449,11 +455,7 @@ namespace Cell
 
         // clear render state
         m_RenderTargetsCustom.clear();
-        // TODO(Joey): this can probably be done in a cleaner fashion:
-        //m_RenderTargetsCustom.push_back(nullptr); // NOTE(Joey): always add the default render 
-        // target to the queue.
         m_CurrentRenderTargetCustom = nullptr;
-
     }
     // ------------------------------------------------------------------------
     void Renderer::Blit(Texture *src,
@@ -517,6 +519,7 @@ namespace Cell
             // if no scene node was provided, use root node (capture all)
             scene = Scene::Root;
         }
+        scene->UpdateTransform();
         // build a command list of nodes within the reflection probe's capture box/radius.
         CommandBuffer commandBuffer(this);
         std::vector<Material*> materials;
@@ -557,12 +560,6 @@ namespace Cell
                     commandBuffer.Push(node->Mesh, materials[materials.size() - 1], node->GetTransform());
                 }
             }
-            else
-            {
-                // do make sure we do always update the parent's transform.
-                // TODO: this needs to go!
-                node->GetTransform();
-            }
             for (unsigned int i = 0; i < node->GetChildCount(); ++i)
                 sceneStack.push(node->GetChildByIndex(i));
         }
@@ -592,9 +589,7 @@ namespace Cell
         Material *material = command->Material;
         Mesh     *mesh     = command->Mesh;
 
-        // NOTE(Joey): set global GL state based on material
-        // TODO(Joey): only change these if different value, and sort by major state changes
-        //             write a state cache.
+        // update global GL state based on material
         if (updateGLSettings)
         {
             m_GLCache.SetDepthFunc(material->DepthCompare);
@@ -679,7 +674,6 @@ namespace Cell
         // create a command buffer specifically for this operation (as to not conflict with main 
         // command buffer)
         CommandBuffer commandBuffer(this);
-        // TODO(Joey): code duplication! re-factor!
         commandBuffer.Push(scene->Mesh, scene->Material, scene->GetTransform());
         // recursive function transformed to iterative version by maintaining a stack
         std::stack<SceneNode*> childStack;
@@ -715,7 +709,6 @@ namespace Cell
         float width = (float)target->FaceWidth * pow(0.5, mipLevel);
         float height = (float)target->FaceHeight * pow(0.5, mipLevel);
 
-        // TODO(Joey): only resize/recreate if faceWidth is different than before
         glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferCubemap);
         glBindRenderbuffer(GL_RENDERBUFFER, m_CubemapDepthRBO);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
@@ -773,7 +766,7 @@ namespace Cell
             glBufferSubData(GL_UNIFORM_BUFFER, 336 + i * stride,                      sizeof(math::vec4), &m_DirectionalLights[i]->Direction[0]);
             glBufferSubData(GL_UNIFORM_BUFFER, 336 + i * stride + sizeof(math::vec4), sizeof(math::vec4), &m_DirectionalLights[i]->Color[0]);
         }
-        for (unsigned int i = 0; i < m_PointLights.size() && i < 8; ++i) // NOTE(Joey): constrained to max 8 point lights for now in forward context
+        for (unsigned int i = 0; i < m_PointLights.size() && i < 8; ++i) //  constrained to max 8 point lights in forward context
         {
             glBufferSubData(GL_UNIFORM_BUFFER, 464 + i * stride,                      sizeof(math::vec4), &m_PointLights[i]->Position[0]);
             glBufferSubData(GL_UNIFORM_BUFFER, 464 + i * stride + sizeof(math::vec4), sizeof(math::vec4), &m_PointLights[i]->Color[0]);
@@ -791,35 +784,53 @@ namespace Cell
     // --------------------------------------------------------------------------------------------
     void Renderer::renderDeferredAmbient()
     {
-        PBRCapture* skyCapture = m_PBR->GetSkyCapture();        
-        skyCapture->Prefiltered->Bind(4);
-
-        m_PBR->m_RenderTargetBRDFLUT->GetColorTexture(0)->Bind(5);
-        m_PostProcessor->SSAOOutput->Bind(6);
-
+        PBRCapture* skyCapture = m_PBR->GetSkyCapture();
         auto irradianceProbes = m_PBR->m_CaptureProbes;
-        for (int i = 0; i < irradianceProbes.size(); ++i)
+
+        // if irradiance probes are present, use these as ambient lighting
+        if (irradianceProbes.size() > 0)
         {
-            PBRCapture* probe = irradianceProbes[i];
-            // only render probe if within frustum
-            if (m_Camera->Frustum.Intersect(probe->Position, probe->Radius))
+            skyCapture->Prefiltered->Bind(4);
+            m_PBR->m_RenderTargetBRDFLUT->GetColorTexture(0)->Bind(5);
+            m_PostProcessor->SSAOOutput->Bind(6);
+
+            m_GLCache.SetCullFace(GL_FRONT);
+            for (int i = 0; i < irradianceProbes.size(); ++i)
             {
-                probe->Irradiance->Bind(3);
+                PBRCapture* probe = irradianceProbes[i];
+                // only render probe if within frustum
+                if (m_Camera->Frustum.Intersect(probe->Position, probe->Radius))
+                {
+                    probe->Irradiance->Bind(3);
 
-                Shader* irradianceShader = m_MaterialLibrary->deferredIrradianceShader;
-                irradianceShader->Use();
-                irradianceShader->SetVector("camPos", m_Camera->Position);
-                irradianceShader->SetVector("probePos", probe->Position);
-                irradianceShader->SetFloat("probeRadius", probe->Radius);
-                irradianceShader->SetInt("SSR", m_PostProcessor->SSR);
+                    Shader* irradianceShader = m_MaterialLibrary->deferredIrradianceShader;
+                    irradianceShader->Use();
+                    irradianceShader->SetVector("camPos", m_Camera->Position);
+                    irradianceShader->SetVector("probePos", probe->Position);
+                    irradianceShader->SetFloat("probeRadius", probe->Radius);
+                    irradianceShader->SetInt("SSR", m_PostProcessor->SSR);
 
-                math::mat4 model;
-                math::translate(model, probe->Position);
-                math::scale(model, math::vec3(probe->Radius));
-                irradianceShader->SetMatrix("model", model);
+                    math::mat4 model;
+                    math::translate(model, probe->Position);
+                    math::scale(model, math::vec3(probe->Radius));
+                    irradianceShader->SetMatrix("model", model);
 
-                renderMesh(m_DeferredPointMesh, irradianceShader);
+                    renderMesh(m_DeferredPointMesh, irradianceShader);
+                }
             }
+            m_GLCache.SetCullFace(GL_BACK);
+        }
+        // otherwise do a full-screen ambient pass
+        else
+        {
+            skyCapture->Irradiance->Bind(3);
+            skyCapture->Prefiltered->Bind(4);
+            m_PBR->m_RenderTargetBRDFLUT->GetColorTexture(0)->Bind(5);
+            m_PostProcessor->SSAOOutput->Bind(6);
+
+            Shader* ambientShader = m_MaterialLibrary->deferredAmbientShader;
+            ambientShader->Use();
+            renderMesh(m_NDCPlane, ambientShader);
         }
     }
     // --------------------------------------------------------------------------------------------
@@ -830,7 +841,7 @@ namespace Cell
         dirShader->Use();
         dirShader->SetVector("camPos", m_Camera->Position);
         dirShader->SetVector("lightDir", light->Direction);
-        dirShader->SetVector("lightColor", math::normalize(light->Color) * light->Intensity); // TODO(Joey): enforce light normalization with light setter?
+        dirShader->SetVector("lightColor", math::normalize(light->Color) * light->Intensity); 
 
         if (light->ShadowMapRT)
         {

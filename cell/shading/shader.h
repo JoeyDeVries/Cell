@@ -53,16 +53,10 @@ namespace Cell
         void SetMatrixArray(std::string location, int size, math::mat2* values);
         void SetMatrixArray(std::string location, int size, math::mat3* values);
         void SetMatrixArray(std::string location, int size, math::mat4* values);
-        //void SetTexture1D();
-        //void SetTexture2D();
-        //void SetTexture3D();
-
     private:
-        // NOTE(Joey): retrieves uniform location from pre-stored uniform locations and
-        // reports an error if a non-uniform is set.
+        // retrieves uniform location from pre-stored uniform locations and reports an error if a 
+        // non-uniform is set.
         int getUniformLocation(std::string name);
-
-        void logUniformNotFound(std::string uniform);
     };
 }
 #endif
