@@ -15,6 +15,8 @@
 void framebufferSizeFunc(GLFWwindow *window, int width, int height);
 void keyFunc(GLFWwindow *window, int key, int scancode, int action, int mods);
 void mousePosFunc(GLFWwindow *window, double xpos, double ypos);
+void mouseButtonFunc(GLFWwindow*, int button, int action, int mods);
+void mouseScrollFunc(GLFWwindow*, double xoffset, double yoffset);
 
 Cell::Renderer *renderer;
 Cell::FlyCamera camera(math::vec3(0.0f, 1.0f, 0.0f), math::vec3(0.0f, 0.0f, -1.0f));
@@ -22,6 +24,7 @@ float deltaTime     = 0.0f;
 float lastFrameTime = 0.0f;
 bool keysPressed[1024];
 bool wireframe = false;
+bool renderGUI = false;
 
 /* NOTE(Joey):
 
@@ -56,10 +59,9 @@ int main(int argc, char *argv[])
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-        glfwWindowHint(GLFW_SAMPLES, 16);
         glfwWindowHint(GLFW_RESIZABLE, true);
     
-        GLFWwindow *window = glfwCreateWindow(1280, 720, "Cell", nullptr, nullptr);           
+        GLFWwindow* window = glfwCreateWindow(1280, 720, "Cell", nullptr, nullptr);           
         if (window == nullptr)
         {
             // TODO(Joey): logging/diagnostics
@@ -73,13 +75,15 @@ int main(int argc, char *argv[])
         glfwSetFramebufferSizeCallback(window, framebufferSizeFunc);
         glfwSetKeyCallback(window, keyFunc);
         glfwSetCursorPosCallback(window, mousePosFunc);
+        glfwSetMouseButtonCallback(window, mouseButtonFunc);
+        glfwSetScrollCallback(window, mouseScrollFunc);
 
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
     Log::Message("GLFW initialized", LOG_INIT);
 
     Log::Message("Initializing render system", LOG_INIT);
-        renderer = Cell::Init((GLADloadproc)glfwGetProcAddress);
+        renderer = Cell::Init(window, (GLADloadproc)glfwGetProcAddress);
         renderer->SetRenderSize(width, height);
         renderer->SetCamera(&camera);
     Log::Message("Render system initialized", LOG_INIT);
@@ -240,6 +244,7 @@ int main(int argc, char *argv[])
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
+        Cell::NewFrame();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         float currentFrameTime = glfwGetTime();
@@ -260,11 +265,13 @@ int main(int argc, char *argv[])
                 camera.InputKey(deltaTime, Cell::CAMERA_UP);
             if (keysPressed[GLFW_KEY_Q])
                 camera.InputKey(deltaTime, Cell::CAMERA_DOWN);
+            if(keysPressed[GLFW_KEY_TAB])
+                renderGUI = !renderGUI;
 
             // update render logic
             camera.Update(deltaTime);
 
-            Log::Message(camera.Frustum.Intersect(light2.Position, light2.Radius) ? "truezz" : "falsezz", LOG_DEBUG);
+            //Log::Message(camera.Frustum.Intersect(light2.Position, light2.Radius) ? "truezz" : "falsezz", LOG_DEBUG);
 
             //Log::Message("(" + std::to_string(camera.Position.x) + ", " + std::to_string(camera.Position.y) + ", " + std::to_string(camera.Position.z) + ")", LOG_DEBUG);
 
@@ -299,6 +306,16 @@ int main(int argc, char *argv[])
             renderer->RenderPushedCommands();
         }
 
+        // GUI
+        if (renderGUI)
+        {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            Cell::RenderGUI();
+        }
+        else
+        {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
         glfwSwapBuffers(window);
     }
 
@@ -325,6 +342,7 @@ void keyFunc(GLFWwindow *window, int key, int scancode, int action, int mods)
         else if (action == GLFW_RELEASE)
             keysPressed[key] = false;
     }
+    Cell::InputKey(key, action);
 }
 
 bool firstMouse = true;
@@ -339,11 +357,24 @@ void mousePosFunc(GLFWwindow *window, double xpos, double ypos)
         firstMouse = false;
     }
 
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos;  // reversed since y-coordinates go from bottom to left
+        float xoffset = xpos - lastX;
+        float yoffset = lastY - ypos;  // reversed since y-coordinates go from bottom to left
 
-    lastX = xpos;
-    lastY = ypos;
-
-    camera.InputMouse(xoffset, yoffset);
+        lastX = xpos;
+        lastY = ypos;
+    if (!renderGUI)
+    {
+        camera.InputMouse(xoffset, yoffset);
+    }
 }
+
+void mouseButtonFunc(GLFWwindow*, int button, int action, int mods)
+{
+    Cell::InputMouse(button, action);
+}
+
+void mouseScrollFunc(GLFWwindow*, double xoffset, double yoffset)
+{
+    Cell::InputScroll(yoffset);
+}
+

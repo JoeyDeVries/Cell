@@ -164,11 +164,16 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="C:\Users\Joey\Downloads\imgui-master\imgui.cpp" />
+    <ClCompile Include="C:\Users\Joey\Downloads\imgui-master\imgui_draw.cpp" />
     <ClCompile Include="camera\camera.cpp" />
     <ClCompile Include="camera\fly_camera.cpp" />
     <ClCompile Include="camera\camera_frustum.cpp" />
     <ClCompile Include="cell.cpp" />
     <ClCompile Include="glad\glad.c" />
+    <ClCompile Include="imgui\imgui.cpp" />
+    <ClCompile Include="imgui\imgui_demo.cpp" />
+    <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="lighting\directional_light.cpp" />
     <ClCompile Include="lighting\point_light.cpp" />
     <ClCompile Include="mesh\circle.cpp" />
@@ -180,6 +185,7 @@
     <ClCompile Include="mesh\sphere.cpp" />
     <ClCompile Include="mesh\torus.cpp" />
     <ClCompile Include="renderer\command_buffer.cpp" />
+    <ClCompile Include="renderer\gl_cache.cpp" />
     <ClCompile Include="renderer\MaterialLibrary.cpp" />
     <ClCompile Include="renderer\PBR.cpp" />
     <ClCompile Include="renderer\pbr_capture.cpp" />
@@ -200,12 +206,23 @@
     <ClCompile Include="stb\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="C:\Users\Joey\Downloads\imgui-master\imgui.h" />
+    <ClInclude Include="C:\Users\Joey\Downloads\imgui-master\imgui_internal.h" />
+    <ClInclude Include="C:\Users\Joey\Downloads\imgui-master\stb_rect_pack.h" />
+    <ClInclude Include="C:\Users\Joey\Downloads\imgui-master\stb_textedit.h" />
+    <ClInclude Include="C:\Users\Joey\Downloads\imgui-master\stb_truetype.h" />
     <ClInclude Include="camera\camera.h" />
     <ClInclude Include="camera\fly_camera.h" />
     <ClInclude Include="camera\camera_frustum.h" />
     <ClInclude Include="cell.h" />
     <ClInclude Include="glad\glad.h" />
     <ClInclude Include="glad\khrplatform.h" />
+    <ClInclude Include="imgui\imconfig.h" />
+    <ClInclude Include="imgui\imgui.h" />
+    <ClInclude Include="imgui\imgui_internal.h" />
+    <ClInclude Include="imgui\stb_rect_pack.h" />
+    <ClInclude Include="imgui\stb_textedit.h" />
+    <ClInclude Include="imgui\stb_truetype.h" />
     <ClInclude Include="lighting\directional_light.h" />
     <ClInclude Include="lighting\point_light.h" />
     <ClInclude Include="mesh\circle.h" />
@@ -217,6 +234,7 @@
     <ClInclude Include="mesh\sphere.h" />
     <ClInclude Include="mesh\torus.h" />
     <ClInclude Include="renderer\command_buffer.h" />
+    <ClInclude Include="renderer\gl_cache.h" />
     <ClInclude Include="renderer\MaterialLibrary.h" />
     <ClInclude Include="renderer\PBR.h" />
     <ClInclude Include="renderer\pbr_capture.h" />
@@ -237,6 +255,9 @@
     <ClInclude Include="shading\texture.h" />
     <ClInclude Include="shading\texture_cube.h" />
     <ClInclude Include="stb\stb_image.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="imgui\.travis.yml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

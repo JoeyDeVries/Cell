@@ -24,8 +24,7 @@
 
 #include "glad/glad.h"
 
-
-
+class GLFWwindow;
 
 namespace Cell
 {
@@ -37,14 +36,36 @@ namespace Cell
       are initialized here as well (including any extensions) w/ GLAD.
 
     */
-    Renderer* Init(GLADloadproc loadProcFunc);
+    Renderer* Init(GLFWwindow* window, GLADloadproc loadProcFunc);
 
-    /* NOTE(Joey): 
 
-      Cleans up Cell of all resources that are no longer relevant.
+    // Cleans up Cell of all resources that are no longer relevant.
+    void Clean();
+
+    /* NOTE(Joey):
+
+      Initializes all render data required for processing a new frame. This is mostly relevant
+      for rendering GUI items.
 
     */
-    void Clean();
+    void NewFrame();
+
+    /* NOTE(Joey):
+
+      Renders (debugging) GUI (IMGUI) on top of Cell's main renderer, by default the renderer's 
+      configuration UI is rendered as well, which can be enabled/disabled on demand.
+
+    */
+    void RenderGUI();
+
+    // pass mouse input to Cell
+    void InputMouse(int button, int action);
+
+    // pass keyboard input to Cell
+    void InputKey(int key, int action);
+
+    // pass scroll input to Cell
+    void InputScroll(float scrollOffset);
 }
 
 #endif
