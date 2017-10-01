@@ -16,8 +16,8 @@ uniform sampler2D TexMetallic;
 uniform sampler2D TexRoughness;
 uniform sampler2D TexAO;
 
-uniform sampler2D lightShadowMap;
-uniform mat4 lightShadowViewProjection;
+uniform sampler2D lightShadowMap1;
+uniform mat4 lightShadowViewProjection1;
 
 void main()
 {
@@ -31,8 +31,9 @@ void main()
         albedo.rgb, N, metallic, roughness, camPos.xyz,
         FragPos, vec4(dirLight0_Dir.xyz, 0.0), dirLight0_Col.rgb, 0.0
     );
-    vec4 fragPosLightSpace = lightShadowViewProjection * vec4(FragPos, 1.0);
-    float shadow = ShadowFactor(lightShadowMap, fragPosLightSpace, N, L);
+    vec4 fragPosLightSpace = lightShadowViewProjection1 * vec4(FragPos, 1.0);
+    float shadow = ShadowFactor(lightShadowMap1, fragPosLightSpace, N, L);
+    color.rgb *= max(1.0 - shadow, 0.1);
                       
     #ifdef ALPHA_DISCARD
         if(albedo.a <= 0.5) 

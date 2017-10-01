@@ -42,6 +42,9 @@ namespace Cell
 
         // ssao
         int SSAOKernelSize = 32;      
+
+        // motion-blur
+        float FPSTarget = 60.0;
     private:
         // global post-process state
         Shader*       m_PostProcessShader;

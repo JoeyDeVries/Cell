@@ -28,5 +28,5 @@ void main()
     );
     
     // FragColor = vec4(albedo * 0.4 + color * 0.6, 1.0);
-    FragColor = vec4(albedo * 0.2 + color * 0.8, 1.0);
+    FragColor = vec4(albedo * 0.4 + color * 0.6, 1.0);
 }

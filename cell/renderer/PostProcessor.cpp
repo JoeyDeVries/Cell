@@ -10,6 +10,7 @@
 #include "../shading/texture.h"
 #include "../shading/shader.h"
 #include "../camera/camera.h"
+#include "../imgui/imgui.h"
 
 #include <math/common.h>
 #include <utility/logging/log.h>
@@ -236,10 +237,10 @@ namespace Cell
             renderer->renderMesh(renderer->m_NDCPlane, m_BloomShader);
 
             // blur bloom result
-            blur(renderer, m_BloomRenderTarget0->GetColorTexture(0), m_BloomRenderTarget1, 2);
-            blur(renderer, m_BloomRenderTarget1->GetColorTexture(0), m_BloomRenderTarget2, 2);
-            blur(renderer, m_BloomRenderTarget2->GetColorTexture(0), m_BloomRenderTarget3, 2);
-            blur(renderer, m_BloomRenderTarget3->GetColorTexture(0), m_BloomRenderTarget4, 2);
+            blur(renderer, m_BloomRenderTarget0->GetColorTexture(0), m_BloomRenderTarget1, 8);
+            blur(renderer, m_BloomRenderTarget1->GetColorTexture(0), m_BloomRenderTarget2, 8);
+            blur(renderer, m_BloomRenderTarget2->GetColorTexture(0), m_BloomRenderTarget3, 8);
+            blur(renderer, m_BloomRenderTarget3->GetColorTexture(0), m_BloomRenderTarget4, 8);
         }
         // SSR
         if(SSR)
@@ -289,7 +290,8 @@ namespace Cell
         m_PostProcessShader->SetBool("SSR", SSR);
         // motion blur
         m_PostProcessShader->SetBool("MotionBlur", MotionBlur);
-        m_PostProcessShader->SetFloat("MotionScale", 2.0f);
+        Log::Message(std::to_string(ImGui::GetIO().Framerate / FPSTarget * 0.8), LOG_DEBUG);
+        m_PostProcessShader->SetFloat("MotionScale", ImGui::GetIO().Framerate / FPSTarget * 0.8);
         m_PostProcessShader->SetInt("MotionSamples", 16);
 
         renderer->renderMesh(renderer->m_NDCPlane, m_PostProcessShader);               

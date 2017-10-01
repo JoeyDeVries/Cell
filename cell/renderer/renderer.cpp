@@ -77,12 +77,12 @@ namespace Cell
         glGenFramebuffers(1, &m_FramebufferCubemap);
         glGenRenderbuffers(1, &m_CubemapDepthRBO);
 
-        m_CustomTarget = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, true);
+        m_CustomTarget       = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, true);
         m_PostProcessTarget1 = new RenderTarget(1, 1, GL_UNSIGNED_BYTE, 1, false);
-        m_PostProcessor = new PostProcessor(this);
+        m_PostProcessor      = new PostProcessor(this);
 
         // lights
-        m_DebugLightMesh = new Sphere(16, 16);
+        m_DebugLightMesh    = new Sphere(16, 16);
         m_DeferredPointMesh = new Sphere(16, 16);
 
         // deferred renderer
@@ -387,8 +387,6 @@ namespace Cell
                     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
                 else
                     glClear(GL_COLOR_BUFFER_BIT);
-                // TODO(Joey): enable multiple color targets
-                // TODO(Joey): more configurable camera settings, what about orthographic? and near/far plane?
                 m_Camera->SetPerspective(m_Camera->FOV, 
                                          (float)renderTarget->Width / (float)renderTarget->Height, 
                                          0.1, 100.0f); 
@@ -416,16 +414,37 @@ namespace Cell
         }
 
         // 7. alpha material pass
+        glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
+        glBindFramebuffer(GL_FRAMEBUFFER, m_CustomTarget->ID);
         std::vector<RenderCommand> alphaRenderCommands = m_CommandBuffer->GetAlphaRenderCommands(true);
         for (unsigned int i = 0; i < alphaRenderCommands.size(); ++i)
         {
             renderCustomCommand(&alphaRenderCommands[i], nullptr);
         }
 
+        // render light mesh (as visual cue), if requested
+        for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
+        {
+            if ((*it)->RenderMesh)
+            {
+                m_MaterialLibrary->debugLightMaterial->SetVector("lightColor", (*it)->Color * (*it)->Intensity * 0.25f);
+
+                RenderCommand command;
+                command.Material = m_MaterialLibrary->debugLightMaterial;
+                command.Mesh = m_DebugLightMesh;
+                math::mat4 model;
+                math::translate(model, (*it)->Position);
+                math::scale(model, math::vec3(0.25f));
+                command.Transform = model;
+
+                renderCustomCommand(&command, nullptr);
+            }
+        }
+
         // 8. post-processing stage after all lighting calculations 
         m_PostProcessor->ProcessPostLighting(this, m_GBuffer, m_CustomTarget, m_Camera);
 
-        // 9. render (debug) visuals
+        // 9. render debug visuals
         glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
         glBindFramebuffer(GL_FRAMEBUFFER, m_CustomTarget->ID);
         if (LightVolumes)
@@ -434,20 +453,17 @@ namespace Cell
             m_GLCache.SetCullFace(GL_FRONT);
             for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
             {
-                if ((*it)->RenderMesh)
-                {
-                    m_MaterialLibrary->debugLightMaterial->SetVector("lightColor", (*it)->Color);
+                m_MaterialLibrary->debugLightMaterial->SetVector("lightColor", (*it)->Color);
 
-                    RenderCommand command;
-                    command.Material = m_MaterialLibrary->debugLightMaterial;
-                    command.Mesh = m_DebugLightMesh;
-                    math::mat4 model;
-                    math::translate(model, (*it)->Position);
-                    math::scale(model, math::vec3((*it)->Radius));
-                    command.Transform = model;
+                RenderCommand command;
+                command.Material = m_MaterialLibrary->debugLightMaterial;
+                command.Mesh = m_DebugLightMesh;
+                math::mat4 model;
+                math::translate(model, (*it)->Position);
+                math::scale(model, math::vec3((*it)->Radius));
+                command.Transform = model;
 
-                    renderCustomCommand(&command, nullptr);
-                }
+                renderCustomCommand(&command, nullptr);
             }
             m_GLCache.SetPolygonMode(GL_FILL);
             m_GLCache.SetCullFace(GL_BACK);
@@ -456,6 +472,8 @@ namespace Cell
         {
             m_PBR->RenderProbes();
         }
+
+       
 
         // 10. custom post-processing pass
         std::vector<RenderCommand> postProcessingCommands = m_CommandBuffer->GetPostProcessingRenderCommands();
@@ -640,6 +658,19 @@ namespace Cell
         }
         material->GetShader()->SetMatrix("model", command->Transform);
         material->GetShader()->SetMatrix("prevModel", command->PrevTransform);
+
+        material->GetShader()->SetBool("ShadowsEnabled", Shadows);
+        if (Shadows && material->Type == MATERIAL_CUSTOM && material->ShadowReceive)
+        {
+            for (int i = 0; i < m_DirectionalLights.size(); ++i)
+            {
+                if (m_DirectionalLights[i]->ShadowMapRT)
+                {
+                    material->GetShader()->SetMatrix("lightShadowViewProjection" + std::to_string(i + 1), m_DirectionalLights[i]->LightSpaceViewProjection);
+                    m_DirectionalLights[i]->ShadowMapRT->GetDepthStencilTexture()->Bind(10 + i);
+                }
+            }
+        }
 
         // bind/active uniform sampler/texture objects
         auto *samplers = material->GetSamplerUniforms();
@@ -865,6 +896,7 @@ namespace Cell
         dirShader->SetVector("camPos", m_Camera->Position);
         dirShader->SetVector("lightDir", light->Direction);
         dirShader->SetVector("lightColor", math::normalize(light->Color) * light->Intensity); 
+        dirShader->SetBool("ShadowsEnabled", Shadows);
 
         if (light->ShadowMapRT)
         {

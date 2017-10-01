@@ -32,12 +32,13 @@ namespace Cell
         command.BoxMax        = boxMax;
 
         // if material requires alpha support, add it to alpha render commands for later rendering.
-      /*  if (material->Blend)
+        if (material->Blend)
         {
+            material->Type = MATERIAL_CUSTOM;
             m_AlphaRenderCommands.push_back(command);
         }
         else
-        {*/
+        {
             // check the type of the material and process differently where necessary
             if (material->Type == MATERIAL_DEFAULT)
             {
@@ -59,7 +60,7 @@ namespace Cell
             {
                 m_PostProcessingRenderCommands.push_back(command);
             }
-        //}
+        }
     }
     // ------------------------------------------------------------------------
     void CommandBuffer::Clear()
@@ -174,7 +175,7 @@ namespace Cell
         if (cull)
         {
             std::vector<RenderCommand> commands;
-            for (auto it = m_AlpharenderCommands.begin(); it != m_AlpharenderCommands.end(); ++it)
+            for (auto it = m_AlphaRenderCommands.begin(); it != m_AlphaRenderCommands.end(); ++it)
             {
                 RenderCommand command = *it;
                 math::vec3 boxMinWorld = (command.Transform * math::vec4(command.BoxMin, 1.0f)).xyz;
@@ -187,7 +188,7 @@ namespace Cell
         }
         else
         {
-            return m_AlpharenderCommands;
+            return m_AlphaRenderCommands;
         }
     }
     // ------------------------------------------------------------------------

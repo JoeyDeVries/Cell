@@ -55,11 +55,11 @@ void main()
        
     if(Bloom)
     {
-        const float strength = 1.0;
+        const float strength = 0.5;
         vec3 bloom1 = texture(TexBloom1, TexCoords).rgb * strength;
-        vec3 bloom2 = texture(TexBloom1, TexCoords).rgb * strength;
-        vec3 bloom3 = texture(TexBloom1, TexCoords).rgb * strength;
-        vec3 bloom4 = texture(TexBloom1, TexCoords).rgb * strength;
+        vec3 bloom2 = texture(TexBloom2, TexCoords).rgb * strength * 0.5;
+        vec3 bloom3 = texture(TexBloom3, TexCoords).rgb * strength * 0.25;
+        vec3 bloom4 = texture(TexBloom4, TexCoords).rgb * strength * 0.125;
         color += bloom1;
         color += bloom2;
         color += bloom3;
@@ -74,10 +74,12 @@ void main()
     
     // HDR tonemapping
     float exposure = 1.0;
-	// color = vec3(1.0) - exp(-color * exposure);	
     color = color / (color + vec3(1.0));
 	// gamma correct
 	color = pow(color, vec3(1.0/2.2));     
+    // color *= 2.0;  // Hardcoded Exposure Adjustment
+    // vec3 x = max(vec3(0.0), color - 0.004);
+    // color = (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
     
     if(Sepia)
     {

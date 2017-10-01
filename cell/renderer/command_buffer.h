@@ -36,7 +36,7 @@ namespace Cell
         // TODO(Joey): perhaps we want to retain alpha renders as within their custom render 
         // commands but sort them on their alpha state, and only store seperately for deferred
         // render commands?
-        std::vector<RenderCommand> m_AlpharenderCommands;
+        std::vector<RenderCommand> m_AlphaRenderCommands;
         std::vector<RenderCommand> m_PostProcessingRenderCommands;
         std::map<RenderTarget*, std::vector<RenderCommand>> m_CustomRenderCommands;
 

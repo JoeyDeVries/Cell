@@ -27,8 +27,8 @@ void main()
     {
         for(int i = 1; i < 3; ++i)
         {
-            result += texture(TexSrc, TexCoords + vec2(0.0, offset[i] / texSize.y)).rgb * weights[i];
-            result += texture(TexSrc, TexCoords - vec2(0.0, offset[i] / texSize.y)).rgb * weights[i];
+            result += texture(TexSrc, TexCoords + vec2(0.0, offset[i] / texSize.x)).rgb * weights[i];
+            result += texture(TexSrc, TexCoords - vec2(0.0, offset[i] / texSize.x)).rgb * weights[i];
         }
     }
     FragColor = vec4(result, 1.0);

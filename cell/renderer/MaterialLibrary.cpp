@@ -85,6 +85,11 @@ namespace Cell
         m_DefaultMaterials[SID("default")] = defaultMat;
         // glass material
         Shader *glassShader = Resources::LoadShader("glass", "shaders/forward_render.vs", "shaders/forward_render.fs", { "ALPHA_GLASS" });
+        glassShader->Use();
+        glassShader->SetInt("lightShadowMap1", 10);
+        glassShader->SetInt("lightShadowMap2", 10);
+        glassShader->SetInt("lightShadowMap3", 10);
+        glassShader->SetInt("lightShadowMap4", 10);
         Material *glassMat = new Material(glassShader);
         glassMat->Type = MATERIAL_CUSTOM; // this material can't fit in the deferred rendering pipeline (due to transparency sorting).
         glassMat->SetTexture("TexAlbedo", Cell::Resources::LoadTexture("glass albedo", "textures/glass.png", GL_TEXTURE_2D, GL_RGB), 0);
@@ -96,12 +101,22 @@ namespace Cell
         m_DefaultMaterials[SID("glass")] = glassMat;
         // alpha blend material
         Shader *alphaBlendShader = Resources::LoadShader("alpha blend", "shaders/forward_render.vs", "shaders/forward_render.fs", { "ALPHA_BLEND" });
+        alphaBlendShader->Use();
+        alphaBlendShader->SetInt("lightShadowMap1", 10);
+        alphaBlendShader->SetInt("lightShadowMap2", 10);
+        alphaBlendShader->SetInt("lightShadowMap3", 10);
+        alphaBlendShader->SetInt("lightShadowMap4", 10);
         Material *alphaBlendMaterial = new Material(alphaBlendShader);
         alphaBlendMaterial->Type = MATERIAL_CUSTOM;
         alphaBlendMaterial->Blend = true;
         m_DefaultMaterials[SID("alpha blend")] = alphaBlendMaterial;
         // alpha cutout material
         Shader *alphaDiscardShader = Resources::LoadShader("alpha discard", "shaders/forward_render.vs", "shaders/forward_render.fs", { "ALPHA_DISCARD" });
+        alphaDiscardShader->Use();
+        alphaDiscardShader->SetInt("lightShadowMap1", 10);
+        alphaDiscardShader->SetInt("lightShadowMap2", 10);
+        alphaDiscardShader->SetInt("lightShadowMap3", 10);
+        alphaDiscardShader->SetInt("lightShadowMap4", 10);
         Material *alphaDiscardMaterial = new Material(alphaDiscardShader);
         alphaDiscardMaterial->Type = MATERIAL_CUSTOM;
         alphaDiscardMaterial->Cull = false;
