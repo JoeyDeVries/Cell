@@ -282,6 +282,7 @@ namespace Cell
         // set settings 
         // TODO(Joey): only update settings when changed
         m_PostProcessShader->Use();
+        m_PostProcessShader->SetBool("SSAO", SSAO);
         m_PostProcessShader->SetBool("Sepia", Sepia);
         m_PostProcessShader->SetBool("Vignette", Vignette);
         m_PostProcessShader->SetBool("Bloom", Bloom);

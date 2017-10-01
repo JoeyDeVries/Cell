@@ -46,7 +46,16 @@ namespace Cell
     {
         friend PostProcessor;
         friend PBR;
-    private:
+    public:
+        // options
+        bool IrradianceGI = true;
+        bool Shadows      = true;
+        bool Lights       = true;
+        bool RenderLights = true;
+        bool LightVolumes = false;
+        bool RenderProbes = false;
+        bool Wireframe    = false;
+    private:       
         // render state
         CommandBuffer* m_CommandBuffer;
         GLCache        m_GLCache;
@@ -103,6 +112,8 @@ namespace Cell
 
         Camera* GetCamera();
         void    SetCamera(Camera* camera);
+
+        PostProcessor* GetPostProcessor();
 
         // idea, create either a deferred default material (based on default set of materials available (like glass)), or a custom material (with custom you have to supply your own shader)
         Material* CreateMaterial(std::string base = "default"); // these don't have the custom flag set (default material has default state and uses checkerboard texture as albedo (and black metallic, half roughness, purple normal, white ao)

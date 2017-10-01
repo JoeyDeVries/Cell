@@ -13,6 +13,7 @@
 #include "../camera/camera.h"
 #include "../camera/fly_camera.h"
 #include "../resources/resources.h"
+#include "../imgui/imgui.h"
 
 #include <math/linear_algebra/vector.h>
 #include <math/linear_algebra/matrix.h>
@@ -91,8 +92,6 @@ namespace Cell
         m_MaterialLibrary = new MaterialLibrary(m_GBuffer);
 
         // shadows
-        // TODO: think of a more flexible system to allow any number of shadow casters
-        // TODO:  (add shadow cast caching; detect light/dynamic-object movement!)
         for (int i = 0; i < 4; ++i) // allow up to a total of 4 dir/spot shadow casters
         {
             RenderTarget *rt = new RenderTarget(2048, 2048, GL_UNSIGNED_BYTE, 1, true);
@@ -159,6 +158,11 @@ namespace Cell
     void Renderer::SetCamera(Camera *camera)
     {
         m_Camera = camera;
+    }
+    // ------------------------------------------------------------------------
+    PostProcessor* Renderer::GetPostProcessor()
+    {
+        return m_PostProcessor;
     }
     // ------------------------------------------------------------------------
     Material* Renderer::CreateMaterial(std::string base)
@@ -228,7 +232,7 @@ namespace Cell
     }
     // ------------------------------------------------------------------------
     void Renderer::RenderPushedCommands()
-    {
+    {      
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         /* NOTE(Joey): 
@@ -255,6 +259,13 @@ namespace Cell
         // update (global) uniform buffers
         updateGlobalUBOs();
 
+        // set default GL state
+        m_GLCache.SetBlend(false);
+        m_GLCache.SetCull(true);
+        m_GLCache.SetCullFace(GL_BACK);
+        m_GLCache.SetDepthTest(true);
+        m_GLCache.SetDepthFunc(GL_LESS);
+
         // 1. Geometry buffer
         std::vector<RenderCommand> deferredRenderCommands = m_CommandBuffer->GetDeferredRenderCommands(true);
         glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
@@ -262,10 +273,12 @@ namespace Cell
         unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
         glDrawBuffers(4, attachments);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        m_GLCache.SetPolygonMode(Wireframe ? GL_LINE : GL_FILL);
         for (unsigned int i = 0; i < deferredRenderCommands.size(); ++i)
         {
             renderCustomCommand(&deferredRenderCommands[i], nullptr, false);
         }
+        m_GLCache.SetPolygonMode(GL_FILL);
 
         //attachments[0] = GL_NONE; // disable for next pass (shadow map generation)
         attachments[1] = GL_NONE;
@@ -274,34 +287,37 @@ namespace Cell
         glDrawBuffers(4, attachments);
 
         // 2. render all shadow casters to light shadow buffers
-        m_GLCache.SetCullFace(GL_FRONT);
-        std::vector<RenderCommand> shadowRenderCommands = m_CommandBuffer->GetShadowCastRenderCommands();
-        m_ShadowViewProjections.clear();
-
-        unsigned int shadowRtIndex = 0;
-        for (int i = 0; i < m_DirectionalLights.size(); ++i)
+        if (Shadows)
         {
-            DirectionalLight* light = m_DirectionalLights[i];
-            if (light->CastShadows)
+            m_GLCache.SetCullFace(GL_FRONT);
+            std::vector<RenderCommand> shadowRenderCommands = m_CommandBuffer->GetShadowCastRenderCommands();
+            m_ShadowViewProjections.clear();
+
+            unsigned int shadowRtIndex = 0;
+            for (int i = 0; i < m_DirectionalLights.size(); ++i)
             {
-                m_MaterialLibrary->dirShadowShader->Use();
-
-                glBindFramebuffer(GL_FRAMEBUFFER, m_ShadowRenderTargets[shadowRtIndex]->ID);
-                glViewport(0, 0, m_ShadowRenderTargets[shadowRtIndex]->Width, m_ShadowRenderTargets[shadowRtIndex]->Height);
-                glClear(GL_DEPTH_BUFFER_BIT);
-
-                math::mat4 lightProjection = math::orthographic(-20.0f, 20.0f, 20.0f, -20.0f, -15.0f, 20.0f);
-                math::mat4 lightView = math::lookAt(-light->Direction * 10.0f, math::vec3(0.0), math::vec3::UP);
-                m_DirectionalLights[i]->LightSpaceViewProjection = lightProjection * lightView;
-                m_DirectionalLights[i]->ShadowMapRT = m_ShadowRenderTargets[shadowRtIndex];
-                for (int j = 0; j < shadowRenderCommands.size(); ++j)
+                DirectionalLight* light = m_DirectionalLights[i];
+                if (light->CastShadows)
                 {
-                    renderShadowCastCommand(&shadowRenderCommands[j], lightProjection, lightView);
+                    m_MaterialLibrary->dirShadowShader->Use();
+
+                    glBindFramebuffer(GL_FRAMEBUFFER, m_ShadowRenderTargets[shadowRtIndex]->ID);
+                    glViewport(0, 0, m_ShadowRenderTargets[shadowRtIndex]->Width, m_ShadowRenderTargets[shadowRtIndex]->Height);
+                    glClear(GL_DEPTH_BUFFER_BIT);
+
+                    math::mat4 lightProjection = math::orthographic(-20.0f, 20.0f, 20.0f, -20.0f, -15.0f, 20.0f);
+                    math::mat4 lightView = math::lookAt(-light->Direction * 10.0f, math::vec3(0.0), math::vec3::UP);
+                    m_DirectionalLights[i]->LightSpaceViewProjection = lightProjection * lightView;
+                    m_DirectionalLights[i]->ShadowMapRT = m_ShadowRenderTargets[shadowRtIndex];
+                    for (int j = 0; j < shadowRenderCommands.size(); ++j)
+                    {
+                        renderShadowCastCommand(&shadowRenderCommands[j], lightProjection, lightView);
+                    }
+                    ++shadowRtIndex;
                 }
-                ++shadowRtIndex;
             }
+            m_GLCache.SetCullFace(GL_BACK);
         }
-        m_GLCache.SetCullFace(GL_BACK);
         attachments[0] = GL_COLOR_ATTACHMENT0;
         glDrawBuffers(4, attachments);
 
@@ -325,22 +341,25 @@ namespace Cell
         // ambient lighting
         renderDeferredAmbient();
 
-        // directional lights
-        for (auto it = m_DirectionalLights.begin(); it != m_DirectionalLights.end(); ++it)
+        if (Lights)
         {
-            renderDeferredDirLight(*it);
-        }
-        // point lights
-        m_GLCache.SetCullFace(GL_FRONT);
-        for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
-        {
-            // only render point lights if within frustum
-            if (m_Camera->Frustum.Intersect((*it)->Position, (*it)->Radius))
+            // directional lights
+            for (auto it = m_DirectionalLights.begin(); it != m_DirectionalLights.end(); ++it)
             {
-                renderDeferredPointLight(*it);
+                renderDeferredDirLight(*it);
             }
+            // point lights
+            m_GLCache.SetCullFace(GL_FRONT);
+            for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
+            {
+                // only render point lights if within frustum
+                if (m_Camera->Frustum.Intersect((*it)->Position, (*it)->Radius))
+                {
+                    renderDeferredPointLight(*it);
+                }
+            }
+            m_GLCache.SetCullFace(GL_BACK);
         }
-        m_GLCache.SetCullFace(GL_BACK);
 
         m_GLCache.SetDepthTest(true);
         m_GLCache.SetBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -356,7 +375,7 @@ namespace Cell
         // 6. custom forward render pass 
         // push default render target to the end of the render target buffer s.t. we always render 
         // the default buffer last.
-        m_RenderTargetsCustom.push_back(nullptr);
+        m_RenderTargetsCustom.push_back(nullptr);        
         for (unsigned int targetIndex = 0; targetIndex < m_RenderTargetsCustom.size(); ++targetIndex)
         {
             RenderTarget *renderTarget = m_RenderTargetsCustom[targetIndex];
@@ -388,10 +407,12 @@ namespace Cell
             std::vector<RenderCommand> renderCommands = m_CommandBuffer->GetCustomRenderCommands(renderTarget);
 
             // terate over all the render commands and execute
+            m_GLCache.SetPolygonMode(Wireframe ? GL_LINE : GL_FILL);
             for (unsigned int i = 0; i < renderCommands.size(); ++i)
             {
                 renderCustomCommand(&renderCommands[i], nullptr);
             }
+            m_GLCache.SetPolygonMode(GL_FILL);
         }
 
         // 7. alpha material pass
@@ -407,27 +428,33 @@ namespace Cell
         // 9. render (debug) visuals
         glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
         glBindFramebuffer(GL_FRAMEBUFFER, m_CustomTarget->ID);
-        for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
+        if (LightVolumes)
         {
-            if ((*it)->RenderMesh)
+            m_GLCache.SetPolygonMode(GL_LINE);
+            m_GLCache.SetCullFace(GL_FRONT);
+            for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
             {
-                m_MaterialLibrary->debugLightMaterial->SetVector("lightColor", (*it)->Color);
+                if ((*it)->RenderMesh)
+                {
+                    m_MaterialLibrary->debugLightMaterial->SetVector("lightColor", (*it)->Color);
 
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-                m_GLCache.SetCullFace(false);
-                RenderCommand command;
-                command.Material = m_MaterialLibrary->debugLightMaterial;
-                command.Mesh = m_DebugLightMesh;
-                math::mat4 model;
-                math::translate(model, (*it)->Position);
-                math::scale(model, math::vec3((*it)->Radius));
-                command.Transform = model;
+                    RenderCommand command;
+                    command.Material = m_MaterialLibrary->debugLightMaterial;
+                    command.Mesh = m_DebugLightMesh;
+                    math::mat4 model;
+                    math::translate(model, (*it)->Position);
+                    math::scale(model, math::vec3((*it)->Radius));
+                    command.Transform = model;
 
-                renderCustomCommand(&command, nullptr);
-                m_GLCache.SetCullFace(true);
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                    renderCustomCommand(&command, nullptr);
+                }
             }
-            //m_PBR->RenderProbes();
+            m_GLCache.SetPolygonMode(GL_FILL);
+            m_GLCache.SetCullFace(GL_BACK);
+        }
+        if (RenderProbes)
+        {
+            m_PBR->RenderProbes();
         }
 
         // 10. custom post-processing pass
@@ -776,10 +803,6 @@ namespace Cell
     RenderTarget* Renderer::getCurrentRenderTarget()
     {
         return m_CurrentRenderTargetCustom;
-        //if(m_RenderTargetsCustom.size() > 0)
-            //return m_RenderTargetsCustom[m_RenderTargetsCustom.size() - 1];
-        //else
-            //return nullptr;
     }
     // --------------------------------------------------------------------------------------------
     void Renderer::renderDeferredAmbient()
@@ -788,7 +811,7 @@ namespace Cell
         auto irradianceProbes = m_PBR->m_CaptureProbes;
 
         // if irradiance probes are present, use these as ambient lighting
-        if (irradianceProbes.size() > 0)
+        if (IrradianceGI && irradianceProbes.size() > 0)
         {
             skyCapture->Prefiltered->Bind(4);
             m_PBR->m_RenderTargetBRDFLUT->GetColorTexture(0)->Bind(5);

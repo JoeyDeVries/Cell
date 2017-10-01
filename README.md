@@ -45,8 +45,9 @@ Feature List (complete:base-functionality)
     3. Normal mapping.
     4. Environment lighting.
 	5. Environment reflection support.
-    6. Number of lights optimization.
-    7. Per-object motion blur.
+    6. Directional shadows
+    7. Number of lights optimization.
+    8. Per-object motion blur.
 8. Functioning PBR render pipeline.
 	1. Calculate diffuse integral and store into cubemap.
 	2. Prefilter environment map w/ integral and store into cubemap as diffuse integral.
@@ -62,6 +63,9 @@ Feature List (complete:base-functionality)
     1. Store material-independent uniforms in UBO; together with barely changing shader parameters.   
 	2. Per-object Frustum culling.    
     3. Cache GL state.
+11. GUI
+    1. IMGUI
+		
 	
 Feature List (work-in-progress)
 ------
@@ -72,10 +76,7 @@ Feature List (work-in-progress)
 1. Add Camera functionality; add multiple camera variations: FPS, FlightSim, ArcBall.
 2. Configure Deferred rendering pipeline:	
 	1. Fog.
-	2. Shadow Mapping (default, omni, CSM).
-8. GUI
-    1. IMGUI
-		
+
 Feature List (todo)
 ------
 12. Skeletal animation:

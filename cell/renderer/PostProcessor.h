@@ -36,7 +36,7 @@ namespace Cell
         bool Vignette   = true;
         bool Bloom      = false;
         bool SSAO       = true;
-        bool TXAA       = true;
+        bool TXAA       = false;
         bool SSR        = false;
         bool MotionBlur = true;
 

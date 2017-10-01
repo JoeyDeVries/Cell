@@ -23,6 +23,7 @@ Cell::FlyCamera camera(math::vec3(0.0f, 1.0f, 0.0f), math::vec3(0.0f, 0.0f, -1.0
 float deltaTime     = 0.0f;
 float lastFrameTime = 0.0f;
 bool keysPressed[1024];
+bool keysActive[1024];
 bool wireframe = false;
 bool renderGUI = false;
 
@@ -252,8 +253,11 @@ int main(int argc, char *argv[])
                 camera.InputKey(deltaTime, Cell::CAMERA_UP);
             if (keysPressed[GLFW_KEY_Q])
                 camera.InputKey(deltaTime, Cell::CAMERA_DOWN);
-            if(keysPressed[GLFW_KEY_TAB])
+            if (keysPressed[GLFW_KEY_TAB] && !keysActive[GLFW_KEY_TAB])
+            {
                 renderGUI = !renderGUI;
+                keysActive[GLFW_KEY_TAB] = true;
+            }
 
             // update render logic
             camera.Update(deltaTime);
@@ -327,7 +331,10 @@ void keyFunc(GLFWwindow *window, int key, int scancode, int action, int mods)
         if (action == GLFW_PRESS)
             keysPressed[key] = true;
         else if (action == GLFW_RELEASE)
+        {
             keysPressed[key] = false;
+            keysActive[key] = false;
+        }
     }
     Cell::InputKey(key, action);
 }

@@ -27,6 +27,7 @@ namespace Cell
         GLenum m_BlendSrc;
         GLenum m_BlendDst;
         GLenum m_FrontFace;
+        GLenum m_PolygonMode;
 
         // shaders
         unsigned int m_ActiveShaderID;
@@ -41,6 +42,7 @@ namespace Cell
         void SetBlendFunc(GLenum src, GLenum dst);
         void SetCull(bool enable);
         void SetCullFace(GLenum face);
+        void SetPolygonMode(GLenum mode);
 
         // switch shader only if a different ID is requested.
         // note that we won't use this too often, as we already sort render state on shader ID.

@@ -27,5 +27,6 @@ void main()
         FragPos, vec4(dirLight0_Dir.xyz, 0.0), dirLight0_Col.rgb, 0.0
     );
     
-    FragColor = vec4(albedo * 0.4 + color * 0.6, 1.0);
+    // FragColor = vec4(albedo * 0.4 + color * 0.6, 1.0);
+    FragColor = vec4(albedo * 0.2 + color * 0.8, 1.0);
 }

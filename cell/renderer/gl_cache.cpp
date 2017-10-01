@@ -6,12 +6,12 @@ namespace Cell
     {
 
     }
-
+    // --------------------------------------------------------------------------------------------
     GLCache::~GLCache()
     {
 
     }
-
+    // --------------------------------------------------------------------------------------------
     void GLCache::SetDepthTest(bool enable)
     {
         if (m_DepthTest != enable)
@@ -24,6 +24,7 @@ namespace Cell
         }
 
     }
+    // --------------------------------------------------------------------------------------------
     void GLCache::SetDepthFunc(GLenum depthFunc)
     {
         if (m_DepthFunc != depthFunc)
@@ -32,6 +33,7 @@ namespace Cell
             glDepthFunc(depthFunc);
         }
     }
+    // --------------------------------------------------------------------------------------------
     void GLCache::SetBlend(bool enable)
     {
         if (m_Blend != enable)
@@ -43,6 +45,7 @@ namespace Cell
                 glDisable(GL_BLEND);
         }
     }
+    // --------------------------------------------------------------------------------------------
     void GLCache::SetBlendFunc(GLenum src, GLenum dst)
     {
         if (m_BlendSrc != src || m_BlendDst != dst)
@@ -52,6 +55,7 @@ namespace Cell
             glBlendFunc(src, dst);
         }
     }
+    // --------------------------------------------------------------------------------------------
     void GLCache::SetCull(bool enable)
     {
         if (m_CullFace != enable)
@@ -63,6 +67,7 @@ namespace Cell
                 glDisable(GL_CULL_FACE);
         }
     }
+    // --------------------------------------------------------------------------------------------
     void GLCache::SetCullFace(GLenum face)
     {
         if (m_FrontFace != face)
@@ -71,7 +76,16 @@ namespace Cell
             glCullFace(face);
         }
     }
-
+    // --------------------------------------------------------------------------------------------
+    void GLCache::SetPolygonMode(GLenum mode)
+    {
+        if (m_PolygonMode != mode)
+        {
+            m_PolygonMode = mode;
+            glPolygonMode(GL_FRONT_AND_BACK, mode);
+        }
+    }
+    // --------------------------------------------------------------------------------------------
     void GLCache::SwitchShader(unsigned int ID)
     {
         if (m_ActiveShaderID != ID)

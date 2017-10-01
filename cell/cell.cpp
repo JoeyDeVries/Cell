@@ -5,6 +5,8 @@
 #include <glfw/glfw3.h>
 #include "imgui/imgui.h"
 
+#include "renderer/PostProcessor.h"
+
 namespace Cell
 {
     void APIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, void *userParam);
@@ -127,28 +129,33 @@ namespace Cell
 
     void RenderGUI()
     {
-        {
-            static float f = 0.0f;
-            ImGui::Text("Hello, world!");
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-            ImGui::ColorEdit3("clear color", (float*)&(math::vec4(0.45f, 0.55f, 0.60f, 1.00f)[0]));
-            if (ImGui::Button("Test Window")) show_test_window ^= 1;
-            if (ImGui::Button("Another Window")) show_another_window ^= 1;
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        }
+        ImGui::Begin("Renderer", (bool*)1);
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-        if (show_test_window)
+        if (ImGui::CollapsingHeader("General Options"))
         {
-            ImGui::Begin("Another Window", &show_another_window);
-            ImGui::Text("Hello from another window!");
-            ImGui::End();
+            ImGui::Checkbox("IrradianceGI", &renderer->IrradianceGI);
+            ImGui::Checkbox("Shadows", &renderer->Shadows);
+            ImGui::Checkbox("Lights", &renderer->Lights);
+            ImGui::Checkbox("Render Light Shapes", &renderer->RenderLights);
         }
-
-        if (show_another_window)
+        if (ImGui::CollapsingHeader("Post-processing"))
         {
-            ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver);
-            ImGui::ShowTestWindow(&show_test_window);
+            ImGui::Checkbox("SSAO", &renderer->GetPostProcessor()->SSAO);
+            ImGui::Checkbox("Bloom", &renderer->GetPostProcessor()->Bloom);
+            ImGui::Checkbox("Motion Blur", &renderer->GetPostProcessor()->MotionBlur);
+            ImGui::Checkbox("SSR", &renderer->GetPostProcessor()->SSR);
+            ImGui::Checkbox("TXAA", &renderer->GetPostProcessor()->TXAA);
+            ImGui::Checkbox("Vignette", &renderer->GetPostProcessor()->Vignette);
+            ImGui::Checkbox("Sepia", &renderer->GetPostProcessor()->Sepia);
         }
+        if (ImGui::CollapsingHeader("Debug visualization"))
+        {
+            ImGui::Checkbox("Wireframe", &renderer->Wireframe);
+            ImGui::Checkbox("Light Volumes", &renderer->LightVolumes);
+            ImGui::Checkbox("Ambient Probes", &renderer->RenderProbes);
+        }
+        ImGui::End();
 
         ImGui::Render();
     }

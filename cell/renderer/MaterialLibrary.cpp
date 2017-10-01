@@ -87,11 +87,11 @@ namespace Cell
         Shader *glassShader = Resources::LoadShader("glass", "shaders/forward_render.vs", "shaders/forward_render.fs", { "ALPHA_GLASS" });
         Material *glassMat = new Material(glassShader);
         glassMat->Type = MATERIAL_CUSTOM; // this material can't fit in the deferred rendering pipeline (due to transparency sorting).
-        glassMat->SetTexture("TexAlbedo", Cell::Resources::LoadTexture("glass albedo", "textures/glass.png", GL_TEXTURE_2D, GL_RGB), 3);
-        glassMat->SetTexture("TexNormal", Cell::Resources::LoadTexture("glass normal", "textures/pbr/plastic/normal.png"), 4);
-        glassMat->SetTexture("TexMetallic", Cell::Resources::LoadTexture("glass metallic", "textures/pbr/plastic/metallic.png"), 5);
-        glassMat->SetTexture("TexRoughness", Cell::Resources::LoadTexture("glass roughness", "textures/pbr/plastic/roughness.png"), 6);
-        glassMat->SetTexture("TexAO", Cell::Resources::LoadTexture("glass ao", "textures/pbr/plastic/ao.png"), 7);
+        glassMat->SetTexture("TexAlbedo", Cell::Resources::LoadTexture("glass albedo", "textures/glass.png", GL_TEXTURE_2D, GL_RGB), 0);
+        glassMat->SetTexture("TexNormal", Cell::Resources::LoadTexture("glass normal", "textures/pbr/plastic/normal.png"), 1);
+        glassMat->SetTexture("TexMetallic", Cell::Resources::LoadTexture("glass metallic", "textures/pbr/plastic/metallic.png"), 2);
+        glassMat->SetTexture("TexRoughness", Cell::Resources::LoadTexture("glass roughness", "textures/pbr/plastic/roughness.png"), 3);
+        glassMat->SetTexture("TexAO", Cell::Resources::LoadTexture("glass ao", "textures/pbr/plastic/ao.png"), 4);
         glassMat->Blend = true;
         m_DefaultMaterials[SID("glass")] = glassMat;
         // alpha blend material

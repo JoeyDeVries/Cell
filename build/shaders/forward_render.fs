@@ -6,7 +6,9 @@ in vec2 TexCoords;
 in vec3 FragPos;
 in vec3 Normal;
 
+#include common/shadows.glsl
 #include common/uniforms.glsl
+#include pbr/pbr.glsl
 
 uniform sampler2D TexAlbedo;
 uniform sampler2D TexNormal;
@@ -14,19 +16,23 @@ uniform sampler2D TexMetallic;
 uniform sampler2D TexRoughness;
 uniform sampler2D TexAO;
 
-#include pbr/pbr.glsl
+uniform sampler2D lightShadowMap;
+uniform mat4 lightShadowViewProjection;
 
 void main()
 {
     vec4 albedo = texture(TexAlbedo, TexCoords);
-    vec3 normal = normalize(Normal); // TODO: normal mapping
     float metallic = texture(TexMetallic, TexCoords).r;
     float roughness = texture(TexRoughness, TexCoords).r;
+    vec3 N = normalize(Normal); // TODO: normal mapping
+    vec3 L = normalize(-dirLight0_Dir.xyz);
     
     vec3 color = PBRAnalyticLighting(
-        albedo.rgb, normal, metallic, roughness, camPos.xyz,
+        albedo.rgb, N, metallic, roughness, camPos.xyz,
         FragPos, vec4(dirLight0_Dir.xyz, 0.0), dirLight0_Col.rgb, 0.0
     );
+    vec4 fragPosLightSpace = lightShadowViewProjection * vec4(FragPos, 1.0);
+    float shadow = ShadowFactor(lightShadowMap, fragPosLightSpace, N, L);
                       
     #ifdef ALPHA_DISCARD
         if(albedo.a <= 0.5) 
