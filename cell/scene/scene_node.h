@@ -61,9 +61,11 @@ namespace Cell
         void SetRotation(math::vec4 rotation);
         void SetScale(math::vec3 scale);
         void SetScale(float scale);
-        math::vec3 GetPosition();
-        math::vec4 GetRotation();
-        math::vec3 GetScale();
+        math::vec3 GetLocalPosition();
+        math::vec4 GetLocalRotation();
+        math::vec3 GetLocalScale();
+        math::vec3 GetWorldPosition();
+        math::vec3 GetWorldScale();
 
         // scene graph 
         unsigned int GetID();

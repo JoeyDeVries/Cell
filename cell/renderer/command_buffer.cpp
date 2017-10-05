@@ -133,9 +133,7 @@ namespace Cell
             for (auto it = m_DeferredRenderCommands.begin(); it != m_DeferredRenderCommands.end(); ++it)
             {
                 RenderCommand command = *it;
-                math::vec3 boxMinWorld = (command.Transform * math::vec4(command.BoxMin, 1.0f)).xyz;
-                math::vec3 boxMaxWorld = (command.Transform * math::vec4(command.BoxMax, 1.0f)).xyz;
-                if (m_Renderer->GetCamera()->Frustum.Intersect(boxMinWorld, boxMaxWorld)) {
+                if (m_Renderer->GetCamera()->Frustum.Intersect(command.BoxMin, command.BoxMax)) {
                     commands.push_back(command);
                 }
             }
@@ -156,9 +154,7 @@ namespace Cell
             for (auto it = m_CustomRenderCommands[target].begin(); it != m_CustomRenderCommands[target].end(); ++it)
             {
                 RenderCommand command = *it;
-                math::vec3 boxMinWorld = (command.Transform * math::vec4(command.BoxMin, 1.0f)).xyz;
-                math::vec3 boxMaxWorld = (command.Transform * math::vec4(command.BoxMax, 1.0f)).xyz;
-                if (m_Renderer->GetCamera()->Frustum.Intersect(boxMinWorld, boxMaxWorld)) {
+                if (m_Renderer->GetCamera()->Frustum.Intersect(command.BoxMin, command.BoxMax)) {
                     commands.push_back(command);
                 }
             }
@@ -178,9 +174,7 @@ namespace Cell
             for (auto it = m_AlphaRenderCommands.begin(); it != m_AlphaRenderCommands.end(); ++it)
             {
                 RenderCommand command = *it;
-                math::vec3 boxMinWorld = (command.Transform * math::vec4(command.BoxMin, 1.0f)).xyz;
-                math::vec3 boxMaxWorld = (command.Transform * math::vec4(command.BoxMax, 1.0f)).xyz;
-                if (m_Renderer->GetCamera()->Frustum.Intersect(boxMinWorld, boxMaxWorld)) {
+                if (m_Renderer->GetCamera()->Frustum.Intersect(command.BoxMin, command.BoxMax)) {
                     commands.push_back(command);
                 }
             }

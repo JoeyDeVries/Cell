@@ -50,19 +50,36 @@ namespace Cell
         m_Dirty = true;
     }
     // --------------------------------------------------------------------------------------------
-    math::vec3 SceneNode::GetPosition()
+    math::vec3 SceneNode::GetLocalPosition()
     {
         return m_Position;
     }
     // --------------------------------------------------------------------------------------------
-    math::vec4 SceneNode::GetRotation()
+    math::vec4 SceneNode::GetLocalRotation()
     {
         return m_Rotation;
     }
     // --------------------------------------------------------------------------------------------
-    math::vec3 SceneNode::GetScale()
+    math::vec3 SceneNode::GetLocalScale()
     {
         return m_Scale;
+    }
+    // --------------------------------------------------------------------------------------------
+    math::vec3 SceneNode::GetWorldPosition()
+    {
+        math::mat4 transform = GetTransform();
+        math::vec4 pos = transform * math::vec4(m_Position, 1.0f);
+        return pos.xyz;
+    }
+    // --------------------------------------------------------------------------------------------
+    math::vec3 SceneNode::GetWorldScale()
+    {
+        math::mat4 transform = GetTransform();
+        math::vec3 scale = math::vec3(transform[0][0], transform[1][1], transform[2][2]);
+        if (scale.x < 0.0f) scale.x *= -1.0f;
+        if (scale.y < 0.0f) scale.y *= -1.0f;
+        if(scale.z < 0.0f) scale.z *= -1.0f;
+        return scale;
     }
     // --------------------------------------------------------------------------------------------
     unsigned int SceneNode::GetID()

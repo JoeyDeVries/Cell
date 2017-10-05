@@ -208,25 +208,27 @@ namespace Cell
             // only push render command if the child isn't a container node.
             if (node->Mesh)
             {
-                 m_CommandBuffer->Push(node->Mesh, node->Material, node->GetTransform(), node->GetPrevTransform(), node->BoxMin, node->BoxMax, target);
+                math::vec3 boxMinWorld = node->GetWorldPosition() + (node->GetWorldScale() * node->BoxMin);
+                math::vec3 boxMaxWorld = node->GetWorldPosition() + (node->GetWorldScale() * node->BoxMax);
+                 m_CommandBuffer->Push(node->Mesh, node->Material, node->GetTransform(), node->GetPrevTransform(), boxMinWorld, boxMaxWorld, target);
             }
             for(unsigned int i = 0; i < node->GetChildCount(); ++i)
                 nodeStack.push(node->GetChildByIndex(i));
         }
     }
     // ------------------------------------------------------------------------
-    void Renderer::PushPostProcessor(Material *postProcessor)
+    void Renderer::PushPostProcessor(Material* postProcessor)
     {
         // we only care about the material, mesh as NDC quad is pre-defined.
         m_CommandBuffer->Push(nullptr, postProcessor);
     }
     // ------------------------------------------------------------------------
-    void Renderer::AddLight(DirectionalLight *light)
+    void Renderer::AddLight(DirectionalLight* light)
     {
         m_DirectionalLights.push_back(light);
     }
     // ------------------------------------------------------------------------
-    void Renderer::AddLight(PointLight *light)
+    void Renderer::AddLight(PointLight* light)
     {
         m_PointLights.push_back(light);
     }
@@ -353,10 +355,10 @@ namespace Cell
             for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
             {
                 // only render point lights if within frustum
-                if (m_Camera->Frustum.Intersect((*it)->Position, (*it)->Radius))
-                {
+                //if (m_Camera->Frustum.Intersect((*it)->Position, (*it)->Radius))
+                //{
                     renderDeferredPointLight(*it);
-                }
+                //}
             }
             m_GLCache.SetCullFace(GL_BACK);
         }

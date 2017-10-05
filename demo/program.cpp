@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
         glfwWindowHint(GLFW_RESIZABLE, true);
     
-        GLFWwindow* window = glfwCreateWindow(1280, 720, "Cell", nullptr, nullptr);           
+        GLFWwindow* window = glfwCreateWindow(1920, 1080, "Cell", nullptr, nullptr);           
         if (window == nullptr)
         {
             // TODO(Joey): logging/diagnostics
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
     thirdTorus->AddChild(sphereNode);
 
     mainTorus->SetScale(1.0f);
-    mainTorus->SetPosition(math::vec3(0.0f, 2.5f, 0.0f));
+    mainTorus->SetPosition(math::vec3(-3.0f, 7.5f, 0.0f));
     secondTorus->SetScale(0.65f);
     secondTorus->SetRotation(math::vec4(0.0, 1.0, 0.0, math::Deg2Rad(90.0)));
     thirdTorus->SetScale(0.65f);
@@ -137,31 +137,68 @@ int main(int argc, char *argv[])
     Cell::Material *customPostProcessing1 = renderer->CreatePostProcessingMaterial(postProcessing1);
     Cell::Material *customPostProcessing2 = renderer->CreatePostProcessingMaterial(postProcessing2);
 
-    // test mesh loading
-    Cell::SceneNode *test = Cell::Resources::LoadMesh(renderer, "sponza", "meshes/sponza/sponza.obj");
-    test->SetPosition(math::vec3(0.0, -1.0, 0.0));
-    test->SetScale(0.01f);
+    // mesh 
+    Cell::SceneNode* sponza = Cell::Resources::LoadMesh(renderer, "sponza", "meshes/sponza/sponza.obj");
+    sponza->SetPosition(math::vec3(0.0, -1.0, 0.0));
+    sponza->SetScale(0.01f);
+   /* Cell::SceneNode* fellLord = Cell::Resources::LoadMesh(renderer, "felllord", "meshes/fellord/fellord.obj");
+    fellLord->SetRotation(math::vec4(0.0f, 1.0f, 0.0f, math::Deg2Rad(110.0f)));
+    fellLord->SetPosition(math::vec3(0.0f, -1.0f, 0.0f));*/
+ /*   Cell::SceneNode* lamp = Cell::Resources::LoadMesh(renderer, "lamp", "meshes/lamp/lamp.obj");
+    lamp->SetPosition(math::vec3(-2.0f, -1.0f, 0.0f));
+    lamp->SetScale(5.0f);
+    Cell::SceneNode* turretTop = Cell::Resources::LoadMesh(renderer, "turret_top", "meshes/turret/turret_top.obj");
+    turretTop->SetPosition(math::vec3(3.0f, -1.0f, 0.0f));
+    Cell::SceneNode* turretBottom = Cell::Resources::LoadMesh(renderer, "turret_bottom", "meshes/turret/turret_bottom.obj");
+    turretBottom->SetPosition(math::vec3(3.0f, -1.0f, 0.0f));*/
 
+    // lighting
     Cell::DirectionalLight dirLight;
     dirLight.Direction = math::vec3(0.2f, -1.0f, 0.25f);
     dirLight.Color = math::vec3(1.0f, 0.89f, 0.7f);
     dirLight.Intensity = 50.0f;
     renderer->AddLight(&dirLight);
 
-    Cell::PointLight light;
-    light.Radius = 4.0;
-    light.Position = math::vec3(0.0f, 1.0f, 0.0f);
-    light.Color = math::vec3(1.0f, 0.25, 0.25f);
-    light.Intensity = 50.0f;
-    light.RenderMesh = true;
-    renderer->AddLight(&light);
+    std::vector<Cell::PointLight> torchLights;
+    {
+        Cell::PointLight torch;
+        torch.Radius = 2.5;
+        torch.Color = math::vec3(1.0f, 0.3f, 0.05f);
+        torch.Intensity = 50.0f;
+        torch.RenderMesh = true;
 
-    Cell::PointLight light2;
-    light2.Radius = 3.0;
-    light2.Color = math::vec3(0.5f, 0.5f, 2.0f);
-    light2.Intensity = 25.0f;
-    light2.RenderMesh = true;
-    renderer->AddLight(&light2);
+        torch.Position = math::vec3( 4.85f, 0.7f, 1.43f);
+        torchLights.push_back(torch);
+        torch.Position = math::vec3( 4.85f, 0.7f, -2.2f);
+        torchLights.push_back(torch);
+        torch.Position = math::vec3(-6.19f, 0.7f, 1.43f);
+        torchLights.push_back(torch);
+        torch.Position = math::vec3(-6.19f, 0.7f, -2.2f);
+        torchLights.push_back(torch);
+        renderer->AddLight(&torchLights[0]);
+        renderer->AddLight(&torchLights[1]);
+        renderer->AddLight(&torchLights[2]);
+        renderer->AddLight(&torchLights[3]);
+    }
+    
+    std::vector<Cell::PointLight> randomLights;
+    std::vector<math::vec3> randomLightStartPositions;
+    {
+        for (int i = 0; i < 100; ++i)
+        {
+            Cell::PointLight light;
+            light.Radius = 1.0 + Random::Uniliteral() * 3.0;
+            light.Intensity = 10.0 + Random::Uniliteral() * 1000.0;
+            light.Color = math::vec3(Random::Uniliteral(), Random::Uniliteral(), Random::Uniliteral());
+            light.RenderMesh = true;
+            randomLights.push_back(light);
+            randomLightStartPositions.push_back(math::vec3(Random::Biliteral() * 12.0f, Random::Uniliteral() * 5.0f, Random::Biliteral() * 6.0f));
+        }
+        for (int i = 0; i < randomLights.size(); ++i)
+        {
+            //renderer->AddLight(&randomLights[i]);
+        }
+    }
 
     // bake irradiance GI (with grid placement of probes)
     {
@@ -262,9 +299,7 @@ int main(int argc, char *argv[])
             // update render logic
             camera.Update(deltaTime);
 
-            //Log::Message(camera.Frustum.Intersect(light2.Position, light2.Radius) ? "truezz" : "falsezz", LOG_DEBUG);
-
-            //Log::Message("(" + std::to_string(camera.Position.x) + ", " + std::to_string(camera.Position.y) + ", " + std::to_string(camera.Position.z) + ")", LOG_DEBUG);
+            Log::Message("(" + std::to_string(camera.Position.x) + ", " + std::to_string(camera.Position.y) + ", " + std::to_string(camera.Position.z) + ")", LOG_DEBUG);
 
             // fill the renderer's command buffer with default test scene
             mainTorus->SetRotation(math::vec4(math::vec3(1.0f, 0.0f, 0.0f), glfwGetTime() * 2.0));
@@ -272,23 +307,38 @@ int main(int argc, char *argv[])
             thirdTorus->SetRotation(math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 4.0));
             sphereNode->SetRotation(math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime()));
 
-            light2.Position = math::vec3(sin(glfwGetTime() * 0.3f) * 1.5 + 3.0, 2.0f, cos(glfwGetTime() * 0.1f) * 5.0f);
+            //turretTop->SetRotation(math::vec4(0.0f, 1.0f, 0.0f, glfwGetTime()));
 
           /*  dirLight.Direction.x = sin(glfwGetTime() * 0.05f) * 1.5;
             dirLight.Direction.y = -(sin(glfwGetTime() * 0.1f) * 0.5 + 0.5) * 0.5 - 0.5;
             dirLight.Direction.z = (cos(glfwGetTime() * 0.13f) * 0.5 + 0.5) * 0.5 + 0.5;*/
+
+            for (int i = 0; i < torchLights.size(); ++i)
+            {
+                torchLights[i].Radius = 1.5f + 0.1 * std::cos(std::sin(glfwGetTime() * 1.37 + i * 7.31) * 3.1 + i);
+                torchLights[i].Intensity = 25.0f + 5.0 * std::cos(std::sin(glfwGetTime() * 0.67 + i * 2.31) * 2.31 * i);
+            }
+
+            for (int i = 0; i < randomLights.size(); ++i)
+            {
+                randomLights[i].Position = randomLightStartPositions[i] + math::vec3(std::sin(glfwGetTime() * 0.31f + i * 3.17f) * 1.79f, std::cos(glfwGetTime() * 0.21f + i * 1.11f) * 1.61f, std::sin(glfwGetTime() * 0.49 + i * 0.79f) * 1.31);
+            }
         }
 
         {
             //CLOCK(PUSH);
             renderer->PushRender(mainTorus);
-            renderer->PushRender(test);
+            renderer->PushRender(sponza);
+            //renderer->PushRender(fellLord);
             renderer->PushRender(background);
+            //renderer->PushRender(lamp);
+            //renderer->PushRender(turretTop);
+            //renderer->PushRender(turretBottom);
         }
         {
             // push post-processing calls
-            //renderer->PushPostProcessor(&customPostProcessing1);
-            //renderer->PushPostProcessor(&customPostProcessing2);
+            //renderer->PushPostProcessor(customPostProcessing1);
+            //renderer->PushPostProcessor(customPostProcessing2);
         }
 
         {
