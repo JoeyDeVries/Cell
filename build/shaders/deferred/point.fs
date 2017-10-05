@@ -41,7 +41,7 @@ void main()
           
     // calculate light radiance (based of UE4's light attenuation model)   
     float distance = length(worldPos - lightPos);
-    float attenuation = pow(clamp(1.0 - pow(distance / lightRadius, 4.0), 0.0, 1.0), 2.0) / (distance * distance + 1.0);
+    float attenuation = pow(clamp(1.0 - pow(distance / lightRadius, 1.0), 0.0, 1.0), 2.0) / (distance * distance + 1.0);
     // float attenuation = max(0.95 - length(worldPos - lightPos) / lightRadius, 0.0);
     vec3 radiance = lightColor * attenuation;        
         

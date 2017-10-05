@@ -34,7 +34,7 @@ namespace Cell
         // toggles
         bool Sepia      = false;
         bool Vignette   = true;
-        bool Bloom      = false;
+        bool Bloom      = true;
         bool SSAO       = true;
         bool TXAA       = false;
         bool SSR        = false;

@@ -285,7 +285,7 @@ namespace Cell
         std::string path = std::string(aPath->C_Str());
         // parse path directly if path contains "/" indicating it is an absolute path;  otherwise 
         // parse as relative.
-        if(path.find("/") == std::string::npos) 
+        if(path.find(":/") == std::string::npos || path.find(":\\") == std::string::npos)
             path = directory + "/" + path;
         return path;
     }
