@@ -68,6 +68,7 @@ namespace Cell
         m_DeferredRenderCommands.clear();
         m_CustomRenderCommands.clear();
         m_PostProcessingRenderCommands.clear();
+        m_AlphaRenderCommands.clear();
     }
     // ------------------------------------------------------------------------
     // TODO(Joey): can we combine these render sorts in one sort? First attempts failed so it's 
