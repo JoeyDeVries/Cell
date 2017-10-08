@@ -364,7 +364,7 @@ namespace Cell
         }
 
         m_GLCache.SetDepthTest(true);
-        m_GLCache.SetBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        m_GLCache.SetBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         m_GLCache.SetBlend(false);
 
         // 5. blit depth buffer to default for forward rendering

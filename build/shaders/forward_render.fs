@@ -22,6 +22,9 @@ uniform mat4 lightShadowViewProjection1;
 void main()
 {
     vec4 albedo = texture(TexAlbedo, TexCoords);
+    #ifdef ALPHA_BLEND
+        albedo.rgb *= albedo.a; // pre-multiplied alpha
+    #endif
     float metallic = texture(TexMetallic, TexCoords).r;
     float roughness = texture(TexRoughness, TexCoords).r;
     vec3 N = normalize(Normal); // TODO: normal mapping

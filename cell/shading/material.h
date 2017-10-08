@@ -56,7 +56,7 @@ namespace Cell
 
         // blending state
         bool   Blend         = false;
-        GLenum BlendSrc      = GL_SRC_ALPHA;
+        GLenum BlendSrc      = GL_ONE; // pre-multiplied alpha
         GLenum BlendDst      = GL_ONE_MINUS_SRC_ALPHA;
         GLenum BlendEquation = GL_FUNC_ADD;
 
