@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
         for (int i = 0; i < randomLights.size(); ++i)
         {
             // uncomment for deferred lighting madness
-            renderer->AddLight(&randomLights[i]);
+            //renderer->AddLight(&randomLights[i]);
         }
     }
 
