@@ -3,7 +3,7 @@
 #include <math/math.h>
 #include <utility/logging/log.h>
 #include <cell/Cell.h>
-
+#include <cell/imgui/imgui.h>
 
 #include "scenes/pbr_test.h"
 
@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
         glfwWindowHint(GLFW_RESIZABLE, true);
+
     
         GLFWwindow* window = glfwCreateWindow(1920, 1080, "Cell", nullptr, nullptr);           
         if (window == nullptr)
@@ -92,44 +93,48 @@ int main(int argc, char *argv[])
     // basic shapes
     Cell::Plane plane(16, 16);
     Cell::Sphere sphere(64, 64);
+    Cell::Sphere tSphere(256, 256);
     Cell::Torus torus(2.0f, 0.4f, 32, 32);
     Cell::Cube cube;
 
     // material setup
-    Cell::Material *matPbr = renderer->CreateMaterial();
-    Cell::Material *matPbrGlass = renderer->CreateMaterial("glass");
- 
+    Cell::Material* matPbr = renderer->CreateMaterial();
+    Cell::Shader*   plasmaOrbShader = Cell::Resources::LoadShader("plasma orb", "shaders/custom/plasma_orb.vs", "shaders/custom/plasma_orb.fs");
+    Cell::Material* matPlasmaOrb = renderer->CreateCustomMaterial(plasmaOrbShader);
+    matPlasmaOrb->Cull = false;
+    matPlasmaOrb->Blend = true;
+    matPlasmaOrb->BlendSrc = GL_ONE;
+    matPlasmaOrb->BlendDst = GL_ONE;
+    matPlasmaOrb->SetTexture("TexPerllin", Cell::Resources::LoadTexture("perlin noise", "textures/perlin.png"), 0);    
+    matPlasmaOrb->SetFloat("Strength", 1.5f);
+    matPlasmaOrb->SetFloat("Speed", 0.083f);
     // configure camera
     camera.SetPerspective(math::Deg2Rad(60.0f), renderer->GetRenderSize().x / renderer->GetRenderSize().y ,0.1f, 100.0f);
 
     // scene setup
-    Cell::SceneNode *mainTorus   = Cell::Scene::MakeSceneNode(&torus, matPbr);
-    Cell::SceneNode *secondTorus = Cell::Scene::MakeSceneNode(&torus, matPbr);
-    Cell::SceneNode *thirdTorus  = Cell::Scene::MakeSceneNode(&torus, matPbr);
-    Cell::SceneNode *sphereNode  = Cell::Scene::MakeSceneNode(&sphere, matPbrGlass);
+    Cell::SceneNode* mainTorus   = Cell::Scene::MakeSceneNode(&torus, matPbr);
+    Cell::SceneNode* secondTorus = Cell::Scene::MakeSceneNode(&torus, matPbr);
+    Cell::SceneNode* thirdTorus  = Cell::Scene::MakeSceneNode(&torus, matPbr);
+    Cell::SceneNode* plasmaOrb   = Cell::Scene::MakeSceneNode(&tSphere, matPlasmaOrb);
 
     mainTorus->AddChild(secondTorus);
     secondTorus->AddChild(thirdTorus);
-    thirdTorus->AddChild(sphereNode);
 
     mainTorus->SetScale(1.0f);
-    mainTorus->SetPosition(math::vec3(-3.0f, 7.5f, 0.0f));
+    mainTorus->SetPosition(math::vec3(-4.4f, 3.46f, -0.3));
     secondTorus->SetScale(0.65f);
     secondTorus->SetRotation(math::vec4(0.0, 1.0, 0.0, math::Deg2Rad(90.0)));
     thirdTorus->SetScale(0.65f);
-    sphereNode->SetScale(1.35f);
 
-    Cell::Background* background = new Cell::Background;
-  
+    plasmaOrb->SetPosition(math::vec3(-4.0f, 4.0f, 0.25f));
+    plasmaOrb->SetScale(0.6f);
+
     // - background
+    Cell::Background* background = new Cell::Background;
     Cell::PBRCapture *pbrEnv = renderer->GetSkypCature();
     background->SetCubemap(pbrEnv->Prefiltered);
 	float lodLevel = 1.5f; 
 	background->Material->SetFloat("lodLevel", lodLevel);
-	float exposure = 1.0;
-	background->Material->SetFloat("Exposure", exposure);
-    matPbr->GetShader()->Use();
-    matPbr->GetShader()->SetFloat("Exposure", exposure);
 
     // post processing
     Cell::Shader *postProcessing1 = Cell::Resources::LoadShader("postprocessing1", "shaders/screen_quad.vs", "shaders/custom_post_1.fs");
@@ -141,16 +146,6 @@ int main(int argc, char *argv[])
     Cell::SceneNode* sponza = Cell::Resources::LoadMesh(renderer, "sponza", "meshes/sponza/sponza.obj");
     sponza->SetPosition(math::vec3(0.0, -1.0, 0.0));
     sponza->SetScale(0.01f);
-   /* Cell::SceneNode* fellLord = Cell::Resources::LoadMesh(renderer, "felllord", "meshes/fellord/fellord.obj");
-    fellLord->SetRotation(math::vec4(0.0f, 1.0f, 0.0f, math::Deg2Rad(110.0f)));
-    fellLord->SetPosition(math::vec3(0.0f, -1.0f, 0.0f));*/
- /*   Cell::SceneNode* lamp = Cell::Resources::LoadMesh(renderer, "lamp", "meshes/lamp/lamp.obj");
-    lamp->SetPosition(math::vec3(-2.0f, -1.0f, 0.0f));
-    lamp->SetScale(5.0f);
-    Cell::SceneNode* turretTop = Cell::Resources::LoadMesh(renderer, "turret_top", "meshes/turret/turret_top.obj");
-    turretTop->SetPosition(math::vec3(3.0f, -1.0f, 0.0f));
-    Cell::SceneNode* turretBottom = Cell::Resources::LoadMesh(renderer, "turret_bottom", "meshes/turret/turret_bottom.obj");
-    turretBottom->SetPosition(math::vec3(3.0f, -1.0f, 0.0f));*/
 
     // lighting
     Cell::DirectionalLight dirLight;
@@ -196,7 +191,8 @@ int main(int argc, char *argv[])
         }
         for (int i = 0; i < randomLights.size(); ++i)
         {
-            //renderer->AddLight(&randomLights[i]);
+            // uncomment for deferred lighting madness
+            renderer->AddLight(&randomLights[i]);
         }
     }
 
@@ -264,7 +260,6 @@ int main(int argc, char *argv[])
         // bake before rendering
         renderer->BakeProbes();
     }
-  
 
     while (!glfwWindowShouldClose(window))
     {
@@ -299,19 +294,9 @@ int main(int argc, char *argv[])
             // update render logic
             camera.Update(deltaTime);
 
-            //Log::Message("(" + std::to_string(camera.Position.x) + ", " + std::to_string(camera.Position.y) + ", " + std::to_string(camera.Position.z) + ")", LOG_DEBUG);
-
-            // fill the renderer's command buffer with default test scene
             mainTorus->SetRotation(math::vec4(math::vec3(1.0f, 0.0f, 0.0f), glfwGetTime() * 2.0));
             secondTorus->SetRotation(math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 3.0));
             thirdTorus->SetRotation(math::vec4(math::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 4.0));
-            sphereNode->SetRotation(math::vec4(math::normalize(math::vec3(1.0f, 1.0f, 1.0f)), glfwGetTime()));
-
-            //turretTop->SetRotation(math::vec4(0.0f, 1.0f, 0.0f, glfwGetTime()));
-
-          /*  dirLight.Direction.x = sin(glfwGetTime() * 0.05f) * 1.5;
-            dirLight.Direction.y = -(sin(glfwGetTime() * 0.1f) * 0.5 + 0.5) * 0.5 - 0.5;
-            dirLight.Direction.z = (cos(glfwGetTime() * 0.13f) * 0.5 + 0.5) * 0.5 + 0.5;*/
 
             for (int i = 0; i < torchLights.size(); ++i)
             {
@@ -323,17 +308,16 @@ int main(int argc, char *argv[])
             {
                 randomLights[i].Position = randomLightStartPositions[i] + math::vec3(std::sin(glfwGetTime() * 0.31f + i * 3.17f) * 1.79f, std::cos(glfwGetTime() * 0.21f + i * 1.11f) * 1.61f, std::sin(glfwGetTime() * 0.49 + i * 0.79f) * 1.31);
             }
+            
+            matPlasmaOrb->SetFloat("Time", glfwGetTime());           
         }
 
         {
             //CLOCK(PUSH);
             renderer->PushRender(mainTorus);
             renderer->PushRender(sponza);
-            //renderer->PushRender(fellLord);
+            renderer->PushRender(plasmaOrb);
             renderer->PushRender(background);
-            //renderer->PushRender(lamp);
-            //renderer->PushRender(turretTop);
-            //renderer->PushRender(turretBottom);
         }
         {
             // push post-processing calls
@@ -419,6 +403,7 @@ void mouseButtonFunc(GLFWwindow*, int button, int action, int mods)
 
 void mouseScrollFunc(GLFWwindow*, double xoffset, double yoffset)
 {
+    camera.InputScroll(xoffset, yoffset);
     Cell::InputScroll(yoffset);
 }
 

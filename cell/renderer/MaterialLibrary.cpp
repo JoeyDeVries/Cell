@@ -81,7 +81,6 @@ namespace Cell
         defaultMat->SetTexture("TexNormal", Resources::LoadTexture("default normal", "textures/norm.png"), 4);
         defaultMat->SetTexture("TexMetallic", Resources::LoadTexture("default metallic", "textures/black.png"), 5);
         defaultMat->SetTexture("TexRoughness", Resources::LoadTexture("default roughness", "textures/checkerboard.png"), 6);
-        defaultMat->SetTexture("TexAO", Resources::LoadTexture("default ao", "textures/white.png"), 7);
         m_DefaultMaterials[SID("default")] = defaultMat;
         // glass material
         Shader *glassShader = Resources::LoadShader("glass", "shaders/forward_render.vs", "shaders/forward_render.fs", { "ALPHA_BLEND" });

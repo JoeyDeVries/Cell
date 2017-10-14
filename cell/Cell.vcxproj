@@ -174,8 +174,6 @@
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
-    <ClCompile Include="lighting\directional_light.cpp" />
-    <ClCompile Include="lighting\point_light.cpp" />
     <ClCompile Include="mesh\circle.cpp" />
     <ClCompile Include="mesh\cube.cpp" />
     <ClCompile Include="mesh\mesh.cpp" />

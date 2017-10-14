@@ -281,7 +281,6 @@ namespace Cell
         renderer->m_GBuffer->GetColorTexture(3)->Bind(6);
 
         // set settings 
-        // TODO(Joey): only update settings when changed
         m_PostProcessShader->Use();
         m_PostProcessShader->SetBool("SSAO", SSAO);
         m_PostProcessShader->SetBool("Sepia", Sepia);
@@ -290,7 +289,6 @@ namespace Cell
         m_PostProcessShader->SetBool("SSR", SSR);
         // motion blur
         m_PostProcessShader->SetBool("MotionBlur", MotionBlur);
-        Log::Message(std::to_string(ImGui::GetIO().Framerate / FPSTarget * 0.8), LOG_DEBUG);
         m_PostProcessShader->SetFloat("MotionScale", ImGui::GetIO().Framerate / FPSTarget * 0.8);
         m_PostProcessShader->SetInt("MotionSamples", 16);
 

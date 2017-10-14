@@ -81,12 +81,6 @@
     <ClCompile Include="shading\texture_cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="lighting\point_light.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="lighting\directional_light.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="scene\background.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

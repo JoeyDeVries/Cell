@@ -7,8 +7,8 @@
 
 namespace Cell
 {
-    // NOTE(Joey): defines several possible options for camera movement. Used as abstraction 
-    // to stay away from window-system specific input methods.
+    // defines several possible options for camera movement. Used as abstraction to stay away from 
+    // window-system specific input methods.
     enum CAMERA_MOVEMENT {
         CAMERA_FORWARD,
         CAMERA_BACK,
@@ -18,11 +18,10 @@ namespace Cell
         CAMERA_DOWN,
     };
 
-    /* NOTE(Joey):
+    /* 
 
-      Basic root camera. Only does relevant camera calculations 
-      with manual forced direction setters. This camera should
-      only be used in code and not respond to user input; the
+      Basic root camera. Only does relevant camera calculations with manual forced direction 
+      setters. This camera should only be used in code and not respond to user input; the
       derived cameras are for user/player interaction.
 
     */
@@ -48,7 +47,7 @@ namespace Cell
         CameraFrustum Frustum;
     private:
     public:
-        Camera(); // NOTE(Joey): y do I need to make constructor here; See CameraFrustum note.
+        Camera(); 
         Camera(math::vec3 position, math::vec3 forward, math::vec3 up);
 
         void Update(float dt);

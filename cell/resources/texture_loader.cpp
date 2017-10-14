@@ -9,7 +9,7 @@
 
 namespace Cell
 {
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Texture TextureLoader::LoadTexture(std::string path, GLenum target, GLenum internalFormat, bool srgb)
     {
         Texture texture;
@@ -20,10 +20,9 @@ namespace Cell
         if (texture.InternalFormat == GL_RGBA || texture.InternalFormat == GL_SRGB_ALPHA)
             texture.InternalFormat = srgb ? GL_SRGB_ALPHA : GL_RGBA;
 
-        // NOTE(Joey): flip textures on their y coordinate while loading
+        // flip textures on their y coordinate while loading
         stbi_set_flip_vertically_on_load(true);
 
-        // TODO(Joey): load float textures? stbi_loadf
         int width, height, nrComponents;
         unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0);
         if (data)
@@ -53,7 +52,7 @@ namespace Cell
 
         return texture;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Texture TextureLoader::LoadHDRTexture(std::string path)
     {
         Texture texture;
@@ -94,12 +93,12 @@ namespace Cell
 
         return texture;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     TextureCube TextureLoader::LoadTextureCube(std::string top, std::string bottom, std::string left, std::string right, std::string front, std::string back)
     {
         TextureCube texture;
 
-        // NOTE(Joey): disable y flip on cubemaps
+        // disable y flip on cubemaps
         stbi_set_flip_vertically_on_load(false);
 
         std::vector<std::string> faces = { top, bottom, left, right, front, back };
@@ -131,7 +130,7 @@ namespace Cell
 
         return texture;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     TextureCube TextureLoader::LoadTextureCube(std::string folder)
     {
         return TextureLoader::LoadTextureCube(folder + "right.jpg",

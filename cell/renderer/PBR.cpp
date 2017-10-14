@@ -78,7 +78,6 @@ namespace Cell
             delete m_CaptureProbes[i]->Prefiltered;
             delete m_CaptureProbes[i];
         }
-        //delete m_ProbeCapture;
         delete m_ProbeDebugSphere;
     }
     // --------------------------------------------------------------------------------------------

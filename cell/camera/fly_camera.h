@@ -7,11 +7,10 @@
 
 namespace Cell
 {
-
+	/*
 	
-	/* NOTE(Joey):
-	
-	  FlyCamera.
+	  Derivation of the base camera with support for fly-through motions. Think of WASD forward/right
+      type of movement, combined with strafing and free yaw/pitch camera rotation.
 	  
 	*/
     class FlyCamera : public Camera
@@ -36,6 +35,7 @@ namespace Cell
 
         virtual void InputKey(float dt, CAMERA_MOVEMENT direction);
         virtual void InputMouse(float deltaX, float deltaY);
+        virtual void InputScroll(float deltaX, float deltaY);
     };
 }
 #endif

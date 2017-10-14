@@ -8,15 +8,13 @@
 
 namespace Cell
 {
-    /* NOTE(Joey):
+    /*
 
-      Manually define a list of topology types as we don't want to
-      directly link a mesh to an OpenGL toplogy type as this would
-      reduce the renderer's cross compatbility.
+      Manually define a list of topology types as we don't want to directly link a mesh to an 
+      OpenGL toplogy type as this would reduce the renderer's cross compatbility.
 
-      Yes, yes I know that we still have OpenGL indices in here (
-      VAO, VBO, EBO) which we will eventually get rid of in a
-      cross renderer way.
+      Yes, yes I know that we still have OpenGL indices in here (VAO, VBO, EBO) which we will 
+      eventually get rid of in a cross renderer way.
 
     */
     enum TOPOLOGY

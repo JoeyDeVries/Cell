@@ -72,7 +72,6 @@ namespace Cell
         glViewport(0.0f, 0.0f, m_RenderSize.x, m_RenderSize.y);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-        // TODO(Joey): do we want to abstract this or not? as it is very specific.
         m_NDCPlane = new Quad;
         glGenFramebuffers(1, &m_FramebufferCubemap);
         glGenRenderbuffers(1, &m_CubemapDepthRBO);
@@ -114,7 +113,7 @@ namespace Cell
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_GlobalUBO);
 
         // default PBR pre-compute (get a more default oriented HDR map for this)
-        Cell::Texture *hdrMap = Cell::Resources::LoadHDR("hdr factory catwalk", "textures/backgrounds/alley.hdr");
+        Cell::Texture *hdrMap = Cell::Resources::LoadHDR("sky env", "textures/backgrounds/alley.hdr");
         Cell::PBRCapture *envBridge = m_PBR->ProcessEquirectangular(hdrMap);
         SetSkyCapture(envBridge);
     }
@@ -355,10 +354,10 @@ namespace Cell
             for (auto it = m_PointLights.begin(); it != m_PointLights.end(); ++it)
             {
                 // only render point lights if within frustum
-                //if (m_Camera->Frustum.Intersect((*it)->Position, (*it)->Radius))
-                //{
+                if (m_Camera->Frustum.Intersect((*it)->Position, (*it)->Radius))
+                {
                     renderDeferredPointLight(*it);
-                //}
+                }
             }
             m_GLCache.SetCullFace(GL_BACK);
         }
@@ -490,9 +489,6 @@ namespace Cell
 
         // 11. final post-processing steps, blitting to default framebuffer
         m_PostProcessor->Blit(this, postProcessingCommands.size() % 2 == 0 ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0));
-
-        //Blit(m_PostProcessor->SSROutput, nullptr);
-        //Blit(m_ShadowRenderTargets[0]->GetColorTexture(0), nullptr);
 
         // store view projection as previous view projection for next frame's motion blur
         m_PrevViewProjection = m_Camera->Projection * m_Camera->View;
@@ -816,9 +812,9 @@ namespace Cell
         glBufferSubData(GL_UNIFORM_BUFFER,  64, sizeof(math::mat4), &m_PrevViewProjection[0][0]); 
         glBufferSubData(GL_UNIFORM_BUFFER, 128, sizeof(math::mat4), &m_Camera->Projection[0][0]);
         glBufferSubData(GL_UNIFORM_BUFFER, 192, sizeof(math::mat4), &m_Camera->View[0][0]);
-        glBufferSubData(GL_UNIFORM_BUFFER, 256, sizeof(math::mat4), &m_Camera->View[0][0]); // todo: make inv function in math library
+        glBufferSubData(GL_UNIFORM_BUFFER, 256, sizeof(math::mat4), &m_Camera->View[0][0]); // TODO: make inv function in math library
         // scene data
-        glBufferSubData(GL_UNIFORM_BUFFER, 320, sizeof(math::vec4), &m_Camera->Position[0]); // todo: make inv function in math library
+        glBufferSubData(GL_UNIFORM_BUFFER, 320, sizeof(math::vec4), &m_Camera->Position[0]);
         // lighting
         unsigned int stride = 2 * sizeof(math::vec4);
         for (unsigned int i = 0; i < m_DirectionalLights.size() && i < 4; ++i) // no more than 4 directional lights

@@ -9,6 +9,13 @@ namespace Cell
 {
     class RenderTarget;
 
+    /*
+
+      Light container object for any 3D directional light source. Directional light types support
+      shadow casting, holding a reference to the RenderTarget (and the relevant light space view 
+      projection matrix) used for its shadow map generation.
+
+    */
     class DirectionalLight
     {
     public:

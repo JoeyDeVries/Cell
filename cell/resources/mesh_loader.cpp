@@ -17,7 +17,7 @@
 namespace Cell
 {
     std::vector<Mesh*> MeshLoader::meshStore = std::vector<Mesh*>();
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void MeshLoader::Clean()
     {
         for (unsigned int i = 0; i < MeshLoader::meshStore.size(); ++i)
@@ -25,7 +25,7 @@ namespace Cell
             delete MeshLoader::meshStore[i];
         }
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     SceneNode* MeshLoader::LoadMesh(Renderer *renderer, std::string path, bool setDefaultMaterial)
     {
         Log::Message("Loading mesh file at: " + path + ".", LOG_INIT);
@@ -45,7 +45,7 @@ namespace Cell
 
         return MeshLoader::processNode(renderer, scene->mRootNode, scene, directory, setDefaultMaterial);
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     SceneNode* MeshLoader::processNode(Renderer* renderer, aiNode* aNode, const aiScene* aScene, std::string directory, bool setDefaultMaterial)
     {
         // note that we allocate memory ourselves and pass memory responsibility to calling 
@@ -96,7 +96,7 @@ namespace Cell
 
         return node;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Mesh* MeshLoader::parseMesh(aiMesh* aMesh, const aiScene* aScene, math::vec3& out_Min, math::vec3& out_Max)
     {
         std::vector<math::vec3> positions;
@@ -175,7 +175,7 @@ namespace Cell
 
         return mesh;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Material *MeshLoader::parseMaterial(Renderer* renderer, aiMaterial* aMaterial, const aiScene* aScene, std::string directory)
     {
         // create a unique default material for each loaded mesh.     
@@ -279,7 +279,7 @@ namespace Cell
 
         return material;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     std::string MeshLoader::processPath(aiString *aPath, std::string directory)
     {
         std::string path = std::string(aPath->C_Str());

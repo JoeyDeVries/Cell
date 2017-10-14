@@ -41,7 +41,6 @@ namespace Cell
     void FlyCamera::InputKey(float dt, CAMERA_MOVEMENT direction)
     {
         float speed = MovementSpeed * dt;
-        // TODO(Joey): define += and -= operators on vectors and re-factor code below.
         if (direction      == CAMERA_FORWARD)
             m_TargetPosition = m_TargetPosition + Forward*speed;
         else if (direction == CAMERA_BACK)
@@ -72,5 +71,11 @@ namespace Cell
         // world-up vector would break our LookAt calculation.
         if (m_TargetPitch > 89.0f)  m_TargetPitch =  89.0f;
         if (m_TargetPitch < -89.0f) m_TargetPitch = -89.0f;
+    }
+    // --------------------------------------------------------------------------------------------
+    void FlyCamera::InputScroll(float deltaX, float deltaY)
+    {
+        MovementSpeed = math::clamp(MovementSpeed + deltaY * 1.0f, 1.0f, 25.0f); 
+        Damping       = math::clamp(Damping       + deltaX * 0.5f, 1.0f, 25.0f);
     }
 }

@@ -49,7 +49,7 @@ void main()
 	
 	// calculate specular global illumination contribution w/ Epic's split-sum approximation
 	const float MAX_REFLECTION_LOD = 5.0;
-    vec3 prefilteredColor = pow(textureLod(envPrefilter, R,  roughness * MAX_REFLECTION_LOD).rgb, vec3(2.2));
+    vec3 prefilteredColor = textureLod(envPrefilter, R,  roughness * MAX_REFLECTION_LOD).rgb;
     vec2 envBRDF          = texture(BRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
     vec3 specular         = prefilteredColor * (F * envBRDF.x + envBRDF.y);
     

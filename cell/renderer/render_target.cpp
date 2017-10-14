@@ -4,7 +4,7 @@
 
 namespace Cell
 {
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     RenderTarget::RenderTarget(unsigned int width, unsigned int height, GLenum type, unsigned int nrColorAttachments, bool depthAndStencil)
     {
         Width  = width;
@@ -13,7 +13,7 @@ namespace Cell
 
         glGenFramebuffers(1, &ID);
         glBindFramebuffer(GL_FRAMEBUFFER, ID);
-        // NOTE(Joey): generate all color attachments
+        // generate all requested color attachments
         for (unsigned int i = 0; i < nrColorAttachments; ++i)
         {
             Texture texture;
@@ -33,7 +33,7 @@ namespace Cell
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, texture.ID, 0);
             m_ColorAttachments.push_back(texture);
         }
-        // NOTE(Joey): then generate Depth/Stencil texture if requested
+        // then generate Depth/Stencil texture if requested
         HasDepthAndStencil = depthAndStencil;
         if (depthAndStencil)
         {
@@ -54,12 +54,12 @@ namespace Cell
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Texture* RenderTarget::GetDepthStencilTexture()
     {
         return &m_DepthStencil;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Texture* RenderTarget::GetColorTexture(unsigned int index)
     {
         if(index < m_ColorAttachments.size())
@@ -70,7 +70,7 @@ namespace Cell
             return nullptr;
         }
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void RenderTarget::Resize(unsigned int width, unsigned int height)
     {
         Width = width;
@@ -86,12 +86,12 @@ namespace Cell
             m_DepthStencil.Resize(width, height);
         }
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void RenderTarget::SetTarget(GLenum target)
     {
         m_Target = target;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
    /* void RenderTarget::Bind(bool clear, bool setViewport)
     {
         glBindFramebuffer(GL_FRAMEBUFFER, ID);
