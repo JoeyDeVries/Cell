@@ -11,7 +11,7 @@
 namespace Cell
 {
     // --------------------------------------------------------------------------------------------
-    MaterialLibrary::MaterialLibrary(RenderTarget *gBuffer)
+    MaterialLibrary::MaterialLibrary(RenderTarget* gBuffer)
     {
         generateDefaultMaterials();
         generateInternalMaterials(gBuffer);
@@ -30,12 +30,6 @@ namespace Cell
         delete debugLightMaterial;
 
         delete defaultBlitMaterial;
-        delete postProcessingMaterial;
-
-        delete PBRHdrToCubemap;
-        delete PBRIrradianceCapture;
-        delete PBRPrefilterCapture;
-        delete PBRIntegrateBRDF;
     }
     // --------------------------------------------------------------------------------------------
     Material* MaterialLibrary::CreateMaterial(std::string base)
@@ -44,8 +38,8 @@ namespace Cell
         if (found != m_DefaultMaterials.end())
         {
             Material copy = found->second->Copy();
-            Material *mat = new Material(copy);
-            m_Materials.push_back(mat); // TODO(Joey): a bit ugly for now, come up with more proper memory management scheme for materials
+            Material* mat = new Material(copy);
+            m_Materials.push_back(mat); // TODO(Joey): a bit ugly for now, come up with a bettermemory management scheme for materials
             return mat;
         }
         else
@@ -55,17 +49,17 @@ namespace Cell
         }
     }
     // --------------------------------------------------------------------------------------------
-    Material* MaterialLibrary::CreateCustomMaterial(Shader *shader)
+    Material* MaterialLibrary::CreateCustomMaterial(Shader* shader)
     {
-        Material *mat = new Material(shader);
+        Material* mat = new Material(shader);
         mat->Type = MATERIAL_CUSTOM;
         m_Materials.push_back(mat);
         return mat;
     }
     // --------------------------------------------------------------------------------------------
-    Material* MaterialLibrary::CreatePostProcessingMaterial(Shader *shader)
+    Material* MaterialLibrary::CreatePostProcessingMaterial(Shader* shader)
     {
-        Material *mat = new Material(shader);
+        Material* mat = new Material(shader);
         mat->Type = MATERIAL_POST_PROCESS;
         m_Materials.push_back(mat);
         return mat;
@@ -74,8 +68,8 @@ namespace Cell
     void MaterialLibrary::generateDefaultMaterials()
     {
         // default render material (deferred path)
-        Shader *defaultShader = Resources::LoadShader("default", "shaders/deferred/g_buffer.vs", "shaders/deferred/g_buffer.fs");
-        Material *defaultMat = new Material(defaultShader);
+        Shader* defaultShader = Resources::LoadShader("default", "shaders/deferred/g_buffer.vs", "shaders/deferred/g_buffer.fs");
+        Material* defaultMat = new Material(defaultShader);
         defaultMat->Type = MATERIAL_DEFAULT;
         defaultMat->SetTexture("TexAlbedo", Resources::LoadTexture("default albedo", "textures/checkerboard.png", GL_TEXTURE_2D, GL_RGB), 3);
         defaultMat->SetTexture("TexNormal", Resources::LoadTexture("default normal", "textures/norm.png"), 4);
@@ -83,13 +77,13 @@ namespace Cell
         defaultMat->SetTexture("TexRoughness", Resources::LoadTexture("default roughness", "textures/checkerboard.png"), 6);
         m_DefaultMaterials[SID("default")] = defaultMat;
         // glass material
-        Shader *glassShader = Resources::LoadShader("glass", "shaders/forward_render.vs", "shaders/forward_render.fs", { "ALPHA_BLEND" });
+        Shader* glassShader = Resources::LoadShader("glass", "shaders/forward_render.vs", "shaders/forward_render.fs", { "ALPHA_BLEND" });
         glassShader->Use();
         glassShader->SetInt("lightShadowMap1", 10);
         glassShader->SetInt("lightShadowMap2", 10);
         glassShader->SetInt("lightShadowMap3", 10);
         glassShader->SetInt("lightShadowMap4", 10);
-        Material *glassMat = new Material(glassShader);
+        Material* glassMat = new Material(glassShader);
         glassMat->Type = MATERIAL_CUSTOM; // this material can't fit in the deferred rendering pipeline (due to transparency sorting).
         glassMat->SetTexture("TexAlbedo", Cell::Resources::LoadTexture("glass albedo", "textures/glass.png", GL_TEXTURE_2D, GL_RGBA), 0);
         glassMat->SetTexture("TexNormal", Cell::Resources::LoadTexture("glass normal", "textures/pbr/plastic/normal.png"), 1);
@@ -99,24 +93,24 @@ namespace Cell
         glassMat->Blend = true;
         m_DefaultMaterials[SID("glass")] = glassMat;
         // alpha blend material
-        Shader *alphaBlendShader = Resources::LoadShader("alpha blend", "shaders/forward_render.vs", "shaders/forward_render.fs", { "ALPHA_BLEND" });
+        Shader* alphaBlendShader = Resources::LoadShader("alpha blend", "shaders/forward_render.vs", "shaders/forward_render.fs", { "ALPHA_BLEND" });
         alphaBlendShader->Use();
         alphaBlendShader->SetInt("lightShadowMap1", 10);
         alphaBlendShader->SetInt("lightShadowMap2", 10);
         alphaBlendShader->SetInt("lightShadowMap3", 10);
         alphaBlendShader->SetInt("lightShadowMap4", 10);
-        Material *alphaBlendMaterial = new Material(alphaBlendShader);
+        Material* alphaBlendMaterial = new Material(alphaBlendShader);
         alphaBlendMaterial->Type = MATERIAL_CUSTOM;
         alphaBlendMaterial->Blend = true;
         m_DefaultMaterials[SID("alpha blend")] = alphaBlendMaterial;
         // alpha cutout material
-        Shader *alphaDiscardShader = Resources::LoadShader("alpha discard", "shaders/forward_render.vs", "shaders/forward_render.fs", { "ALPHA_DISCARD" });
+        Shader* alphaDiscardShader = Resources::LoadShader("alpha discard", "shaders/forward_render.vs", "shaders/forward_render.fs", { "ALPHA_DISCARD" });
         alphaDiscardShader->Use();
         alphaDiscardShader->SetInt("lightShadowMap1", 10);
         alphaDiscardShader->SetInt("lightShadowMap2", 10);
         alphaDiscardShader->SetInt("lightShadowMap3", 10);
         alphaDiscardShader->SetInt("lightShadowMap4", 10);
-        Material *alphaDiscardMaterial = new Material(alphaDiscardShader);
+        Material* alphaDiscardMaterial = new Material(alphaDiscardShader);
         alphaDiscardMaterial->Type = MATERIAL_CUSTOM;
         alphaDiscardMaterial->Cull = false;
         m_DefaultMaterials[SID("alpha discard")] = alphaDiscardMaterial;
@@ -127,9 +121,7 @@ namespace Cell
         // post-processing
         Shader* defaultBlitShader = Cell::Resources::LoadShader("blit", "shaders/screen_quad.vs", "shaders/default_blit.fs");
         defaultBlitMaterial = new Material(defaultBlitShader);
-        Shader* postProcessingShader = Cell::Resources::LoadShader("post processing", "shaders/screen_quad.vs", "shaders/post_processing.fs");
-        postProcessingMaterial = new Material(postProcessingShader);
-
+        
         // deferred
         deferredAmbientShader     = Cell::Resources::LoadShader("deferred ambient", "shaders/deferred/screen_ambient.vs", "shaders/deferred/ambient.fs");
         deferredIrradianceShader  = Cell::Resources::LoadShader("deferred irradiance", "shaders/deferred/ambient_irradience.vs", "shaders/deferred/ambient_irradience.fs");

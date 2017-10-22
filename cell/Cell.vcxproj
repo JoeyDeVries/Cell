@@ -164,8 +164,6 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\Joey\Downloads\imgui-master\imgui.cpp" />
-    <ClCompile Include="C:\Users\Joey\Downloads\imgui-master\imgui_draw.cpp" />
     <ClCompile Include="camera\camera.cpp" />
     <ClCompile Include="camera\fly_camera.cpp" />
     <ClCompile Include="camera\camera_frustum.cpp" />
@@ -204,11 +202,6 @@
     <ClCompile Include="stb\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\Joey\Downloads\imgui-master\imgui.h" />
-    <ClInclude Include="C:\Users\Joey\Downloads\imgui-master\imgui_internal.h" />
-    <ClInclude Include="C:\Users\Joey\Downloads\imgui-master\stb_rect_pack.h" />
-    <ClInclude Include="C:\Users\Joey\Downloads\imgui-master\stb_textedit.h" />
-    <ClInclude Include="C:\Users\Joey\Downloads\imgui-master\stb_truetype.h" />
     <ClInclude Include="camera\camera.h" />
     <ClInclude Include="camera\fly_camera.h" />
     <ClInclude Include="camera\camera_frustum.h" />

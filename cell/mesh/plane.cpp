@@ -2,7 +2,7 @@
 
 namespace Cell
 {
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Plane::Plane(unsigned int xSegments, unsigned int ySegments)
     {
         bool oddRow = false;
@@ -20,10 +20,9 @@ namespace Cell
             }
         }
 
-        // NOTE(Joey): then define indices
         for (int y = 0; y < ySegments; ++y)
         {
-            if (!oddRow) // NOTE(Joey): even rows: y == 0, y == 2; and so on
+            if (!oddRow) // even rows: y == 0, y == 2; and so on
             {
                 for (int x = 0; x <= xSegments; ++x)
                 {
@@ -43,7 +42,6 @@ namespace Cell
         }
 
         Topology = TRIANGLE_STRIP;
-
         Finalize();
     }
 }

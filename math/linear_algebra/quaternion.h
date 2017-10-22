@@ -138,7 +138,7 @@ namespace math
 
         const float w2 = quat.w * quat.w;
 
-        return (w2*w2 - 1.0f)*vec + 2.0f*dot(quat.r, vec)*quat.r + w2*cross(quat.r, vec);
+        return (2.0f*w2 - 1.0f)*vec + 2.0f*dot(quat.r, vec)*quat.r + w2*cross(quat.r, vec);
     }
 
     // NOTE(Joey): the quaternion is assumed to be normalized (length of 1)

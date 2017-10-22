@@ -13,8 +13,8 @@ namespace Cell
       Manually define a list of topology types as we don't want to directly link a mesh to an 
       OpenGL toplogy type as this would reduce the renderer's cross compatbility.
 
-      Yes, yes I know that we still have OpenGL indices in here (VAO, VBO, EBO) which we will 
-      eventually get rid of in a cross renderer way.
+      Yes, yes I know that we still have OpenGL indices in here (VAO, VBO, EBO) which we'll 
+      get rid of in a cross renderer way soon enough.
 
     */
     enum TOPOLOGY
@@ -27,9 +27,10 @@ namespace Cell
         TRIANGLE_FAN,
     };
 
-    /* NOTE(Joey):
+    /* 
 
-      Mesh
+      Base Mesh class. A mesh in its simplest form is purely a list of vertices, with some added 
+      functionality for easily setting up the hardware configuration relevant for rendering.
 
     */
     class Mesh
@@ -49,21 +50,21 @@ namespace Cell
         TOPOLOGY Topology = TRIANGLES;
         std::vector<unsigned int> Indices;
 
-        // NOTE(Joey): we support multiple ways of initializing a mesh
+        // support multiple ways of initializing a mesh
         Mesh();
         Mesh(std::vector<math::vec3> positions, std::vector<unsigned int> indices);
         Mesh(std::vector<math::vec3> positions, std::vector<math::vec2> uv, std::vector<unsigned int> indices);
         Mesh(std::vector<math::vec3> positions, std::vector<math::vec2> uv, std::vector<math::vec3> normals, std::vector<unsigned int> indices);
         Mesh(std::vector<math::vec3> positions, std::vector<math::vec2> uv, std::vector<math::vec3> normals, std::vector<math::vec3> tangents, std::vector<math::vec3> bitangents, std::vector<unsigned int> indices);
 
-        // NOTE(Joey): set vertex data manually
+        // set vertex data manually
         // TODO(Joey): not sure if these are required if we can directly set vertex data from public fields; construct several use-cases to test.
         void SetPositions(std::vector<math::vec3> positions);
         void SetUVs(std::vector<math::vec2> uv);
         void SetNormals(std::vector<math::vec3> normals);
         void SetTangents(std::vector<math::vec3> tangents, std::vector<math::vec3> bitangents); // NOTE(Joey): you can only set both tangents and bitangents at the same time to prevent mismatches
 
-        // NOTE(Joey): commits all buffers and attributes to the renderer
+        // commits all buffers and attributes to the GPU driver
         void Finalize(bool interleaved = true);
 
     private:

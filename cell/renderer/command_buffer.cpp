@@ -10,17 +10,17 @@
 
 namespace Cell
 {
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     CommandBuffer::CommandBuffer(Renderer* renderer)
     {
         m_Renderer = renderer;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     CommandBuffer::~CommandBuffer()
     {
         Clear();
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void CommandBuffer::Push(Mesh* mesh, Material* material, math::mat4 transform, math::mat4 prevTransform, math::vec3 boxMin, math::vec3 boxMax, RenderTarget* target)
     {
         RenderCommand command = {};
@@ -62,7 +62,7 @@ namespace Cell
             }
         }
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void CommandBuffer::Clear()
     {
         m_DeferredRenderCommands.clear();
@@ -70,19 +70,16 @@ namespace Cell
         m_PostProcessingRenderCommands.clear();
         m_AlphaRenderCommands.clear();
     }
-    // ------------------------------------------------------------------------
-    // TODO(Joey): can we combine these render sorts in one sort? First attempts failed so it's 
-    // likely this isn't possible; check w/ community!
-    // NOTE(Joey): custom per-element sort compare function used by the 
-    // CommandBuffer::Sort() function.
+    // --------------------------------------------------------------------------------------------
+    // custom per-element sort compare function used by the CommandBuffer::Sort() function.
     bool renderSortDeferred(const RenderCommand &a, const RenderCommand &b)
     {
         return a.Material->GetShader()->ID < b.Material->GetShader()->ID;
     }
-    // NOTE(Joey): first sort on alpha state
+    // sort render state
     bool renderSortCustom(const RenderCommand &a, const RenderCommand &b)
     {       
-        /* NOTE(Joey):
+        /* 
 
           We want strict weak ordering, which states that if two objects x and y are equivalent
           then both f(x,y) and f(y,x) should be false. Thus when comparing the object to itself
@@ -116,7 +113,7 @@ namespace Cell
     {
         return a.Material->GetShader()->ID < b.Material->GetShader()->ID;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void CommandBuffer::Sort()
     {
         std::sort(m_DeferredRenderCommands.begin(), m_DeferredRenderCommands.end(), renderSortDeferred);
@@ -125,7 +122,7 @@ namespace Cell
             std::sort(rtIt->second.begin(), rtIt->second.end(), renderSortCustom);
         }
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     std::vector<RenderCommand> CommandBuffer::GetDeferredRenderCommands(bool cull)
     {
         if (cull)
@@ -145,7 +142,7 @@ namespace Cell
             return m_DeferredRenderCommands;
         }
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     std::vector<RenderCommand> CommandBuffer::GetCustomRenderCommands(RenderTarget *target, bool cull)
     {
         // only cull when on main/null render target
@@ -166,7 +163,7 @@ namespace Cell
             return m_CustomRenderCommands[target];
         }
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     std::vector<RenderCommand> CommandBuffer::GetAlphaRenderCommands(bool cull)
     {
         if (cull)
@@ -186,12 +183,12 @@ namespace Cell
             return m_AlphaRenderCommands;
         }
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     std::vector<RenderCommand> CommandBuffer::GetPostProcessingRenderCommands()
     {
         return m_PostProcessingRenderCommands;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     std::vector<RenderCommand> CommandBuffer::GetShadowCastRenderCommands()
     {
         std::vector<RenderCommand> commands;

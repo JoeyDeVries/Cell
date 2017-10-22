@@ -18,7 +18,7 @@ void mousePosFunc(GLFWwindow *window, double xpos, double ypos);
 void mouseButtonFunc(GLFWwindow*, int button, int action, int mods);
 void mouseScrollFunc(GLFWwindow*, double xoffset, double yoffset);
 
-Cell::Renderer *renderer;
+Cell::Renderer* renderer;
 Cell::FlyCamera camera(math::vec3(0.0f, 1.0f, 0.0f), math::vec3(0.0f, 0.0f, -1.0f));
 float deltaTime     = 0.0f;
 float lastFrameTime = 0.0f;
@@ -66,7 +66,6 @@ int main(int argc, char *argv[])
         GLFWwindow* window = glfwCreateWindow(1920, 1080, "Cell", nullptr, nullptr);           
         if (window == nullptr)
         {
-            // TODO(Joey): logging/diagnostics
             glfwTerminate();
             return -1;
         }

@@ -11,6 +11,12 @@ namespace Cell
     class Shader;
     class RenderTarget;
 
+    /*
+
+      Manages and maintains a list of common render materials, either for storing a template list 
+      of common materials or for storing internal renderer materials.
+
+    */
     class MaterialLibrary
     {
         friend Renderer;
@@ -22,7 +28,6 @@ namespace Cell
 
         // internal render-specific materials
         Material* defaultBlitMaterial;
-        Material* postProcessingMaterial; // TODO(Joey): move to post-processing toolkit
 
         Shader* deferredAmbientShader;
         Shader* deferredIrradianceShader;
@@ -32,13 +37,6 @@ namespace Cell
         Shader *dirShadowShader;
 
         Material *debugLightMaterial;
-
-        // TODO: move these to PBR toolkit
-        Material *PBRHdrToCubemap;
-        Material *PBRIrradianceCapture;
-        Material *PBRPrefilterCapture;
-        Material *PBRIntegrateBRDF;
-
     public:
         MaterialLibrary(RenderTarget *gBuffer);
         ~MaterialLibrary();

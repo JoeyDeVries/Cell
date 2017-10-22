@@ -5,7 +5,7 @@
 
 namespace Cell
 {
-    /* NOTE(Joey):
+    /* 
 
       GLCache stores the latest state of relevant OpenGL state and through the use of public 
       setters it only updates the actual OpenGL state when the value is different than before.

@@ -5,7 +5,7 @@
 
 namespace Cell
 {
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Circle::Circle(unsigned int edgeSegments, unsigned int ringSegments)
     {
         for (unsigned int y = 0; y <= ringSegments; ++y)
@@ -14,13 +14,13 @@ namespace Cell
             {
                 float xSegment = (float)x / (float)edgeSegments;
                 float ringDepth = (float)y / (float)ringSegments;
-                float xPos = std::cos(xSegment * math::TAU); // NOTE(Joey): TAU is 2PI
+                float xPos = std::cos(xSegment * math::TAU); // TAU is 2PI
                 float yPos = std::sin(xSegment * math::TAU);
 
                 Positions.push_back(math::vec3(xPos * ringDepth, yPos * ringDepth, 0.0f));
             }
         }
-        // NOTE(Joey): indices are exactly the same as for the plane, only the positions differ for a circle
+        // indices are exactly the same as for the plane, only the positions differ for a circle
         bool oddRow = false;
         for (int y = 0; y < ringSegments; ++y)
         {

@@ -7,7 +7,7 @@
 
 namespace Cell
 {
-    /* NOTE(Joey):
+    /* 
 
       Container object for holding all per-environment specific pre-computed PBR data.
 

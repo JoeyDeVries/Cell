@@ -6,7 +6,7 @@
 
 namespace Cell
 {
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     // NOTE(Joey): resources:
     // http://www.paulsprojects.net/tutorials/simplebump/simplebump.html
     // http://www.gamedev.net/topic/334335-geometric-shapessolids-generation/?whichpage=1%25EF%25BF%25BD
@@ -23,8 +23,8 @@ namespace Cell
         UV.resize((numSteps1 + 1) * (numSteps2 + 1));
 
         
-        //  first we calculate all points for the major ring on the xy plane (in textbook 
-        // mathematics, the z-axis is considered the up axis).
+        // first calculate all points for the major ring on the xy plane (in textbook mathematics, 
+        // the z-axis is considered the up axis).
         // TODO(Joey): no need really to pre-calculate these; integrate them within the main for 
         // loops.
         std::vector<math::vec3> p(numSteps1 + 1);

@@ -18,6 +18,13 @@ namespace Cell
     class Shader;
     class PostProcessor;
 
+    /*
+
+      Manages and maintains all render data and functionality related to the (main) deferred PBR
+      pipeline. This includes (pre)processing (captured) reflection data (solving the render 
+      equation integral) for use in later rendering. 
+
+    */
     class PBR
     {
         friend Renderer;

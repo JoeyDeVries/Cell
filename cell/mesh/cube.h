@@ -5,9 +5,9 @@
 
 namespace Cell
 {
-    /* NOTE(Joey);
+    /* 
 
-      Cube
+      A 3D cube in the range [-0.5, 0.5]. Vertices are hard-coded.
 
     */
     class Cube : public Mesh

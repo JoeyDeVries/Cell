@@ -56,7 +56,7 @@ namespace Cell
         }
         // gaussian blur shader
         {
-            m_GaussianRTHalf_H      = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, false); // TODO: 16-bit float? and resolution? make agnostic
+            m_GaussianRTHalf_H      = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, false); 
             m_GaussianRTQuarter_H   = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, false); 
             m_GaussianRTEight_H     = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, false);
             m_GaussianRTSixteenth_H = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, false);

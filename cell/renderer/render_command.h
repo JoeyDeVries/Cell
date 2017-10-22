@@ -8,9 +8,9 @@ namespace Cell
     class Mesh;
     class Material;
 
-    /* NOTE(Joey):
+    /* 
 
-      render command
+      All render state required for submitting a render command.
 
     */
     struct RenderCommand

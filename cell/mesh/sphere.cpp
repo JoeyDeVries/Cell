@@ -5,10 +5,10 @@
 
 namespace Cell
 {
-    // todo: check geodesic; much better texture space mapping.
+    // TODO(Joey): check geodesic (and icosahedron tesselation); much better texture space mapping.
     // ------------------------------------------------------------------------
-    // NOTE(Joey): parametric equation for a sphere F(u,v, r) = [cos(u)*sin(v)*r, cos(v), sin(u)*sin(v)*r]
-    // where u is longitude [0, 2PI] and v is lattitude [0, PI] (note the difference in their range)
+    // arametric equation for a sphere F(u,v, r) = [cos(u)*sin(v)*r, cos(v), sin(u)*sin(v)*r] where 
+    // u is longitude [0, 2PI] and v is lattitude [0, PI] (note the difference in their range)
     Sphere::Sphere(unsigned int xSegments, unsigned int ySegments)
     {
         for (unsigned int y = 0; y <= ySegments; ++y)
@@ -17,7 +17,7 @@ namespace Cell
             {
                 float xSegment = (float)x / (float)ySegments;
                 float ySegment = (float)y / (float)ySegments;
-                float xPos = std::cos(xSegment * math::TAU) * std::sin(ySegment * math::PI); // NOTE(Joey): TAU is 2PI
+                float xPos = std::cos(xSegment * math::TAU) * std::sin(ySegment * math::PI); // TAU is 2PI
                 float yPos = std::cos(ySegment * math::PI);
                 float zPos = std::sin(xSegment * math::TAU) * std::sin(ySegment * math::PI);
 

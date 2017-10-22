@@ -4,25 +4,25 @@
 
 namespace Cell
 {
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Mesh::Mesh()
     {
 
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Mesh::Mesh(std::vector<math::vec3> positions, std::vector<unsigned int> indices)
     {
         Positions = positions;
         Indices = indices;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Mesh::Mesh(std::vector<math::vec3> positions, std::vector<math::vec2> uv, std::vector<unsigned int> indices)
     {
         Positions = positions;
         UV = uv;
         Indices = indices;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Mesh::Mesh(std::vector<math::vec3> positions, std::vector<math::vec2> uv, std::vector<math::vec3> normals, std::vector<unsigned int> indices)
     {
         Positions = positions;
@@ -30,7 +30,7 @@ namespace Cell
         Normals = normals;
         Indices = indices;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Mesh::Mesh(std::vector<math::vec3> positions, std::vector<math::vec2> uv, std::vector<math::vec3> normals, std::vector<math::vec3> tangents, std::vector<math::vec3> bitangents, std::vector<unsigned int> indices)
     {
         Positions = positions;
@@ -40,31 +40,31 @@ namespace Cell
         Bitangents = bitangents;
         Indices = indices;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void Mesh::SetPositions(std::vector<math::vec3> positions)
     {
         Positions = positions;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void Mesh::SetUVs(std::vector<math::vec2> uv)
     {
         UV = uv;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void Mesh::SetNormals(std::vector<math::vec3> normals)
     {
         Normals = normals;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void Mesh::SetTangents(std::vector<math::vec3> tangents, std::vector<math::vec3> bitangents)
     {
         Tangents = tangents;
         Bitangents = bitangents;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void Mesh::Finalize(bool interleaved)
     {
-        // NOTE(Joey): initialize object IDs if not configured before
+        // initialize object IDs if not configured before
         if (!m_VAO)
         {
             glGenVertexArrays(1, &m_VAO);
@@ -72,7 +72,7 @@ namespace Cell
             glGenBuffers(1, &m_EBO);
         }
 
-        // NOTE(Joey): preprocess buffer data as interleaved or seperate when specified
+        // preprocess buffer data as interleaved or seperate when specified
         std::vector<float> data; 
         if (interleaved)
         {
@@ -108,7 +108,7 @@ namespace Cell
         }
         else
         {
-            // NOTE(Joey): if any of the float arrays are empty, data won't be filled by them.
+            // if any of the float arrays are empty, data won't be filled by them.
             for (int i = 0; i < Positions.size(); ++i)
             {
                 data.push_back(Positions[i].x);
@@ -140,11 +140,11 @@ namespace Cell
             }
         }
 
-        // NOTE(Joey): configure vertex attributes (only on vertex data size() > 0)
+        // configure vertex attributes (only on vertex data size() > 0)
         glBindVertexArray(m_VAO);
         glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
         glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), &data[0], GL_STATIC_DRAW);
-        // NOTE(Joey): only fill the index buffer if the index array is non-empty.
+        // only fill the index buffer if the index array is non-empty.
         if (Indices.size() > 0)
         {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
@@ -152,7 +152,7 @@ namespace Cell
         }
         if (interleaved)
         {
-            // NOTE(Joey): calculate stride from number of non-empty vertex attribute arrays
+            // calculate stride from number of non-empty vertex attribute arrays
             size_t stride                      = 3 * sizeof(float);
             if (UV.size() > 0)         stride += 2 * sizeof(float);
             if (Normals.size() > 0)    stride += 3 * sizeof(float);
@@ -221,12 +221,12 @@ namespace Cell
         }
         glBindVertexArray(0);
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void Mesh::calculateNormals(bool smooth)
     {
         // TODO(Joey): manually calculate the normals of each vertex
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void Mesh::calculateTangents()
     {
         // TODO(Joey): walk overall the vertices and calculate the tangent space vectors manually

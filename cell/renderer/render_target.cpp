@@ -80,7 +80,7 @@ namespace Cell
         {
             m_ColorAttachments[i].Resize(width, height);
         }
-        // NOTE(Joey): then generate Depth/Stencil texture if requested
+        // generate Depth/Stencil texture if requested
         if (HasDepthAndStencil)
         {
             m_DepthStencil.Resize(width, height);
