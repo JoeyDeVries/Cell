@@ -11,7 +11,7 @@
 
 namespace Cell
 {
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Background::Background() : SceneNode(Scene::CounterID++)
     {
         Scene::Root->AddChild(this);
@@ -22,18 +22,17 @@ namespace Cell
         BoxMin    = math::vec3(-99999.0);
         BoxMax    = math::vec3( 99999.0);
 
-
         // default material configuration
         Material->SetFloat("Exposure", 1.0f);
         Material->DepthCompare = GL_LEQUAL;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Background::~Background()
     {
 
     }
-    // ------------------------------------------------------------------------
-    void Background::SetCubemap(TextureCube *cubemap)
+    // --------------------------------------------------------------------------------------------
+    void Background::SetCubemap(TextureCube* cubemap)
     {
         m_CubeMap = cubemap;
         Material->SetTextureCube("background", m_CubeMap, 0);

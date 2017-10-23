@@ -19,9 +19,9 @@ namespace Cell
     class Mesh;
     class Material;
 
-    /* NOTE(Joey):
+    /* 
 
-      MeshLoader
+      Mesh load functionality.
 
     */
     class MeshLoader

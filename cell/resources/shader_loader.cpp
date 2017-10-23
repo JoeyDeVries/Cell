@@ -33,7 +33,7 @@ namespace Cell
         return shader;
     }
     // --------------------------------------------------------------------------------------------
-    std::string ShaderLoader::readShader(std::ifstream &file, const std::string& name, std::string path)
+    std::string ShaderLoader::readShader(std::ifstream& file, const std::string& name, std::string path)
     {
         std::string directory = path.substr(0, path.find_last_of("/\\"));
         std::string source, line;

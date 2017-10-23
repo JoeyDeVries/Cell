@@ -4,27 +4,27 @@
 
 namespace Cell
 {
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Material::Material()
     {
-        //m_Shader = Resources::GetShader("standard");
+
     }
-    // ------------------------------------------------------------------------
-    Material::Material(Shader *shader)
+    // --------------------------------------------------------------------------------------------
+    Material::Material(Shader* shader)
     {
         m_Shader = shader;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Shader* Material::GetShader()
     {
         return m_Shader;
     }
-    // ------------------------------------------------------------------------
-    void Material::SetShader(Shader *shader)
+    // --------------------------------------------------------------------------------------------
+    void Material::SetShader(Shader* shader)
     {
         m_Shader = shader;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Material Material::Copy()
     {
         Material copy(m_Shader);
@@ -51,26 +51,26 @@ namespace Cell
         
         return copy;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void Material::SetBool(std::string name, bool value)
     {
         m_Uniforms[name].Type = SHADER_TYPE_BOOL;
         m_Uniforms[name].Bool = value;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void Material::SetInt(std::string name, int value)
     {
         m_Uniforms[name].Type = SHADER_TYPE_INT;
         m_Uniforms[name].Int  = value;
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void Material::SetFloat(std::string name, float value)
     {
         m_Uniforms[name].Type  = SHADER_TYPE_FLOAT;
         m_Uniforms[name].Float = value;
     }
-    // ------------------------------------------------------------------------
-    void Material::SetTexture(std::string name, Texture *value, unsigned int unit)
+    // --------------------------------------------------------------------------------------------
+    void Material::SetTexture(std::string name, Texture* value, unsigned int unit)
     {
         m_SamplerUniforms[name].Unit    = unit;
         m_SamplerUniforms[name].Texture = value;
@@ -97,8 +97,8 @@ namespace Cell
             m_Shader->SetInt(name, unit);
         }
     }
-    // ------------------------------------------------------------------------
-    void Material::SetTextureCube(std::string name, TextureCube *value, unsigned int unit)
+    // --------------------------------------------------------------------------------------------
+    void Material::SetTextureCube(std::string name, TextureCube* value, unsigned int unit)
     {
         m_SamplerUniforms[name].Unit        = unit;
         m_SamplerUniforms[name].Type        = SHADER_TYPE_SAMPLERCUBE;

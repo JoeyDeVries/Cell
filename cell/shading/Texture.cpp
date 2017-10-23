@@ -6,21 +6,18 @@
 
 namespace Cell
 {
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Texture::Texture()
     {
         
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     Texture::~Texture()
     {
-        // TODO(Joey): this doesn't work as texture objects get frequently passed around over the
-        // stack at which variables are copied and destructors are called; either manage the lifetime
-        // over a single container, or do explicit texture cleanup.
-        //glDeleteTextures(1, &m_ID);
+
     }
-    // ------------------------------------------------------------------------
-    void Texture::Generate(unsigned int width, GLenum internalFormat, GLenum format, GLenum type, void *data)
+    // --------------------------------------------------------------------------------------------
+    void Texture::Generate(unsigned int width, GLenum internalFormat, GLenum format, GLenum type, void* data)
     {
         glGenTextures(1, &ID);
 
@@ -41,8 +38,8 @@ namespace Cell
                 glGenerateMipmap(Target);
         Unbind();
     }
-    // ------------------------------------------------------------------------
-    void Texture::Generate(unsigned int width, unsigned int height, GLenum internalFormat, GLenum format, GLenum type, void *data)
+    // --------------------------------------------------------------------------------------------
+    void Texture::Generate(unsigned int width, unsigned int height, GLenum internalFormat, GLenum format, GLenum type, void* data)
     {
         glGenTextures(1, &ID);
 
@@ -64,8 +61,8 @@ namespace Cell
                 glGenerateMipmap(Target);
         Unbind();
     }
-    // ------------------------------------------------------------------------
-    void Texture::Generate(unsigned int width, unsigned int height, unsigned int depth, GLenum internalFormat, GLenum format, GLenum type, void *data)
+    // --------------------------------------------------------------------------------------------
+    void Texture::Generate(unsigned int width, unsigned int height, unsigned int depth, GLenum internalFormat, GLenum format, GLenum type, void* data)
     {
         glGenTextures(1, &ID);
 
@@ -88,7 +85,7 @@ namespace Cell
                 glGenerateMipmap(Target);
         Unbind();
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void Texture::Resize(unsigned int width, unsigned int height, unsigned int depth)
     {
         Bind();
@@ -107,19 +104,19 @@ namespace Cell
             glTexImage3D(GL_TEXTURE_3D, 0, InternalFormat, width, height, depth, 0, Format, Type, 0);
         }
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void Texture::Bind(int unit)
     {
         if(unit >= 0)
             glActiveTexture(GL_TEXTURE0 + unit);
         glBindTexture(Target, ID);
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void Texture::Unbind()
     {
         glBindTexture(Target, 0);
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void Texture::SetWrapMode(GLenum wrapMode, bool bind)
     {
         if(bind)
@@ -146,14 +143,14 @@ namespace Cell
             glTexParameteri(Target, GL_TEXTURE_WRAP_R, wrapMode);
         }
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void Texture::SetFilterMin(GLenum filter, bool bind)
     {
         if(bind)
             Bind();
         glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, filter);
     }
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     void Texture::SetFilterMax(GLenum filter, bool bind)
     {
         if (bind)

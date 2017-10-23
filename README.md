@@ -9,6 +9,8 @@ to use and read. Cell also aims to provide both flexible and properly maintainab
 The engine will be heavily commented and documented from within the source code itself, to motivate new graphics programmers
 to take a look at any of its inner workings, without feeling too overwhelming. 
 
+![Cell Preview](preview.png "Cell Preview")
+
 Feature List (complete:base-functionality)
 ------
 * Fully functioning (custom) math library (vectors, matrices, transformations, utility functions):

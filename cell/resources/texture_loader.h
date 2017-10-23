@@ -11,9 +11,9 @@ namespace Cell
     class Texture;
     class TextureCube;
 
-    /* NOTE(Joey):
+    /* 
 
-      TextureLoader
+      Manages all custom logic for loading a variety of different texture files.
 
     */
     class TextureLoader
@@ -23,7 +23,7 @@ namespace Cell
         static Texture LoadHDRTexture(std::string path);
         // TODO(Joey): read and copy original cubemap order from GL specification
         static TextureCube LoadTextureCube(std::string top, std::string bottom, std::string left, std::string right, std::string front, std::string back);
-        // NOTE(Joey): assumes default names for cubemap faces
+        // assumes default names for cubemap faces
         static TextureCube LoadTextureCube(std::string folder);
     };
 }

@@ -28,21 +28,21 @@ class GLFWwindow;
 
 namespace Cell
 {
-    /* NOTE(Joey):
+    /* 
 
-      Global entry-point for Cell's initialization. Starts all Cell's relevant
-      initialization calls, and makes sure Cell is ready to operate after 
-      calling its initialization function. Note that all GL function pointers
-      are initialized here as well (including any extensions) w/ GLAD.
+      Global entry-point for Cell's initialization. Starts all Cell's relevant initialization 
+      calls, and makes sure Cell is ready to operate after calling its initialization function. 
+      Note that all GL function pointers are initialized here as well (including any extensions) 
+      w/ GLAD.
 
     */
     Renderer* Init(GLFWwindow* window, GLADloadproc loadProcFunc);
 
 
-    // Cleans up Cell of all resources that are no longer relevant.
+    // cleans up Cell of all resources that are no longer relevant.
     void Clean();
 
-    /* NOTE(Joey):
+    /* 
 
       Initializes all render data required for processing a new frame. This is mostly relevant
       for rendering GUI items.
@@ -50,7 +50,7 @@ namespace Cell
     */
     void NewFrame();
 
-    /* NOTE(Joey):
+    /* 
 
       Renders (debugging) GUI (IMGUI) on top of Cell's main renderer, by default the renderer's 
       configuration UI is rendered as well, which can be enabled/disabled on demand.

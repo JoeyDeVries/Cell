@@ -34,22 +34,20 @@ namespace Cell
     Renderer* renderer;
     Renderer* Init(GLFWwindow* window, GLADloadproc loadProcFunc)
     {
-        /* NOTE(Joey):
+        /* 
 
-          Before doing anything with OpenGL we have to load all its functions
-          into stored function pointers from the OpenGL driver. Windows by
-          default only hosts a small set of OpenGL functions in its library
-          so all the more 'modern' functions have to be manually loaded/
+          Before doing anything with OpenGL we have to load all its functions into stored function 
+          pointers from the OpenGL driver. Windows by default only hosts a small set of OpenGL 
+          functions in its library so all the more 'modern' functions have to be manually loaded/
           requested from the graphics cards' OpenGL driver itself.
           
-          This is a cumbersome work as we generally have to store all the
-          required function prototypes, function pointer storage and all
-          the enum / unique ids of the OpenGL functionality and on top of
-          that we have to query for the function's memory location for
+          This is a cumbersome work as we generally have to store all the required function 
+          prototypes, function pointer storage and all the enum / unique ids of the OpenGL 
+          functionality and on top of that we have to query for the function's memory location for
           each and every one of these functions.
           
-          For this reason we use a library called GLAD
-          http://glad.dav1d.de/ <- their webservice for generating header file
+          For this reason we use a library called GLAD http://glad.dav1d.de/ <- their webservice 
+          for generating header file.
 
         */
         if (!gladLoadGLLoader(loadProcFunc))
@@ -64,21 +62,17 @@ namespace Cell
             Log::Message("Driver: " + std::string((char*)glGetString(GL_VENDOR)) + " Renderer: " + std::string((char*)glGetString(GL_RENDERER)), LOG_INIT);
         }
 
-        /* NOTE(Joey):
+        /* 
 
-          Next up is initializing debug output. Debug output allows us to
-          give a callback error reporting function to OpenGL that OpenGL
-          will call each time an internal error occurs with detailed
-          information about the error. This helps us to easily catch
-          errors from within OpenGL itself saving us from long hours
-          of debugging. For more info see:
+          Next up is initializing debug output. Debug output allows us to give a callback error 
+          reporting function to OpenGL that OpenGL will call each time an internal error occurs 
+          with detailed information about the error. This helps us to easily catch errors from 
+          within OpenGL itself saving us from long hours of debugging. For more info see:
           http://learnopengl.com/#!In-Practice/Debugging
           
-          Note that debug output will only be initialized if the
-          windowing library initialized an OpenGL context with the
-          debug output bit flag set; otherwise this functionality
-          is simply ignored. Note that it did not on a 3.3 context,
-          it's interesting to figure out why!
+          Note that debug output will only be initialized if the windowing library initialized an
+          OpenGL context with the debug output bit flag set; otherwise this functionality is simply
+          ignored. Note that it did not on a 3.3 context, it's interesting to figure out why!
 
         */
         Log::Message("Initializing debug Output.", LOG_INIT);
