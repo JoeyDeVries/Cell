@@ -8,9 +8,8 @@ float VanDerCorpus(uint n, uint base)
     float denom   = 1.0;
     float result  = 0.0;
 
-    // NOTE(Joey): do this for all 32 bits; doesn't work with
-    // while loop. This produces a lot of wasted cycles but
-    // difficult to do otherwise in ES 2.0.
+    // do this for all 32 bits; doesn't work with while loop. This produces a lot 
+    // of wasted cycles, but impossible to do otherwise in <= ES 2.0.
     for(uint i = 0u; i < 32u; ++i)
     {
         if(n > 0u)
@@ -73,13 +72,13 @@ vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness)
 	float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a*a - 1.0) * Xi.y));
 	float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
 	
-	// NOTE(Joey): from spherical coordinates to cartesian coordinates - halfway vector
+	// from spherical coordinates to cartesian coordinates - halfway vector
 	vec3 H;
 	H.x = cos(phi) * sinTheta;
 	H.y = sin(phi) * sinTheta;
 	H.z = cosTheta;
 	
-	// NOTE(Joey): from tangent-space H vector to world-space sample vector
+	// from tangent-space H vector to world-space sample vector
 	vec3 up          = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
 	vec3 tangent   = normalize(cross(up, N));
 	vec3 bitangent = cross(N, tangent);

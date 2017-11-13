@@ -61,35 +61,35 @@ namespace Cell
 
         // ssao
         RenderTarget* m_SSAORenderTarget;
-        Shader* m_SSAOShader;
-        Shader* m_SSAOBlurShader;
-        Texture* m_SSAONoise;
+        Shader*       m_SSAOShader;
+        Shader*       m_SSAOBlurShader;
+        Texture*      m_SSAONoise;
         // bloom
         RenderTarget* m_BloomRenderTarget0;
         RenderTarget* m_BloomRenderTarget1;
         RenderTarget* m_BloomRenderTarget2;
         RenderTarget* m_BloomRenderTarget3;
         RenderTarget* m_BloomRenderTarget4;
-        Shader* m_BloomShader;
-        Shader* m_BloomBlurShader;
+        Shader*       m_BloomShader;
+        Shader*       m_BloomBlurShader;
         // downsample
         RenderTarget* m_DownSampleRTHalf;
         RenderTarget* m_DownSampleRTQuarter;
         RenderTarget* m_DownSampleRTEight;
         RenderTarget* m_DownSampleRTSixteenth;
-        Shader* m_DownSampleShader;
+        Shader*       m_DownSampleShader;
         // (lower resolution) downsampled blurs
         RenderTarget* m_DownSampleBlurRTEight;
         RenderTarget* m_DownSampleBlurRTSixteenth;
         // blur
-        RenderTarget* m_GaussianRTHalf_H; // to help with ping-ponging (note: do we want this to be a floating point framebuffer as well?)
+        RenderTarget* m_GaussianRTHalf_H; 
         RenderTarget* m_GaussianRTQuarter_H;
         RenderTarget* m_GaussianRTEight_H;
         RenderTarget* m_GaussianRTSixteenth_H;
-        Shader* m_OnePassGaussianShader;
+        Shader*       m_OnePassGaussianShader;
         // ssr
-        RenderTarget *m_SSRRT;
-        Shader* m_SSRShader;
+        RenderTarget* m_SSRRT;
+        Shader*       m_SSRShader;
 
     public:
         PostProcessor(Renderer* renderer);

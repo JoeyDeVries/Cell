@@ -32,6 +32,17 @@ uniform int MotionSamples;
 // ssr
 uniform sampler2D TexSSR;
 
+// https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
+vec3 aces(vec3 col)
+{
+    float a = 2.51f;
+    float b = 0.03f;
+    float c = 2.43f;
+    float d = 0.59f;
+    float e = 0.14f;
+    return clamp((col*(a*col+b))/(col*(c*col+d)+e), 0.0, 1.0);
+}
+
 void main()
 {
     vec3 color = texture(TexSrc, TexCoords).rgb;
@@ -73,13 +84,12 @@ void main()
     }
     
     // HDR tonemapping
-    float exposure = 1.0;
+    const float exposure = 1.0;
+    color *= exposure;
+    // color = aces(color);
     color = color / (color + vec3(1.0));
 	// gamma correct
 	color = pow(color, vec3(1.0/2.2));     
-    // color *= 2.0;  // Hardcoded Exposure Adjustment
-    // vec3 x = max(vec3(0.0), color - 0.004);
-    // color = (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
     
     if(Sepia)
     {

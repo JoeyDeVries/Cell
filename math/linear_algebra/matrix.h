@@ -6,21 +6,18 @@
 
 #include "vector.h"
 
-
 namespace math
 {    
-    /* NOTE(Joey):
+    /* 
 
-      Generic m by n dimensional matrix template type version supporting matrices
-      of any type. The matrix type follows in functionality conventions from the
-      mathematical literature. By default we will only be using floating point
-      matrices, but having a generic version allows us to potentially use
-      double precision matrices as well (or even integer matrices).
+      Generic m by n dimensional matrix template type version supporting matrices of any type. The 
+      matrix type follows in functionality conventions from the mathematical literature. By default 
+      we will only be using floating point matrices, but having a generic version allows us to 
+      potentially use double precision matrices as well (or even integer matrices).
 
-      The matrices are stored in column-major order, the resulting transformations
-      will also assume column-major order, keeping matrix-vector multiplications
-      with the matrix on the left side of the equation and representing vectors
-      as column vectors (post-multiplication).
+      The matrices are stored in column-major order, the resulting transformations will also assume 
+      column-major order, keeping matrix-vector multiplications with the matrix on the left side of 
+      the equation and representing vectors as column vectors (post-multiplication).
 
       Matrix numbering by math conventions:
       |  0  1  2  3 |
@@ -46,14 +43,13 @@ namespace math
             T e[n][m];
             struct
             {
-                // NOTE(Joey): allow access on a per-column basis.
-                // We do not provide support for per-row access as this is not
-                // sequential in memory.
+                // allow access on a per-column basis. We do not provide support for per-row access 
+                // as this is not sequential in memory.
                 vector<m, T> col[n];
             };
         };
-
-        // NOTE(Joey): consturctor0: default initializes matrix to identity matrix 
+        // --------------------------------------------------------------------------------------------
+        // consturctor0: default initializes matrix to identity matrix 
         matrix()
         {
             for (std::size_t col = 0; col < n; ++col)
@@ -64,8 +60,8 @@ namespace math
                 }
             }
         }
-
-        // NOTE(Joey): constructor1: initialize matrix with initializer list
+        // --------------------------------------------------------------------------------------------
+        // constructor1: initialize matrix with initializer list
         matrix(const std::initializer_list<T> args)
         {
             assert(args.size() <= m * n);
@@ -81,9 +77,9 @@ namespace math
 				}
 			}
         }
-
-        // NOTE(Joey): returns a column vector, that can again be indexed with the vector subscript 
-        // operator. In effect: [][] and [] indexing is possible.
+        // --------------------------------------------------------------------------------------------
+        // returns a column vector, that can again be indexed with the vector subscript operator. 
+        // In effect: [][] and [] indexing is possible.
         vector<m, T>& operator[](const std::size_t colIndex)
         {
             assert(colIndex >= 0 && colIndex < n);
@@ -99,14 +95,11 @@ namespace math
     typedef matrix<4, 4, double> dmat4;
 
 
-    // NOTE(Joey): per-matrix operations
-    // ---------------------------------
-    // NOTE(Joey): addition (note that we do not define matrix scalar operations
-    // as they are not mathematically defined; they should be defined as 
-    // operations on a matrix completely filled with the respective scalar.
-    // TODO(Joey): consider using pointers/references instead of using the
-    // stack for passing arguments here as the memory savings might now 
-    // outweigh the cost of walking the pointers.
+    // per-matrix operations
+    // --------------------------------------------------------------------------------------------
+    // addition (note that we do not define matrix scalar operations as they are not mathematically 
+    // defined; they should be defined as  operations on a matrix completely filled with the 
+    // respective scalar.
     template <std::size_t m, std::size_t n, typename T>
     matrix<m, n, T> operator+(matrix<m, n, T>& lhs, matrix<m, n, T>& rhs)
     {
@@ -120,7 +113,8 @@ namespace math
         }
         return result;
     }
-    // NOTE(Joey): subtraction
+    // subtraction
+    // --------------------------------------------------------------------------------------------
     template <std::size_t m, std::size_t n, typename T>
     matrix<m, n, T> operator-(matrix<m, n, T>& lhs, matrix<m, n, T>& rhs)
     {
@@ -134,13 +128,12 @@ namespace math
         }
         return result;
     }
-    // NOTE(Joey): multiplication
-    // NOTE(Joey): note that with matrix multiplication both matrices can have
-    // varying dimensions/sizes as long as they adhere to the following rule:
-    // - The number of columns (n) of the LHS matrix should equal the number
-    //   of rows (n) on the RHS matrix.
-    // The result of the matrix multiplication is then always a matrix of 
-    // dimensions m x o (LHS:rows x RHS:cols) dimensions.
+    // multiplication
+    // --------------------------------------------------------------------------------------------
+    // note that with matrix multiplication both matrices can have varying dimensions/sizes as long 
+    // as they adhere to the following rule: the number of columns (n) of the LHS matrix should 
+    // equal the number of rows (n) on the RHS matrix.  Theresult of the matrix multiplication is 
+    // then always a matrix of dimensions m x o (LHS:rows x RHS:cols) dimensions.
     template <std::size_t m, std::size_t n, std::size_t o, typename T>
     matrix<m, o, T> operator*(matrix<m, n, T>& lhs, matrix<n, o, T>& rhs)
     {
@@ -150,7 +143,7 @@ namespace math
             for (std::size_t row = 0; row < m; ++row)
             {
                 T value = {};
-                for (std::size_t j = 0; j < n; ++j) // NOTE(Joey): j equals col in math notation (i = row)
+                for (std::size_t j = 0; j < n; ++j) // j equals col in math notation (i = row)
                 {
                     value += lhs[j][row] * rhs[col][j];
                 }
@@ -159,8 +152,8 @@ namespace math
         }
         return result;
     }
-
-    // NOTE(Joey): multiplication with reference matrix (store directly inside provided matrix)
+    // multiplication with reference matrix (store directly inside provided matrix)
+    // --------------------------------------------------------------------------------------------
     template <std::size_t m, std::size_t n, std::size_t o, typename T>
     matrix<m, o, T>& mul(matrix <m, n, T> &result, const matrix<m, n, T>& lhs, const matrix<n, o, T>& rhs)
     {
@@ -169,7 +162,7 @@ namespace math
             for (std::size_t row = 0; row < m; ++row)
             {
                 T value = {};
-                for (std::size_t j = 0; j < n; ++j) // NOTE(Joey): j equals col in math notation (i = row)
+                for (std::size_t j = 0; j < n; ++j) // j equals col in math notation (i = row)
                 {
                     value += lhs[j][row] * rhs[col][j];
                 }
@@ -178,12 +171,10 @@ namespace math
         }
         return result;
     }
-
-    // NOTE(Joey): vector-matrix operations
-    // ------------------------------------
-    // NOTE(Joey): rhs vector multiplication. We only define vector-matrix
-    // multiplication with the vector on the right-side of the equation due
-    // to the column-major convention.
+    // matrix * vector multiplication
+    // --------------------------------------------------------------------------------------------
+    // rhs vector multiplication. We only define vector-matrix multiplication with the vector on 
+    // the right-side of the equation due to the column-major convention.
     template <std::size_t m, std::size_t n, typename T>
     vector<m, T> operator*(matrix<m, n, T>& lhs, vector<n, T>& rhs)
     {
@@ -191,7 +182,7 @@ namespace math
         for (std::size_t row = 0; row < m; ++row)
         {
             T value = {};
-            for (std::size_t j = 0; j < n; ++j) // NOTE(Joey): j equals col in math notation (i = row)
+            for (std::size_t j = 0; j < n; ++j) // j equals col in math notation (i = row)
             {
                 value += lhs[j][row] * rhs[j];
             }
@@ -199,5 +190,5 @@ namespace math
         }
         return result;
     }
-} // namespace math
+} 
 #endif

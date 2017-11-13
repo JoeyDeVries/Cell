@@ -9,11 +9,11 @@ uniform samplerCube environment;
 uniform float roughness;
 
 void main(void) {
-    // NOTE(Joey): the world vector acts as the normal of a tangent surface
-    // from the origin, aligned to vWorld. Given this normal, calculate all
-    // incoming radiance of the environment.
+    // the world vector acts as the normal of a tangent surface from the origin, 
+    // aligned to vWorld. Given this normal, calculate all incoming radiance of 
+    // the environment.
     vec3 N = normalize(WorldPos);
-    // NOTE(Joey): approximate view/reflection angle as equal to N (Unreal; split-sum)
+    // approximate view/reflection angle as equal to N (Unreal; split-sum)
     vec3 R = N;
     vec3 V = N;
 
@@ -21,26 +21,25 @@ void main(void) {
     vec3 prefilteredColor = vec3(0.0);
     float totalWeight = 0.0;
 
-    // NOTE(Joey): for debugging, make scope visible to end part
+    // for debugging, make scope visible to end part
     for(uint i = 0u; i < SAMPLE_COUNT; ++i)
     {
-        // NOTE(Joey): generates a sample vector that's biased towards the
+        // generates a sample vector that's biased towards the
         // preferred alignment direction (importance sampling).
         vec2 Xi = Hammersley(i, SAMPLE_COUNT);
         vec3 H = ImportanceSampleGGX(Xi, N, roughness);
         vec3 L = normalize(2.0 * dot(V, H) * H - V);
 
         float NdotL = max(dot(N, L), 0.0);
-        // NOTE(Joey): also try without NdotL!
+        // also try without NdotL!
         if(NdotL > 0.0)
         {
-            // NOTE(Joey): note that HDR environment map is loaded linearly, so no need for linearizing first.
+            // note that HDR environment map is loaded linearly, so no need for linearizing first.
             prefilteredColor += texture(environment, L).rgb * NdotL;
             totalWeight      += NdotL;
         }
     }
 
     prefilteredColor = prefilteredColor / totalWeight;
-
     FragColor = vec4(prefilteredColor, 1.0);
 }

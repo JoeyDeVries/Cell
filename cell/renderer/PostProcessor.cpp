@@ -167,9 +167,9 @@ namespace Cell
     void PostProcessor::UpdateRenderSize(unsigned int width, unsigned int height)
     {
         // resize all buffers
-        m_DownSampleRTHalf->Resize((int)(width * 0.5f),    (int)(height * 0.5f)); 
-        m_DownSampleRTQuarter->Resize((int)(width * 0.25f),   (int)(height * 0.25f));
-        m_DownSampleRTEight->Resize((int)(width * 0.125f),  (int)(height * 0.125f));
+        m_DownSampleRTHalf->Resize((int)(width * 0.5f), (int)(height * 0.5f)); 
+        m_DownSampleRTQuarter->Resize((int)(width * 0.25f), (int)(height * 0.25f));
+        m_DownSampleRTEight->Resize((int)(width * 0.125f), (int)(height * 0.125f));
         m_DownSampleRTSixteenth->Resize((int)(width * 0.0675f), (int)(height * 0.0675f));
 
         m_DownSampleBlurRTEight->Resize((int)(width * 0.125f), (int)(height * 0.125f));

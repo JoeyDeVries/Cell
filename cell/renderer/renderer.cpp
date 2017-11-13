@@ -136,7 +136,7 @@ namespace Cell
         return m_RenderSize;
     }
     // ------------------------------------------------------------------------
-    void Renderer::SetTarget(RenderTarget *renderTarget, GLenum target)
+    void Renderer::SetTarget(RenderTarget* renderTarget, GLenum target)
     {
         m_CurrentRenderTargetCustom = renderTarget;
         if (renderTarget != nullptr) 
@@ -154,7 +154,7 @@ namespace Cell
         return m_Camera;
     }
     // ------------------------------------------------------------------------
-    void Renderer::SetCamera(Camera *camera)
+    void Renderer::SetCamera(Camera* camera)
     {
         m_Camera = camera;
     }
@@ -236,22 +236,22 @@ namespace Cell
     {      
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        /* NOTE(Joey): 
+        /* 
         
           General outline of all the render steps/passes:
-          - 1. First we render all pushed geometry to the GBuffer.
-          - 2. We then render all shadow casting geometry to the shadow buffer.
-          - 3. Pre-lighting post-processing steps.
-          - 4. Deferred lighting pass (ambient, directional, point).
-          - 5. Process deferred data s.t. forward pass is neatly integrated with deferred pass.
-          - 6. Then we do the forward 'custom' rendering pass where developers can write their 
-               own shaders and render stuff as they want, not sacrifcing flexibility; this 
-               includes custom render targets.
-          - 7. Then we render all alpha blended materials last.
-          - 8. Then we do post-processing, one can supply their own post-processing materials 
-               by setting the 'post-processing' flag of the material.
-               Each material flagged as post-processing will run after the default post-processing 
-               shaders (before/after HDR-tonemap/gamma-correct).
+          - First we render all pushed geometry to the GBuffer.
+          - We then render all shadow casting geometry to the shadow buffer.
+          - Pre-lighting post-processing steps.
+          - Deferred lighting pass (ambient, directional, point).
+          - Process deferred data s.t. forward pass is neatly integrated with deferred pass.
+          - Then we do the forward 'custom' rendering pass where developers can write their 
+            own shaders and render stuff as they want, not sacrifcing flexibility; this 
+            includes custom render targets.
+          - Then we render all alpha blended materials last.
+          - Then we do post-processing, one can supply their own post-processing materials 
+            by setting the 'post-processing' flag of the material.
+            Each material flagged as post-processing will run after the default post-processing 
+            shaders (before/after HDR-tonemap/gamma-correct).
 
         */
         // sort all pushed render commands by heavy state-switches e.g. shader switches.
@@ -474,8 +474,6 @@ namespace Cell
             m_PBR->RenderProbes();
         }
 
-       
-
         // 10. custom post-processing pass
         std::vector<RenderCommand> postProcessingCommands = m_CommandBuffer->GetPostProcessingRenderCommands();
         for (unsigned int i = 0; i < postProcessingCommands.size(); ++i)
@@ -501,9 +499,9 @@ namespace Cell
         m_CurrentRenderTargetCustom = nullptr;
     }
     // ------------------------------------------------------------------------
-    void Renderer::Blit(Texture *src,
-                        RenderTarget *dst, 
-                        Material     *material, 
+    void Renderer::Blit(Texture*      src,
+                        RenderTarget* dst, 
+                        Material*     material, 
                         std::string   textureUniformName)
     {
         // if a destination target is given, bind to its framebuffer
@@ -671,7 +669,7 @@ namespace Cell
         }
 
         // bind/active uniform sampler/texture objects
-        auto *samplers = material->GetSamplerUniforms();
+        auto* samplers = material->GetSamplerUniforms();
         for (auto it = samplers->begin(); it != samplers->end(); ++it)
         {
             if (it->second.Type == SHADER_TYPE_SAMPLERCUBE)
@@ -681,7 +679,7 @@ namespace Cell
         }
 
         // set uniform state of material
-        auto *uniforms = material->GetUniforms();
+        auto* uniforms = material->GetUniforms();
         for (auto it = uniforms->begin(); it != uniforms->end(); ++it)
         {
             switch (it->second.Type)
@@ -722,8 +720,8 @@ namespace Cell
         renderMesh(mesh, material->GetShader());
     }
     // ------------------------------------------------------------------------
-    void Renderer::renderToCubemap(SceneNode *  scene,
-        TextureCube *target,
+    void Renderer::renderToCubemap(SceneNode* scene,
+        TextureCube* target,
         math::vec3   position,
         unsigned int mipLevel)
     {
@@ -886,7 +884,7 @@ namespace Cell
         }
     }
     // --------------------------------------------------------------------------------------------
-    void Renderer::renderDeferredDirLight(DirectionalLight *light)
+    void Renderer::renderDeferredDirLight(DirectionalLight* light)
     {
         Shader* dirShader = m_MaterialLibrary->deferredDirectionalShader;
 
@@ -905,7 +903,7 @@ namespace Cell
         renderMesh(m_NDCPlane, dirShader);
     }
     // --------------------------------------------------------------------------------------------
-    void Renderer::renderDeferredPointLight(PointLight *light)
+    void Renderer::renderDeferredPointLight(PointLight* light)
     {
         Shader *pointShader = m_MaterialLibrary->deferredPointShader;
 

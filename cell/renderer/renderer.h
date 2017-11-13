@@ -14,12 +14,11 @@
 
 namespace Cell
 {
-    /* NOTE(Joey):
+    /* 
 
       Forward declare the types, s.t. we don't need to include the required header files here. 
-      Seeing as most objects throughout Cell will link to renderer.h we want to reduce as much 
-      unnecesary additional header code as much as possible (saves in compilation times). And 
-      seeing as we only need the typename for the function specifications this works just fine.
+      Seeing as several objects throughout Cell will link to renderer.h we want to reduce as much 
+      unnecesary additional header code as much as possible (saves in compilation times). 
 
     */
     class Mesh;
@@ -32,11 +31,11 @@ namespace Cell
     class PBR;
     class PostProcessor;
 
-    /* NOTE(Joey):
+    /*
 
-      The main renderer; responsible for maintaining a render buffer queue and providing the front 
-      push commands for filling the buffer, then sorting the buffer, manage multiple render passes 
-      and render the buffer accordingly.
+      The main renderer; responsible for maintaining a render buffer queue, providing the front 
+      push commands for filling the buffer, sorting the buffer, manage multiple render passes and 
+      render the buffer(s) accordingly.
 
     */
     class Renderer
@@ -44,7 +43,7 @@ namespace Cell
         friend PostProcessor;
         friend PBR;
     public:
-        // options
+        // configuration
         bool IrradianceGI = true;
         bool Shadows      = true;
         bool Lights       = true;
@@ -68,7 +67,7 @@ namespace Cell
         MaterialLibrary* m_MaterialLibrary;
 
         // camera
-        Camera* m_Camera;
+        Camera*    m_Camera;
         math::mat4 m_PrevViewProjection;
 
         // render-targets/post
@@ -78,7 +77,7 @@ namespace Cell
         RenderTarget*              m_PostProcessTarget1;
         PostProcessor*             m_PostProcessor;
         Quad*                      m_NDCPlane;
-        unsigned int m_FramebufferCubemap; // cubemap render targets are specific to renderer, so we can directly declare these here
+        unsigned int m_FramebufferCubemap; 
         unsigned int m_CubemapDepthRBO;
 
         // shadow buffers
@@ -112,7 +111,7 @@ namespace Cell
 
         PostProcessor* GetPostProcessor();
 
-        // idea, create either a deferred default material (based on default set of materials available (like glass)), or a custom material (with custom you have to supply your own shader)
+        // create either a deferred default material (based on default set of materials available (like glass)), or a custom material (with custom you have to supply your own shader)
         Material* CreateMaterial(std::string base = "default"); // these don't have the custom flag set (default material has default state and uses checkerboard texture as albedo (and black metallic, half roughness, purple normal, white ao)
         Material* CreateCustomMaterial(Shader* shader);         // these have the custom flag set (will be rendered in forward pass)
         Material* CreatePostProcessingMaterial(Shader* shader); // these have the post-processing flag set (will be rendered after deferred/forward pass)
@@ -135,7 +134,7 @@ namespace Cell
         void        BakeProbes(SceneNode* scene = nullptr);
     private:
         // renderer-specific logic for rendering a custom (forward-pass) command
-        void renderCustomCommand(RenderCommand *command, Camera* customCamera, bool updateGLSettings = true);
+        void renderCustomCommand(RenderCommand* command, Camera* customCamera, bool updateGLSettings = true);
         // renderer-specific logic for rendering a list of commands to a target cubemap
         void renderToCubemap(SceneNode* scene, TextureCube* target, math::vec3 position = math::vec3(0.0f), unsigned int mipLevel = 0);
         void renderToCubemap(std::vector<RenderCommand>& renderCommands, TextureCube* target, math::vec3 position = math::vec3(0.0f), unsigned int mipLevel = 0);
@@ -144,15 +143,15 @@ namespace Cell
         // updates the global uniform buffer objects
         void updateGlobalUBOs();
         // returns the currently active render target
-        RenderTarget *getCurrentRenderTarget();
+        RenderTarget* getCurrentRenderTarget();
 
         // deferred logic:
         // renders all ambient lighting (including indirect IBL)
         void renderDeferredAmbient();
         // render directional light
-        void renderDeferredDirLight(DirectionalLight *light);
+        void renderDeferredDirLight(DirectionalLight* light);
         // render point light
-        void renderDeferredPointLight(PointLight *light);
+        void renderDeferredPointLight(PointLight* light);
 
         // render mesh for shadow buffer generation
         void renderShadowCastCommand(RenderCommand* command, const math::mat4& projection, const math::mat4& view);
