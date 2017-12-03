@@ -71,6 +71,7 @@ namespace Cell
 
         glViewport(0.0f, 0.0f, m_RenderSize.x, m_RenderSize.y);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearDepth(1.0f);
 
         m_NDCPlane = new Quad;
         glGenFramebuffers(1, &m_FramebufferCubemap);
@@ -630,19 +631,20 @@ namespace Cell
         Material *material = command->Material;
         Mesh     *mesh     = command->Mesh;
 
-        // update global GL state based on material
+        // update global GL blend state based on material
         if (updateGLSettings)
         {
-            m_GLCache.SetDepthFunc(material->DepthCompare);
-            m_GLCache.SetDepthTest(material->DepthTest);
             m_GLCache.SetBlend(material->Blend);
             if(material->Blend)
             {
                 m_GLCache.SetBlendFunc(material->BlendSrc, material->BlendDst);
             }
-            m_GLCache.SetCullFace(material->Cull);
+            m_GLCache.SetDepthFunc(material->DepthCompare);
+            m_GLCache.SetDepthTest(material->DepthTest);
+            m_GLCache.SetCull(material->Cull);
+            m_GLCache.SetCullFace(material->CullFace);
         }
-     
+
         // default uniforms that are always configured regardless of shader configuration (see them 
         // as a default set of shader uniform variables always there); with UBO
         material->GetShader()->Use();
@@ -858,7 +860,7 @@ namespace Cell
                     irradianceShader->SetVector("camPos", m_Camera->Position);
                     irradianceShader->SetVector("probePos", probe->Position);
                     irradianceShader->SetFloat("probeRadius", probe->Radius);
-                    irradianceShader->SetInt("SSR", m_PostProcessor->SSR);
+                    irradianceShader->SetInt("SSAO", m_PostProcessor->SSAO);
 
                     math::mat4 model;
                     math::translate(model, probe->Position);
@@ -880,6 +882,7 @@ namespace Cell
 
             Shader* ambientShader = m_MaterialLibrary->deferredAmbientShader;
             ambientShader->Use();
+            ambientShader->SetInt("SSAO", m_PostProcessor->SSAO);
             renderMesh(m_NDCPlane, ambientShader);
         }
     }

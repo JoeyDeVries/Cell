@@ -405,4 +405,3 @@ void mouseScrollFunc(GLFWwindow*, double xoffset, double yoffset)
     camera.InputScroll(xoffset, yoffset);
     Cell::InputScroll(yoffset);
 }
-

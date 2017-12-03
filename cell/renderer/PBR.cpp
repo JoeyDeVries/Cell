@@ -35,6 +35,9 @@ namespace Cell
         m_PBRHdrToCubemap->DepthCompare      = GL_LEQUAL;
         m_PBRIrradianceCapture->DepthCompare = GL_LEQUAL;
         m_PBRPrefilterCapture->DepthCompare  = GL_LEQUAL;
+        m_PBRHdrToCubemap->Cull = false;
+        m_PBRIrradianceCapture->Cull = false;
+        m_PBRPrefilterCapture->Cull = false;
 
         m_PBRCaptureCube = new Cube();
         m_SceneEnvCube = new SceneNode(0);

@@ -25,6 +25,9 @@ namespace Cell
         // default material configuration
         Material->SetFloat("Exposure", 1.0f);
         Material->DepthCompare = GL_LEQUAL;
+        Material->Cull = false;
+        Material->ShadowCast = false;
+        Material->ShadowReceive = false;
     }
     // --------------------------------------------------------------------------------------------
     Background::~Background()
