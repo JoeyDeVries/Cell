@@ -10,7 +10,6 @@ uniform int Vignette;
 uniform int Sepia;
 uniform int Bloom;
 uniform int SSAO;
-uniform int SSR;
 uniform int MotionBlur;
 
 // sepia
@@ -29,9 +28,6 @@ uniform sampler2D gMotion;
 uniform float MotionScale;
 uniform int MotionSamples;
 
-// ssr
-uniform sampler2D TexSSR;
-
 // https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
 vec3 aces(vec3 col)
 {
@@ -49,7 +45,7 @@ void main()
     vec3 grayscale = vec3(dot(color, vec3(0.299, 0.587, 0.114)));
     vec2 texelSize = 1.0 / textureSize(TexSrc, 0).xy;    
         
-    if(MotionBlur)
+    if(MotionBlur == 1)
     {
         vec2 motion = texture(gMotion, TexCoords).xy;
         motion     *= MotionScale;
@@ -64,7 +60,7 @@ void main()
         color = avgColor;
     }    
        
-    if(Bloom)
+    if(Bloom == 1)
     {
         const float strength = 0.5;
         vec3 bloom1 = texture(TexBloom1, TexCoords).rgb * strength * 1.00;
@@ -76,12 +72,6 @@ void main()
         color += bloom3;
         color += bloom4;
     }
-
-    if(SSR)
-    {
-        vec3 ssrColor = texture(TexSSR, TexCoords).rgb;
-        color += ssrColor;
-    }
     
     // HDR tonemapping
     const float exposure = 1.0;
@@ -91,11 +81,11 @@ void main()
 	// gamma correct
 	color = pow(color, vec3(1.0/2.2));     
     
-    if(Sepia)
+    if(Sepia == 1)
     {
         color = mix(color, grayscale * sepiaColor, 0.7);
     }
-    if(Vignette)
+    if(Vignette == 1)
     {
         const float strength = 10.0;
         const float power = 0.1;

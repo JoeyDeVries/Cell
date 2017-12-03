@@ -38,7 +38,6 @@ namespace Cell
         Texture* BloomOutput2;
         Texture* BloomOutput3;
         Texture* BloomOutput4;
-        Texture* SSROutput;
 
         // toggles
         bool Sepia      = false;
@@ -46,7 +45,6 @@ namespace Cell
         bool Bloom      = true;
         bool SSAO       = true;
         bool TXAA       = false;
-        bool SSR        = false;
         bool MotionBlur = true;
 
         // ssao
@@ -87,10 +85,6 @@ namespace Cell
         RenderTarget* m_GaussianRTEight_H;
         RenderTarget* m_GaussianRTSixteenth_H;
         Shader*       m_OnePassGaussianShader;
-        // ssr
-        RenderTarget* m_SSRRT;
-        Shader*       m_SSRShader;
-
     public:
         PostProcessor(Renderer* renderer);
         ~PostProcessor();

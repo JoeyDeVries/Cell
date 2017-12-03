@@ -29,8 +29,7 @@ namespace Cell
             m_PostProcessShader->SetInt("TexBloom2", 2);
             m_PostProcessShader->SetInt("TexBloom3", 3);
             m_PostProcessShader->SetInt("TexBloom4", 4);
-            m_PostProcessShader->SetInt("TexSSR", 5);
-            m_PostProcessShader->SetInt("gMotion", 6);
+            m_PostProcessShader->SetInt("gMotion", 5);
         }
         // down sample
         {
@@ -123,23 +122,7 @@ namespace Cell
             m_BloomShader = Cell::Resources::LoadShader("bloom", "shaders/screen_quad.vs", "shaders/post/bloom.fs");
             m_SSAOShader->Use();
             m_SSAOShader->SetInt("HDRScene", 0);
-        }
-        // SSR
-        {
-            m_SSRRT = new RenderTarget(1, 1, GL_HALF_FLOAT, 1, false);
-            SSROutput = m_SSRRT->GetColorTexture(0);
-
-            m_SSRShader = Cell::Resources::LoadShader("ssr", "shaders/screen_quad.vs", "shaders/post/ssr.fs");
-            m_SSRShader->Use();
-            m_SSRShader->SetInt("screenColor", 0);
-            m_SSRShader->SetInt("screenColorBlur", 1);
-            m_SSRShader->SetInt("gPositionMetallic", 2);
-            m_SSRShader->SetInt("gNormalRoughness", 3);
-            m_SSRShader->SetInt("gAlbedoAO", 4);
-            m_SSRShader->SetInt("envPrefilter", 5);
-            m_SSRShader->SetInt("BRDFLUT", 6);
-            m_SSRShader->SetInt("SSAO", 7);
-        }
+        }      
     }
     // --------------------------------------------------------------------------------------------
     PostProcessor::~PostProcessor()
@@ -161,7 +144,6 @@ namespace Cell
         delete m_BloomRenderTarget2;
         delete m_BloomRenderTarget3;
         delete m_BloomRenderTarget4;
-        delete m_SSRRT;
     }
     // --------------------------------------------------------------------------------------------
     void PostProcessor::UpdateRenderSize(unsigned int width, unsigned int height)
@@ -187,7 +169,6 @@ namespace Cell
         m_BloomRenderTarget4->Resize((int)(width * 0.0675f), (int)(height * 0.0675f));
 
         m_SSAORenderTarget->Resize((int)(width * 0.5f), (int)(height * 0.5f));
-        m_SSRRT->Resize((int)(width * 0.5f), (int)(height * 0.5f));
     }
     // --------------------------------------------------------------------------------------------
     void PostProcessor::ProcessPreLighting(Renderer* renderer, RenderTarget* gBuffer, Camera* camera)
@@ -241,28 +222,7 @@ namespace Cell
             blur(renderer, m_BloomRenderTarget1->GetColorTexture(0), m_BloomRenderTarget2, 8);
             blur(renderer, m_BloomRenderTarget2->GetColorTexture(0), m_BloomRenderTarget3, 8);
             blur(renderer, m_BloomRenderTarget3->GetColorTexture(0), m_BloomRenderTarget4, 8);
-        }
-        // SSR
-        if(SSR)
-        {
-            m_SSRShader->Use();
-            m_SSRShader->SetMatrix("projection", renderer->m_Camera->Projection);
-            m_SSRShader->SetMatrix("view", renderer->m_Camera->View);
-
-            output->GetColorTexture(0)->Bind(0);
-            BlurredSixteenthOutput->Bind(1);
-            gBuffer->GetColorTexture(0)->Bind(2);
-            gBuffer->GetColorTexture(1)->Bind(3);
-            gBuffer->GetColorTexture(2)->Bind(4);
-            renderer->GetSkypCature()->Irradiance->Bind(5);
-            renderer->m_PBR->m_RenderTargetBRDFLUT->GetColorTexture(0)->Bind(6);
-            SSAOOutput->Bind(7);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, m_SSRRT->ID);
-            glViewport(0, 0, m_SSRRT->Width, m_SSRRT->Height);
-            glClear(GL_COLOR_BUFFER_BIT);
-            renderer->renderMesh(renderer->m_NDCPlane, m_SSRShader);
-        }
+        }       
     }
     // --------------------------------------------------------------------------------------------
     void PostProcessor::Blit(Renderer* renderer, Texture* source)
@@ -277,8 +237,7 @@ namespace Cell
         BloomOutput2->Bind(2);
         BloomOutput3->Bind(3);
         BloomOutput4->Bind(4);
-        SSROutput->Bind(5);
-        renderer->m_GBuffer->GetColorTexture(3)->Bind(6);
+        renderer->m_GBuffer->GetColorTexture(3)->Bind(5);
 
         // set settings 
         m_PostProcessShader->Use();
@@ -286,7 +245,6 @@ namespace Cell
         m_PostProcessShader->SetBool("Sepia", Sepia);
         m_PostProcessShader->SetBool("Vignette", Vignette);
         m_PostProcessShader->SetBool("Bloom", Bloom);
-        m_PostProcessShader->SetBool("SSR", SSR);
         // motion blur
         m_PostProcessShader->SetBool("MotionBlur", MotionBlur);
         m_PostProcessShader->SetFloat("MotionScale", ImGui::GetIO().Framerate / FPSTarget * 0.8);
