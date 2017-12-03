@@ -2,6 +2,7 @@
 #define CELL_MESH_H
 
 #include <vector>
+#include <functional>
 
 #include <math/linear_algebra/vector.h>
 
@@ -66,6 +67,9 @@ namespace Cell
 
         // commits all buffers and attributes to the GPU driver
         void Finalize(bool interleaved = true);
+
+        // generate triangulated mesh from signed distance field
+        void FromSDF(std::function<float(math::vec3)>& sdf, float maxDistance, uint16_t gridResolution);
 
     private:
         void calculateNormals(bool smooth = true);

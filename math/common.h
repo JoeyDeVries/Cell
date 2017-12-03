@@ -4,6 +4,7 @@
 #include "linear_algebra/vector.h"
 
 #include <algorithm>
+#include <cmath>
 
 #ifdef _WIN32
 	#define NOMINMAX // <windows.h> has a #define max, min so we need to get rid of that so std::max() and std::min() will work
@@ -47,7 +48,7 @@ namespace math
     }
 
     template <std::size_t n, typename T>
-    inline T clamp(const vector<n, T>& val, const T& min, const T& max)
+    inline vector<n, T> clamp(const vector<n, T>& val, const T& min, const T& max)
     {
         vector<n, T> result;
 		for (std::size_t i = 0; i < n; ++i) {
@@ -57,7 +58,7 @@ namespace math
     }
 
     template <std::size_t n, typename T>
-    inline T clamp01(const vector<n, T>& val, const T& min, const T& max)
+    inline vector<n, T> clamp01(const vector<n, T>& val, const T& min, const T& max)
     {
         vector<n, T> result;
 		for (std::size_t i = 0; i < n; ++i) {
@@ -95,9 +96,71 @@ namespace math
         return result;
     }
 
-    // NOTE(Joey):
+    // NOTE(Joey): numeric
     // -----------------------
+    template <std::size_t n, typename T>
+    vector<n, T> abs(vector<n, T>& val)
+    {
+        vector<n, T> result;
+        for (std::size_t i = 0; i < n; ++i) {
+            result[i] = (T)std::abs(val[i]);
+        }
+        return result;
+    }
 
+ /*    vec3 min(vec3& val, float x)
+    {
+        vec3 result;
+        for (std::size_t i = 0; i < 3; ++i) {
+            result[i] = std::min(val[i], x);
+        }
+        return result;
+    }
+    vec2 min(vec2& val, float x)
+    {
+        vec2 result;
+        for (std::size_t i = 0; i < 2; ++i) {
+            result[i] = std::min(val[i], x);
+        }
+        return result;
+    }
+
+    vec3 max(vec3& val, float x)
+    {
+        vec3 result;
+        for (std::size_t i = 0; i < 3; ++i) {
+            result[i] = std::max(val[i], x);
+        }
+        return result;
+    }
+    vec2 max(vec2& val, float x)
+    {
+        vec2 result;
+        for (std::size_t i = 0; i < 2; ++i) {
+            result[i] = std::max(val[i], x);
+        }
+        return result;
+    }*/
+
+    //template <std::size_t n, typename T>
+    //inline vector<n, T> min(vector<n, T>& val, T& x)
+    //{
+    //    vector<n, T> result;
+    //    for (std::size_t i = 0; i < n; ++i) {
+    //        result[i] = (T)std::min(val[i], x);
+    //    }
+    //    return result;
+    //}
+
+    //template <std::size_t n, typename T>
+    //inline vector<n, T> max(vector<n, T>& val, const T& x)
+    //{
+    //    vector<n, T> result;
+    //    for (std::size_t i = 0; i < n; ++i) {
+    //        result[i] = std::max(val[i], x);
+    //    }
+    //    return result;
+    //}
 
 } // namespace math
 #endif
