@@ -17,11 +17,12 @@ uniform sampler2D gAlbedoAO;
 uniform samplerCube envIrradiance;
 uniform samplerCube envPrefilter;
 uniform sampler2D   BRDFLUT;
-uniform sampler2D   SSAO;
+uniform sampler2D   TexSSAO;
 
 uniform vec3 probePos;
 uniform float probeRadius;
 
+uniform int SSAO;
 uniform int SSR;
 
 void main()
@@ -31,7 +32,11 @@ void main()
     vec4 albedoAO         = texture(gAlbedoAO, uv);
     vec4 normalRoughness  = texture(gNormalRoughness, uv);
     vec4 positionMetallic = texture(gPositionMetallic, uv);
-    float ao              = texture(SSAO, uv).r;
+    float ao = 1.0;
+    if(SSAO)
+    {
+        ao = texture(TexSSAO, uv).r;
+    }
     
     vec3 worldPos   = positionMetallic.xyz;
     vec3 albedo     = albedoAO.rgb;

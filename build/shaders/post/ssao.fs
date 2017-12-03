@@ -16,7 +16,7 @@ uniform mat4 view;
 
 void main()
 {
-    float radius = 0.75;
+    float radius = 0.5;
     float bias = 0.025;
     vec2 noiseScale = renderSize.xy * vec2(1.0 / 4.0);
     

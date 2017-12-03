@@ -16,7 +16,8 @@ uniform sampler2D gPositionMetallic;
 uniform sampler2D gNormalRoughness;
 uniform sampler2D gAlbedoAO;
 
-uniform sampler2D SSAO;
+uniform int SSAO;
+uniform sampler2D TexSSAO;
 
 void main()
 {
@@ -24,7 +25,11 @@ void main()
     vec4 albedoAO         = texture(gAlbedoAO, TexCoords);
     vec4 normalRoughness  = texture(gNormalRoughness, TexCoords);
     vec4 positionMetallic = texture(gPositionMetallic, TexCoords);
-    float ao              = texture(SSAO, TexCoords).r;
+    float ao = 1.0;
+    if(SSAO)
+    {
+        ao = texture(TexSSAO, TexCoords).r;
+    }
     
     vec3 worldPos   = positionMetallic.xyz;
     vec3 albedo     = albedoAO.rgb;
