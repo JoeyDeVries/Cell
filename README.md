@@ -2,7 +2,7 @@ Cell - Graphics engine
 ======
 Welcome to the development repository of Cell, an open-source OpenGL graphics engine aimed to serve as an educational repository 
 for learning how a larger graphics engine can be structured and organized. A large focus of Cell is building an engine that is both easy 
-to use and read. Cell also aims to provide both flexible and properly maintainable code.
+to use and read. Cell also aims to provide both flexible and properly maintainable code. Note that this project is **not** finished, so code may still be vague nor are there proper build files yet.
 
 ![Logo of Cell Graphics Engine](logo.png "Cell Graphics Engine Logo")
 
@@ -85,3 +85,6 @@ Feature List (todo)
 	1. Define Bone structure on top of current scene hierarchy system.
 	2. Load skeletal mesh from Assimp as skeletal hierarchy as well? Think of different design solutions that would work well in current environment.
 	3. Animation blending.
+13. Complete code cleanup (re-factor where relevant), focussing on readability and maintainability. There are still a lot of items that do work, but could be better organized. 
+14. Document the entire engine, describing architectural and semantic choices where relevant. Also include a walkthrough guide describing the best file order to start reading/understanding the engine.
+15. Configure cross-platform build files (there's currently 0 build support).
