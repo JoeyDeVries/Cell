@@ -2,16 +2,20 @@ cmake_minimum_required(VERSION 3.1)
 project(cell)
 
 
-# find_package()
+find_package(glfw3 REQUIRED)
+find_package(OpenGL REQUIRED)
 
 set (CMAKE_CXX_STANDARD 11)
 
-include_directories(.)
+include_directories(. ${GLFW3_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR})
+
+add_subdirectory(vendor/assimp)
 
 add_library(cell
   cell/camera/camera_frustum.cpp
   cell/camera/camera.cpp
   cell/camera/fly_camera.cpp
+  cell/glad/glad.c
   cell/imgui/imgui_demo.cpp
   cell/imgui/imgui_draw.cpp
   cell/imgui/imgui.cpp
@@ -65,4 +69,4 @@ add_executable(demo
 
 target_link_libraries(utility math)
 target_link_libraries(cell math utility)
-target_link_libraries(demo cell)
+target_link_libraries(demo cell assimp ${GLFW3_LIBRARY} ${OPENGL_LIBRARY})
