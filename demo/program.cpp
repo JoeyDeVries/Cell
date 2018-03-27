@@ -2,7 +2,7 @@
 
 #include <math/math.h>
 #include <utility/logging/log.h>
-#include <cell/Cell.h>
+#include <cell/cell.h>
 #include <cell/imgui/imgui.h>
 
 #include "scenes/pbr_test.h"
