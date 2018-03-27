@@ -208,8 +208,8 @@ namespace Cell
             // only push render command if the child isn't a container node.
             if (node->mesh)
             {
-                math::vec3 boxMinWorld = node->GetWorldPosition() + (node->GetWorldScale() * node->BoxMin);
-                math::vec3 boxMaxWorld = node->GetWorldPosition() + (node->GetWorldScale() * node->BoxMax);
+                math::vec3 boxMinWorld = node->GetWorldPosition() + (node->GetWorldScale() * node->boxMin);
+                math::vec3 boxMaxWorld = node->GetWorldPosition() + (node->GetWorldScale() * node->boxMax);
                  m_CommandBuffer->Push(node->mesh, node->material, node->GetTransform(), node->GetPrevTransform(), boxMinWorld, boxMaxWorld, target);
             }
             for(unsigned int i = 0; i < node->GetChildCount(); ++i)
@@ -730,7 +730,7 @@ namespace Cell
         // create a command buffer specifically for this operation (as to not conflict with main 
         // command buffer)
         CommandBuffer commandBuffer(this);
-        commandBuffer.Push(scene->Mesh, scene->Material, scene->GetTransform());
+        commandBuffer.Push(scene->mesh, scene->material, scene->GetTransform());
         // recursive function transformed to iterative version by maintaining a stack
         std::stack<SceneNode*> childStack;
         for (unsigned int i = 0; i < scene->GetChildCount(); ++i)
@@ -739,7 +739,7 @@ namespace Cell
         {
             SceneNode *child = childStack.top();
             childStack.pop();
-            commandBuffer.Push(child->Mesh, child->Material, child->GetTransform());
+            commandBuffer.Push(child->mesh, child->material, child->GetTransform());
             for (unsigned int i = 0; i < child->GetChildCount(); ++i)
                 childStack.push(child->GetChildByIndex(i));
         }
@@ -762,8 +762,8 @@ namespace Cell
         };
 
         // resize target dimensions based on mip level we're rendering.
-        float width = (float)target->FaceWidth * pow(0.5, mipLevel);
-        float height = (float)target->FaceHeight * pow(0.5, mipLevel);
+        float width = (float)target->FaceWidth * std::pow(0.5, mipLevel);
+        float height = (float)target->FaceHeight * std::pow(0.5, mipLevel);
 
         glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferCubemap);
         glBindRenderbuffer(GL_RENDERBUFFER, m_CubemapDepthRBO);
@@ -785,7 +785,7 @@ namespace Cell
             for (unsigned int i = 0; i < renderCommands.size(); ++i)
             {
                 // cubemap generation only works w/ custom materials 
-                assert(renderCommands[i].Material->Type == MATERIAL_CUSTOM);
+                assert(renderCommands[i].material->Type == MATERIAL_CUSTOM);
                 renderCustomCommand(&renderCommands[i], camera);
             }
         }

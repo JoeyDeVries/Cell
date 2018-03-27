@@ -32,8 +32,8 @@ namespace Cell
         Material* material;
 
         // bounding box 
-        math::vec3 BoxMin = math::vec3(-99999.0f);
-        math::vec3 BoxMax = math::vec3( 99999.0f);
+        math::vec3 boxMin = math::vec3(-99999.0f);
+        math::vec3 boxMax = math::vec3( 99999.0f);
     private:
         std::vector<SceneNode*> m_Children;
         SceneNode *m_Parent;

@@ -30,8 +30,8 @@ namespace Cell
     {
         SceneNode* node = new SceneNode(Scene::CounterID++);
 
-        node->Mesh = mesh;
-        node->Material = material;
+        node->mesh = mesh;
+        node->material = material;
 
         // keep a global rerefence to this scene node s.t. we can clear the scene's nodes for 
         // memory management: end of program or when switching scenes.
@@ -43,10 +43,10 @@ namespace Cell
     {
         SceneNode *newNode = new SceneNode(Scene::CounterID++);
 
-        newNode->Mesh     = node->Mesh;
-        newNode->Material = node->Material;
-        newNode->BoxMin   = node->BoxMin;
-        newNode->BoxMax   = node->BoxMax;
+        newNode->mesh     = node->mesh;
+        newNode->material = node->material;
+        newNode->boxMin   = node->boxMin;
+        newNode->boxMax   = node->boxMax;
 
         // traverse through the list of children and add them correspondingly
         std::stack<SceneNode*> nodeStack;
@@ -58,10 +58,10 @@ namespace Cell
             nodeStack.pop();
             // similarly, create SceneNode for each child and push to scene node memory list.
             SceneNode* newChild = new SceneNode(Scene::CounterID++);
-            newChild->Mesh     = child->Mesh;
-            newChild->Material = child->Material;
-            newChild->BoxMin   = child->BoxMin;
-            newChild->BoxMax   = child->BoxMax;
+            newChild->mesh     = child->mesh;
+            newChild->material = child->material;
+            newChild->boxMin   = child->boxMin;
+            newChild->boxMax   = child->boxMax;
             newNode->AddChild(newChild);
 
             for (unsigned int i = 0; i < child->GetChildCount(); ++i)
