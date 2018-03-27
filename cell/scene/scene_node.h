@@ -28,8 +28,8 @@ namespace Cell
     {
     public:
         // each node contains relevant render state
-        Mesh*     Mesh;
-        Material* Material;
+        Mesh*     mesh;
+        Material* material;
 
         // bounding box 
         math::vec3 BoxMin = math::vec3(-99999.0f);

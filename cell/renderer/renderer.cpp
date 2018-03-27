@@ -206,11 +206,11 @@ namespace Cell
             SceneNode* node = nodeStack.top();
             nodeStack.pop();
             // only push render command if the child isn't a container node.
-            if (node->Mesh)
+            if (node->mesh)
             {
                 math::vec3 boxMinWorld = node->GetWorldPosition() + (node->GetWorldScale() * node->BoxMin);
                 math::vec3 boxMaxWorld = node->GetWorldPosition() + (node->GetWorldScale() * node->BoxMax);
-                 m_CommandBuffer->Push(node->Mesh, node->Material, node->GetTransform(), node->GetPrevTransform(), boxMinWorld, boxMaxWorld, target);
+                 m_CommandBuffer->Push(node->mesh, node->material, node->GetTransform(), node->GetPrevTransform(), boxMinWorld, boxMaxWorld, target);
             }
             for(unsigned int i = 0; i < node->GetChildCount(); ++i)
                 nodeStack.push(node->GetChildByIndex(i));
@@ -432,12 +432,12 @@ namespace Cell
                 m_MaterialLibrary->debugLightMaterial->SetVector("lightColor", (*it)->Color * (*it)->Intensity * 0.25f);
 
                 RenderCommand command;
-                command.Material = m_MaterialLibrary->debugLightMaterial;
-                command.Mesh = m_DebugLightMesh;
+                command.material = m_MaterialLibrary->debugLightMaterial;
+                command.mesh = m_DebugLightMesh;
                 math::mat4 model;
                 math::translate(model, (*it)->Position);
                 math::scale(model, math::vec3(0.25f));
-                command.Transform = model;
+                command.transform = model;
 
                 renderCustomCommand(&command, nullptr);
             }
@@ -458,12 +458,12 @@ namespace Cell
                 m_MaterialLibrary->debugLightMaterial->SetVector("lightColor", (*it)->Color);
 
                 RenderCommand command;
-                command.Material = m_MaterialLibrary->debugLightMaterial;
-                command.Mesh = m_DebugLightMesh;
+                command.material = m_MaterialLibrary->debugLightMaterial;
+                command.mesh = m_DebugLightMesh;
                 math::mat4 model;
                 math::translate(model, (*it)->Position);
                 math::scale(model, math::vec3((*it)->Radius));
-                command.Transform = model;
+                command.transform = model;
 
                 renderCustomCommand(&command, nullptr);
             }
@@ -483,7 +483,7 @@ namespace Cell
             bool even = i % 2 == 0;
             Blit(even ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0),
                  even ? m_PostProcessTarget1 : m_CustomTarget, 
-                 postProcessingCommands[i].Material);
+                 postProcessingCommands[i].material);
         }
 
         // 11. final post-processing steps, blitting to default framebuffer
@@ -534,8 +534,8 @@ namespace Cell
         }
         // render screen-space material to quad which will be displayed in dst's buffers.
         RenderCommand command;
-        command.Material = material;
-        command.Mesh = m_NDCPlane;
+        command.material = material;
+        command.mesh = m_NDCPlane;
         renderCustomCommand(&command, nullptr);
     }   
     // ------------------------------------------------------------------------
@@ -573,33 +573,33 @@ namespace Cell
         {
             SceneNode *node = sceneStack.top();
             sceneStack.pop();
-            if (node->Mesh)
+            if (node->mesh)
             {
-                auto samplerUniforms = *(node->Material->GetSamplerUniforms());
+                auto samplerUniforms = *(node->material->GetSamplerUniforms());
                 if (samplerUniforms.find("TexAlbedo") != samplerUniforms.end())
                 {
                     materials.push_back(new Material(m_PBR->m_ProbeCaptureShader));
-                    materials[materials.size() - 1]->SetTexture("TexAlbedo", samplerUniforms["TexAlbedo"].Texture, 0);
+                    materials[materials.size() - 1]->SetTexture("TexAlbedo", samplerUniforms["TexAlbedo"].texture, 0);
                     if (samplerUniforms.find("TexNormal") != samplerUniforms.end())
                     {
-                        materials[materials.size() - 1]->SetTexture("TexNormal", samplerUniforms["TexNormal"].Texture, 1);
+                        materials[materials.size() - 1]->SetTexture("TexNormal", samplerUniforms["TexNormal"].texture, 1);
                     }
                     if (samplerUniforms.find("TexMetallic") != samplerUniforms.end())
                     {
-                        materials[materials.size() - 1]->SetTexture("TexMetallic", samplerUniforms["TexMetallic"].Texture, 2);
+                        materials[materials.size() - 1]->SetTexture("TexMetallic", samplerUniforms["TexMetallic"].texture, 2);
                     }
                     if (samplerUniforms.find("TexRoughness") != samplerUniforms.end())
                     {
-                        materials[materials.size() - 1]->SetTexture("TexRoughness", samplerUniforms["TexRoughness"].Texture, 3);
+                        materials[materials.size() - 1]->SetTexture("TexRoughness", samplerUniforms["TexRoughness"].texture, 3);
                     }
-                    commandBuffer.Push(node->Mesh, materials[materials.size() - 1], node->GetTransform());
+                    commandBuffer.Push(node->mesh, materials[materials.size() - 1], node->GetTransform());
                 }
                 else if (samplerUniforms.find("background") != samplerUniforms.end())
                 {   // we have a background scene node, add those as well
                     materials.push_back(new Material(m_PBR->m_ProbeCaptureBackgroundShader));
-                    materials[materials.size() - 1]->SetTextureCube("background", samplerUniforms["background"].TextureCube, 0);
-                    materials[materials.size() - 1]->DepthCompare = node->Material->DepthCompare;
-                    commandBuffer.Push(node->Mesh, materials[materials.size() - 1], node->GetTransform());
+                    materials[materials.size() - 1]->SetTextureCube("background", samplerUniforms["background"].textureCube, 0);
+                    materials[materials.size() - 1]->DepthCompare = node->material->DepthCompare;
+                    commandBuffer.Push(node->mesh, materials[materials.size() - 1], node->GetTransform());
                 }
             }
             for (unsigned int i = 0; i < node->GetChildCount(); ++i)
@@ -628,8 +628,8 @@ namespace Cell
     // ------------------------------------------------------------------------
     void Renderer::renderCustomCommand(RenderCommand* command, Camera* customCamera, bool updateGLSettings)
     {
-        Material *material = command->Material;
-        Mesh     *mesh     = command->Mesh;
+        Material *material = command->material;
+        Mesh     *mesh     = command->mesh;
 
         // update global GL blend state based on material
         if (updateGLSettings)
@@ -654,8 +654,8 @@ namespace Cell
             material->GetShader()->SetMatrix("view",       customCamera->View);
             material->GetShader()->SetVector("CamPos",     customCamera->Position);
         }
-        material->GetShader()->SetMatrix("model", command->Transform);
-        material->GetShader()->SetMatrix("prevModel", command->PrevTransform);
+        material->GetShader()->SetMatrix("model", command->transform);
+        material->GetShader()->SetMatrix("prevModel", command->prevTransform);
 
         material->GetShader()->SetBool("ShadowsEnabled", Shadows);
         if (Shadows && material->Type == MATERIAL_CUSTOM && material->ShadowReceive)
@@ -675,9 +675,9 @@ namespace Cell
         for (auto it = samplers->begin(); it != samplers->end(); ++it)
         {
             if (it->second.Type == SHADER_TYPE_SAMPLERCUBE)
-                it->second.TextureCube->Bind(it->second.Unit);
+                it->second.textureCube->Bind(it->second.Unit);
             else
-                it->second.Texture->Bind(it->second.Unit);
+                it->second.texture->Bind(it->second.Unit);
         }
 
         // set uniform state of material
@@ -930,8 +930,8 @@ namespace Cell
 
         shadowShader->SetMatrix("projection", projection);
         shadowShader->SetMatrix("view", view);
-        shadowShader->SetMatrix("model", command->Transform);
+        shadowShader->SetMatrix("model", command->transform);
 
-        renderMesh(command->Mesh, shadowShader);
+        renderMesh(command->mesh, shadowShader);
     }
 }

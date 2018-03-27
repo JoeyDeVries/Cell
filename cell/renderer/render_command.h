@@ -15,12 +15,12 @@ namespace Cell
     */
     struct RenderCommand
     {
-        math::mat4 Transform;
-        math::mat4 PrevTransform;
-        Mesh*      Mesh;
-        Material*  Material;
-        math::vec3 BoxMin;
-        math::vec3 BoxMax;
+        math::mat4 transform;
+        math::mat4 prevTransform;
+        Mesh*      mesh;
+        Material*  material;
+        math::vec3 boxMin;
+        math::vec3 boxMax;
     };
 }
 

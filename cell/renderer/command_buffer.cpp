@@ -24,12 +24,12 @@ namespace Cell
     void CommandBuffer::Push(Mesh* mesh, Material* material, math::mat4 transform, math::mat4 prevTransform, math::vec3 boxMin, math::vec3 boxMax, RenderTarget* target)
     {
         RenderCommand command = {};
-        command.Mesh          = mesh;
-        command.Material      = material;
-        command.Transform     = transform;
-        command.PrevTransform = prevTransform;
-        command.BoxMin        = boxMin;
-        command.BoxMax        = boxMax;
+        command.mesh          = mesh;
+        command.material      = material;
+        command.transform     = transform;
+        command.prevTransform = prevTransform;
+        command.boxMin        = boxMin;
+        command.boxMax        = boxMax;
 
         // if material requires alpha support, add it to alpha render commands for later rendering.
         if (material->Blend)
@@ -74,7 +74,7 @@ namespace Cell
     // custom per-element sort compare function used by the CommandBuffer::Sort() function.
     bool renderSortDeferred(const RenderCommand &a, const RenderCommand &b)
     {
-        return a.Material->GetShader()->ID < b.Material->GetShader()->ID;
+        return a.material->GetShader()->ID < b.material->GetShader()->ID;
     }
     // sort render state
     bool renderSortCustom(const RenderCommand &a, const RenderCommand &b)
@@ -106,12 +106,12 @@ namespace Cell
           return false;
 
         */
-        return std::make_tuple(a.Material->Blend, a.Material->GetShader()->ID) < 
-               std::make_tuple(b.Material->Blend, b.Material->GetShader()->ID);
+        return std::make_tuple(a.material->Blend, a.material->GetShader()->ID) < 
+               std::make_tuple(b.material->Blend, b.material->GetShader()->ID);
     }
     bool renderSortShader(const RenderCommand &a, const RenderCommand &b)
     {
-        return a.Material->GetShader()->ID < b.Material->GetShader()->ID;
+        return a.material->GetShader()->ID < b.material->GetShader()->ID;
     }
     // --------------------------------------------------------------------------------------------
     void CommandBuffer::Sort()
@@ -131,7 +131,7 @@ namespace Cell
             for (auto it = m_DeferredRenderCommands.begin(); it != m_DeferredRenderCommands.end(); ++it)
             {
                 RenderCommand command = *it;
-                if (m_Renderer->GetCamera()->Frustum.Intersect(command.BoxMin, command.BoxMax)) {
+                if (m_Renderer->GetCamera()->Frustum.Intersect(command.boxMin, command.boxMax)) {
                     commands.push_back(command);
                 }
             }
@@ -152,7 +152,7 @@ namespace Cell
             for (auto it = m_CustomRenderCommands[target].begin(); it != m_CustomRenderCommands[target].end(); ++it)
             {
                 RenderCommand command = *it;
-                if (m_Renderer->GetCamera()->Frustum.Intersect(command.BoxMin, command.BoxMax)) {
+                if (m_Renderer->GetCamera()->Frustum.Intersect(command.boxMin, command.boxMax)) {
                     commands.push_back(command);
                 }
             }
@@ -172,7 +172,7 @@ namespace Cell
             for (auto it = m_AlphaRenderCommands.begin(); it != m_AlphaRenderCommands.end(); ++it)
             {
                 RenderCommand command = *it;
-                if (m_Renderer->GetCamera()->Frustum.Intersect(command.BoxMin, command.BoxMax)) {
+                if (m_Renderer->GetCamera()->Frustum.Intersect(command.boxMin, command.boxMax)) {
                     commands.push_back(command);
                 }
             }
@@ -194,14 +194,14 @@ namespace Cell
         std::vector<RenderCommand> commands;
         for (auto it = m_DeferredRenderCommands.begin(); it != m_DeferredRenderCommands.end(); ++it)
         {
-            if (it->Material->ShadowCast)
+            if (it->material->ShadowCast)
             {
                 commands.push_back(*it);
             }
         }
         for (auto it = m_CustomRenderCommands[nullptr].begin(); it != m_CustomRenderCommands[nullptr].end(); ++it)
         {
-            if (it->Material->ShadowCast)
+            if (it->material->ShadowCast)
             {
                 commands.push_back(*it);
             }
