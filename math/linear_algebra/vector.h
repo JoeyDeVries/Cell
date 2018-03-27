@@ -166,7 +166,7 @@ namespace math
             {
                 T s;
                 T t;
-                T r;
+                T tt;
             };
             struct
             {
@@ -274,7 +274,7 @@ namespace math
             {
                 T s;
                 T t;
-                T r;
+                T tt;
             };
             struct
             {
@@ -284,24 +284,24 @@ namespace math
             };
             struct
             {
-                T _ignored1;
-                T _ignored2;
+                T _ignored11;
+                T _ignored21;
                 vector<2, T> yz;
             };
             struct
             {
                 vector<3, T> xyz;
-                T _ignored1;
+                T _ignored12;
             };
             struct
             {
                 vector<3, T> rgb;
-                T _ignored1;
+                T _ignored13;
             };
             struct
             {
                 vector<3, T> srt;
-                T _ignored1;
+                T _ignored14;
             };
         };
 
@@ -408,7 +408,7 @@ namespace math
     {
         vector<n, T> result;
         for (std::size_t i = 0; i < n; ++i)
-            result[i] = lhs[i] + scalar;
+            result[i] = rhs[i] + scalar;
         return result;
     }
     template <std::size_t n, typename T>
