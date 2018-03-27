@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
     Cell::PBRCapture *pbrEnv = renderer->GetSkypCature();
     background->SetCubemap(pbrEnv->Prefiltered);
 	float lodLevel = 1.5f; 
-	background->Material->SetFloat("lodLevel", lodLevel);
+	background->material->SetFloat("lodLevel", lodLevel);
 
     // post processing
     Cell::Shader *postProcessing1 = Cell::Resources::LoadShader("postprocessing1", "shaders/screen_quad.vs", "shaders/custom_post_1.fs");
