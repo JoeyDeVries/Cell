@@ -45,3 +45,5 @@ debug/
 *.app
 
 ./*.txt
+
+.vscode
