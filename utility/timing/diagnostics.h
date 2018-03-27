@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <string>
-#include <intrin.h>
+// #include <intrin.h>
 
 #include "../std_types.h"
 
