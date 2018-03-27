@@ -10,7 +10,7 @@
 namespace Cell
 {
     // --------------------------------------------------------------------------------------------
-    SceneNode::SceneNode(unsigned int id) : m_ID(id)
+    SceneNode::SceneNode(unsigned int id) : m_ID(id), m_Parent(nullptr)
     {
         
     }
@@ -91,7 +91,7 @@ namespace Cell
     {
         // check if this child already has a parent. If so, first remove this scene node from its 
         // current parent. Scene nodes aren't allowed to exist under multiple parents.
-        if (node->m_Parent)
+        if (node->m_Parent != nullptr)
         {
             node->m_Parent->RemoveChild(node->m_ID);
         }
@@ -165,7 +165,7 @@ namespace Cell
             m_Transform = math::translate(m_Position);
             m_Transform = math::scale(m_Transform, m_Scale); // TODO: order is off here for some reason, figure out why
             m_Transform = math::rotate(m_Transform, m_Rotation.xyz, m_Rotation.w);
-            if (m_Parent)
+            if (m_Parent != nullptr)
             {
                 m_Transform = m_Parent->m_Transform * m_Transform;
             }        
