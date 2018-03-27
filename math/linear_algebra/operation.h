@@ -88,8 +88,8 @@ namespace math
 
     // NOTE(Joey): matrix algebraic operations
     // ---------------------------------------
-    template <unsigned int m, unsigned int n, typename T>
-    inline matrix<m, n, T> transpose(matrix<m, n, T>& mat)
+    template <long unsigned int m, long unsigned int n, typename T>
+    inline matrix<m, n, T> transpose(const matrix<m, n, T>& mat)
     {
         matrix<n, m, T> result;
 

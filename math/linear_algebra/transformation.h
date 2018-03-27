@@ -112,7 +112,7 @@ namespace math
     // NOTE(Joey): view-space 
     // ----------------------
     template <typename T>
-    matrix<4, 4, T> lookAt(vector<3, T>& position, vector<3, T>& target, vector<3, T>& worldUp)
+    matrix<4, 4, T> lookAt(const vector<3, T>& position, const vector<3, T>& target, const vector<3, T>& worldUp)
     {
         matrix<4, 4, T> frame;
         matrix<4, 4, T> translate;
