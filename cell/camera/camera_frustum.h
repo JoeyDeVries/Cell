@@ -1,8 +1,8 @@
 #ifndef CELL_CAMERA_FRUSTUM_H
 #define CELL_CAMERA_FRUSTUM_H
 
-#include <math/linear_algebra/vector.h>
 #include <math/linear_algebra/operation.h>
+#include <math/linear_algebra/vector.h>
 
 namespace Cell
 {
@@ -32,7 +32,6 @@ namespace Cell
         }
     };
 
-
     /*
 
       Container object managing all 6 camera frustum planes as calculated from any Camera object.
@@ -45,23 +44,26 @@ namespace Cell
     */
     class CameraFrustum
     {
-    public:
-        union
-        {
-            FrustumPlane Planes[6];
-            struct
-            {
-                FrustumPlane Left;
-                FrustumPlane Right;
-                FrustumPlane Top;
-                FrustumPlane Bottom;
-                FrustumPlane Near;
-                FrustumPlane Far;
-            };
-        };
+      public:
+        // union
+        // {
+        //     FrustumPlane Planes[6];
+        //     struct
+        //     {
+        FrustumPlane Left;
+        FrustumPlane Right;
+        FrustumPlane Top;
+        FrustumPlane Bottom;
+        FrustumPlane Near;
+        FrustumPlane Far;
+        //     };
+        // };
 
-    public:
-        CameraFrustum() { } // NOTE(Joey): why do I need to define a constructor here? (otherwise I get deleted constructor error) LOOK IT UP!
+      public:
+        CameraFrustum() {} // NOTE(Joey): why do I need to define a constructor here? (otherwise I get deleted constructor error) LOOK IT UP!
+
+        FrustumPlane&       Planes(int i) { return (&Left)[i]; }
+        const FrustumPlane& Planes(int i) const { return (&Left)[i]; }
 
         void Update(Camera* camera);
 
