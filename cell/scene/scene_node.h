@@ -28,15 +28,15 @@ namespace Cell
     {
     public:
         // each node contains relevant render state
-        Mesh*     mesh;
-        Material* material;
+        Mesh*     mesh{nullptr};
+        Material* material{nullptr};
 
         // bounding box 
         math::vec3 boxMin = math::vec3(-99999.0f);
         math::vec3 boxMax = math::vec3( 99999.0f);
     private:
         std::vector<SceneNode*> m_Children;
-        SceneNode *m_Parent;
+        SceneNode *m_Parent{nullptr};
 
         // per-node transform (w/ parent-child relationship)
         math::mat4 m_Transform;

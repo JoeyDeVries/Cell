@@ -573,7 +573,7 @@ namespace Cell
         {
             SceneNode *node = sceneStack.top();
             sceneStack.pop();
-            if (node->mesh)
+            if (node->mesh != nullptr)
             {
                 auto samplerUniforms = *(node->material->GetSamplerUniforms());
                 if (samplerUniforms.find("TexAlbedo") != samplerUniforms.end())
@@ -662,7 +662,7 @@ namespace Cell
         {
             for (int i = 0; i < m_DirectionalLights.size(); ++i)
             {
-                if (m_DirectionalLights[i]->ShadowMapRT)
+                if (m_DirectionalLights[i]->ShadowMapRT != nullptr)
                 {
                     material->GetShader()->SetMatrix("lightShadowViewProjection" + std::to_string(i + 1), m_DirectionalLights[i]->LightSpaceViewProjection);
                     m_DirectionalLights[i]->ShadowMapRT->GetDepthStencilTexture()->Bind(10 + i);

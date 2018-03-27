@@ -53,7 +53,7 @@ namespace Cell
         bool Wireframe    = false;
     private:       
         // render state
-        CommandBuffer* m_CommandBuffer;
+        CommandBuffer* m_CommandBuffer{nullptr};
         GLCache        m_GLCache;
         math::vec2     m_RenderSize;
 
@@ -64,19 +64,19 @@ namespace Cell
         Mesh*         m_DeferredPointMesh;
 
         // materials
-        MaterialLibrary* m_MaterialLibrary;
+        MaterialLibrary* m_MaterialLibrary{nullptr};
 
         // camera
-        Camera*    m_Camera;
+        Camera*    m_Camera{nullptr};
         math::mat4 m_PrevViewProjection;
 
         // render-targets/post
         std::vector<RenderTarget*> m_RenderTargetsCustom;
         RenderTarget*              m_CurrentRenderTargetCustom = nullptr;
-        RenderTarget*              m_CustomTarget;
-        RenderTarget*              m_PostProcessTarget1;
-        PostProcessor*             m_PostProcessor;
-        Quad*                      m_NDCPlane;
+        RenderTarget*              m_CustomTarget{nullptr};
+        RenderTarget*              m_PostProcessTarget1{nullptr};
+        PostProcessor*             m_PostProcessor{nullptr};
+        Quad*                      m_NDCPlane{nullptr};
         unsigned int m_FramebufferCubemap; 
         unsigned int m_CubemapDepthRBO;
 
@@ -93,7 +93,7 @@ namespace Cell
         unsigned int m_GlobalUBO;
 
         // debug
-        Mesh* m_DebugLightMesh;
+        Mesh* m_DebugLightMesh{nullptr};
 
     public:
         Renderer();

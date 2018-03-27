@@ -18,9 +18,9 @@ namespace Cell
     {
     private:
         // gl toggles
-        bool m_DepthTest;
-        bool m_Blend;
-        bool m_CullFace;
+        bool m_DepthTest{false};
+        bool m_Blend{false};
+        bool m_CullFace{false};
 
         // gl state
         GLenum m_DepthFunc;
