@@ -67,7 +67,7 @@ namespace math
         // NOTE(Joey): math member operators (defined in operation.h)
         // ---------------------------------------------------
         // NOTE(Joey): negate operator
-        vector<n, T> operator-();
+        vector<n, T> operator-() const;
     };
 
     /* NOTE(Joey): 
@@ -146,7 +146,7 @@ namespace math
         // NOTE(Joey): math operators (defined in operation.h)
         // ---------------------------------------------------
         // NOTE(Joey): negate operator
-        vector<2, T> operator-();
+        vector<2, T> operator-() const;
     };
 
     /* NOTE(Joey):
@@ -250,7 +250,7 @@ namespace math
         // NOTE(Joey): math operators (defined in operation.h)
         // ---------------------------------------------------
         // NOTE(Joey): negate operator
-        vector<3, T> operator-();
+        vector<3, T> operator-() const;
     };
 
     // NOTE(Joey): initialize static variables of vec3
@@ -381,7 +381,7 @@ namespace math
         // NOTE(Joey): math operators (defined in operation.h)
         // ---------------------------------------------------
         // NOTE(Joey): negate operator
-        vector<4, T> operator-();
+        vector<4, T> operator-() const;
     };
 
     typedef vector<2, float>  vec2;
@@ -400,7 +400,7 @@ namespace math
     // NOTE(Joey): because this is a member operator, we have to
     // define this for each specialization.
     template <std::size_t n, typename T>
-    inline vector<n, T> vector<n, T>::operator-()
+    inline vector<n, T> vector<n, T>::operator-() const
     {
         vector<n, T> result;
         for (std::size_t i = 0; i < n; ++i)
@@ -410,17 +410,17 @@ namespace math
         return result;
     }
     template <typename T>
-    inline vector<2, T> vector<2, T>::operator-()
+    inline vector<2, T> vector<2, T>::operator-() const
     {
         return {-x, -y};
     }
     template <typename T>
-    inline vector<3, T> vector<3, T>::operator-()
+    inline vector<3, T> vector<3, T>::operator-() const
     {
         return {-x, -y, -z};
     }
     template <typename T>
-    inline vector<4, T> vector<4, T>::operator-()
+    inline vector<4, T> vector<4, T>::operator-() const
     {
         return {-x, -y, -z, -w};
     }
