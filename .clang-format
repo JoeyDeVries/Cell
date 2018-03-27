@@ -7,3 +7,5 @@ IndentCaseLabels: false
 ColumnLimit: 0
 NamespaceIndentation: All
 PointerAlignment: Left
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
