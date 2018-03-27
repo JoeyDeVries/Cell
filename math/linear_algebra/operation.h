@@ -88,7 +88,7 @@ namespace math
 
     // NOTE(Joey): matrix algebraic operations
     // ---------------------------------------
-    template <long unsigned int m, long unsigned int n, typename T>
+    template < std::size_t m,  std::size_t n, typename T>
     inline matrix<m, n, T> transpose(const matrix<m, n, T>& mat)
     {
         matrix<n, m, T> result;

@@ -43,7 +43,7 @@ namespace math
     }
     // NOTE(Joey): version w/ reference
     template <typename T>
-    matrix<4, 4, T>& scale(matrix<4, 4, T>& result, vector<3, T>& scale)
+    matrix<4, 4, T>& scale(matrix<4, 4, T>& result, const vector<3, T>& scale)
     {
         // NOTE(Joey): we can do a manual operation on the matrix scale
 		for (std::size_t i = 0; i < 3; ++i) {

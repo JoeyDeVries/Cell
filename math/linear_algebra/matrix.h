@@ -105,7 +105,7 @@ namespace math
     // defined; they should be defined as  operations on a matrix completely filled with the
     // respective scalar.
     template <std::size_t m, std::size_t n, typename T>
-    matrix<m, n, T> operator+(matrix<m, n, T>& lhs, matrix<m, n, T>& rhs)
+    matrix<m, n, T> operator+(const matrix<m, n, T>& lhs, const matrix<m, n, T>& rhs)
     {
         matrix<m, n, T> result;
         for (std::size_t col = 0; col < n; ++col)
@@ -120,7 +120,7 @@ namespace math
     // subtraction
     // --------------------------------------------------------------------------------------------
     template <std::size_t m, std::size_t n, typename T>
-    matrix<m, n, T> operator-(matrix<m, n, T>& lhs, matrix<m, n, T>& rhs)
+    matrix<m, n, T> operator-(const matrix<m, n, T>& lhs, const matrix<m, n, T>& rhs)
     {
         matrix<m, n, T> result;
         for (std::size_t col = 0; col < n; ++col)
@@ -139,7 +139,7 @@ namespace math
     // equal the number of rows (n) on the RHS matrix.  Theresult of the matrix multiplication is
     // then always a matrix of dimensions m x o (LHS:rows x RHS:cols) dimensions.
     template <std::size_t m, std::size_t n, std::size_t o, typename T>
-    matrix<m, o, T> operator*(matrix<m, n, T>& lhs, matrix<n, o, T>& rhs)
+    matrix<m, o, T> operator*(const matrix<m, n, T>& lhs, const matrix<n, o, T>& rhs)
     {
         matrix<m, o, T> result;
         for (std::size_t col = 0; col < o; ++col)
@@ -180,7 +180,7 @@ namespace math
     // rhs vector multiplication. We only define vector-matrix multiplication with the vector on
     // the right-side of the equation due to the column-major convention.
     template <std::size_t m, std::size_t n, typename T>
-    vector<m, T> operator*(matrix<m, n, T>& lhs, vector<n, T>& rhs)
+    vector<m, T> operator*(const matrix<m, n, T>& lhs, const vector<n, T>& rhs)
     {
         vector<m, T> result;
         for (std::size_t row = 0; row < m; ++row)
