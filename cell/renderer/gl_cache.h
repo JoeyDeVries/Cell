@@ -23,14 +23,14 @@ namespace Cell
         bool m_CullFace{false};
 
         // gl state
-        GLenum m_DepthFunc;
-        GLenum m_BlendSrc;
-        GLenum m_BlendDst;
-        GLenum m_FrontFace;
-        GLenum m_PolygonMode;
+        GLenum m_DepthFunc{0};
+        GLenum m_BlendSrc{0};
+        GLenum m_BlendDst{0};
+        GLenum m_FrontFace{0};
+        GLenum m_PolygonMode{0};
 
         // shaders
-        unsigned int m_ActiveShaderID;
+        unsigned int m_ActiveShaderID{0};
     public:
         GLCache();
         ~GLCache();

@@ -46,7 +46,7 @@ namespace Cell
         math::vec3 m_Scale = math::vec3(1.0f);
 
         // mark the current node's tranform as dirty if it needs to be re-calculated this frame
-        bool m_Dirty;
+        bool m_Dirty{true};
 
         // each node is uniquely identified by a 32-bit incrementing unsigned integer
         unsigned int m_ID;
