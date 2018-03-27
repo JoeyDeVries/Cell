@@ -32,7 +32,8 @@ namespace Cell
     // --------------------------------------------------------------------------------------------
     Background::~Background()
     {
-
+        delete material;
+        delete mesh;
     }
     // --------------------------------------------------------------------------------------------
     void Background::SetCubemap(TextureCube* cubemap)
