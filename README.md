@@ -11,6 +11,18 @@ to take a look at any of its inner workings, without feeling too overwhelming.
 
 ![Cell Preview](preview.png "Cell Preview")
 
+Dependencies
+------------
+- glfw3
+
+Build
+-----
+1. Ensure that you also downloaded the submodule, either you used `git clone --recurse-submodules <url>` or update the submodule by `git submodule update`.
+2. `cd build`
+3. `cmake -DCMAKE_BUILD_TYPE=Release ..`
+4. `make -j5`
+5. run `.\demo`
+
 Feature List (complete:base-functionality)
 ------
 * Fully functioning (custom) math library (vectors, matrices, transformations, utility functions):
