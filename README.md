@@ -17,7 +17,7 @@ Dependencies
 
 Build
 -----
-1. Ensure that you also downloaded the submodule, either you used `git clone --recurse-submodules <url>` or update the submodule by `git submodule update`.
+1. Ensure that you also downloaded the submodule, either you used `git clone --recurse-submodules <url>` or update the submodule by `git submodule init` & `git submodule update`.
 2. `cd build`
 3. `cmake -DCMAKE_BUILD_TYPE=Release ..`
 4. `make -j5`
