@@ -15,7 +15,7 @@ namespace Cell
         {
             for (unsigned int x = 0; x <= xSegments; ++x)
             {
-                float xSegment = (float)x / (float)ySegments;
+                float xSegment = (float)x / (float)xSegments;
                 float ySegment = (float)y / (float)ySegments;
                 float xPos = std::cos(xSegment * math::TAU) * std::sin(ySegment * math::PI); // TAU is 2PI
                 float yPos = std::cos(ySegment * math::PI);
