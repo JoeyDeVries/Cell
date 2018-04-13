@@ -1,22 +1,22 @@
 #include "renderer.h"
 
-#include "render_target.h"
 #include "MaterialLibrary.h"
 #include "PBR.h"
 #include "PostProcessor.h"
+#include "render_target.h"
 
-#include "../mesh/mesh.h"
-#include "../mesh/cube.h"
-#include "../shading/material.h"
-#include "../scene/scene.h"
-#include "../scene/scene_node.h"
 #include "../camera/camera.h"
 #include "../camera/fly_camera.h"
-#include "../resources/resources.h"
 #include "../imgui/imgui.h"
+#include "../mesh/cube.h"
+#include "../mesh/mesh.h"
+#include "../resources/resources.h"
+#include "../scene/scene.h"
+#include "../scene/scene_node.h"
+#include "../shading/material.h"
 
-#include <math/linear_algebra/vector.h>
 #include <math/linear_algebra/matrix.h>
+#include <math/linear_algebra/vector.h>
 
 #include <utility/logging/log.h>
 #include <utility/string_id.h>
@@ -28,11 +28,10 @@ namespace Cell
     // ------------------------------------------------------------------------
     Renderer::Renderer()
     {
-
     }
     // ------------------------------------------------------------------------
     Renderer::~Renderer()
-    {       
+    {
         delete m_CommandBuffer;
 
         delete m_NDCPlane;
@@ -56,7 +55,7 @@ namespace Cell
         delete m_PostProcessor;
 
         // pbr
-        delete m_PBR;      
+        delete m_PBR;
     }
     // ------------------------------------------------------------------------
     void Renderer::Init(GLADloadproc loadProcFunc)
@@ -94,16 +93,16 @@ namespace Cell
         // shadows
         for (int i = 0; i < 4; ++i) // allow up to a total of 4 dir/spot shadow casters
         {
-            RenderTarget *rt = new RenderTarget(2048, 2048, GL_UNSIGNED_BYTE, 1, true);
+            RenderTarget* rt = new RenderTarget(2048, 2048, GL_UNSIGNED_BYTE, 1, true);
             rt->m_DepthStencil.Bind();
             rt->m_DepthStencil.SetFilterMin(GL_NEAREST);
             rt->m_DepthStencil.SetFilterMax(GL_NEAREST);
             rt->m_DepthStencil.SetWrapMode(GL_CLAMP_TO_BORDER);
-            float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+            float borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
             glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
             m_ShadowRenderTargets.push_back(rt);
         }
-       
+
         // pbr
         m_PBR = new PBR(this);
 
@@ -114,8 +113,8 @@ namespace Cell
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_GlobalUBO);
 
         // default PBR pre-compute (get a more default oriented HDR map for this)
-        Cell::Texture *hdrMap = Cell::Resources::LoadHDR("sky env", "textures/backgrounds/alley.hdr");
-        Cell::PBRCapture *envBridge = m_PBR->ProcessEquirectangular(hdrMap);
+        Cell::Texture*    hdrMap    = Cell::Resources::LoadHDR("sky env", "textures/backgrounds/alley.hdr");
+        Cell::PBRCapture* envBridge = m_PBR->ProcessEquirectangular(hdrMap);
         SetSkyCapture(envBridge);
     }
     // ------------------------------------------------------------------------
@@ -128,7 +127,7 @@ namespace Cell
 
         m_CustomTarget->Resize(width, height);
         m_PostProcessTarget1->Resize(width, height);
-        
+
         m_PostProcessor->UpdateRenderSize(width, height);
     }
     // ------------------------------------------------------------------------
@@ -140,10 +139,9 @@ namespace Cell
     void Renderer::SetTarget(RenderTarget* renderTarget, GLenum target)
     {
         m_CurrentRenderTargetCustom = renderTarget;
-        if (renderTarget != nullptr) 
+        if (renderTarget != nullptr)
         {
-            if (std::find(m_RenderTargetsCustom.begin(), m_RenderTargetsCustom.end(), renderTarget)
-                == m_RenderTargetsCustom.end())
+            if (std::find(m_RenderTargetsCustom.begin(), m_RenderTargetsCustom.end(), renderTarget) == m_RenderTargetsCustom.end())
             {
                 m_RenderTargetsCustom.push_back(renderTarget);
             }
@@ -167,15 +165,15 @@ namespace Cell
     // ------------------------------------------------------------------------
     Material* Renderer::CreateMaterial(std::string base)
     {
-        return m_MaterialLibrary->CreateMaterial(base);      
+        return m_MaterialLibrary->CreateMaterial(base);
     }
     // ------------------------------------------------------------------------
-    Material* Renderer::CreateCustomMaterial(Shader *shader)
+    Material* Renderer::CreateCustomMaterial(Shader* shader)
     {
         return m_MaterialLibrary->CreateCustomMaterial(shader);
     }
     // ------------------------------------------------------------------------
-    Material* Renderer::CreatePostProcessingMaterial(Shader *shader)
+    Material* Renderer::CreatePostProcessingMaterial(Shader* shader)
     {
         return m_MaterialLibrary->CreatePostProcessingMaterial(shader);
     }
@@ -195,7 +193,7 @@ namespace Cell
 
         // get current render target
         RenderTarget* target = getCurrentRenderTarget();
-        // traverse through all the scene nodes and for each node: push its render state to the 
+        // traverse through all the scene nodes and for each node: push its render state to the
         // command buffer together with a calculated transform matrix.
         std::stack<SceneNode*> nodeStack;
         nodeStack.push(node);
@@ -206,13 +204,13 @@ namespace Cell
             SceneNode* node = nodeStack.top();
             nodeStack.pop();
             // only push render command if the child isn't a container node.
-            if (node->Mesh)
+            if (node->mesh)
             {
-                math::vec3 boxMinWorld = node->GetWorldPosition() + (node->GetWorldScale() * node->BoxMin);
-                math::vec3 boxMaxWorld = node->GetWorldPosition() + (node->GetWorldScale() * node->BoxMax);
-                 m_CommandBuffer->Push(node->Mesh, node->Material, node->GetTransform(), node->GetPrevTransform(), boxMinWorld, boxMaxWorld, target);
+                math::vec3 boxMinWorld = node->GetWorldPosition() + (node->GetWorldScale() * node->boxMin);
+                math::vec3 boxMaxWorld = node->GetWorldPosition() + (node->GetWorldScale() * node->boxMax);
+                m_CommandBuffer->Push(node->mesh, node->material, node->GetTransform(), node->GetPrevTransform(), boxMinWorld, boxMaxWorld, target);
             }
-            for(unsigned int i = 0; i < node->GetChildCount(); ++i)
+            for (unsigned int i = 0; i < node->GetChildCount(); ++i)
                 nodeStack.push(node->GetChildByIndex(i));
         }
     }
@@ -234,7 +232,7 @@ namespace Cell
     }
     // ------------------------------------------------------------------------
     void Renderer::RenderPushedCommands()
-    {      
+    {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         /* 
@@ -272,7 +270,7 @@ namespace Cell
         std::vector<RenderCommand> deferredRenderCommands = m_CommandBuffer->GetDeferredRenderCommands(true);
         glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
         glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer->ID);
-        unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+        unsigned int attachments[4] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
         glDrawBuffers(4, attachments);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         m_GLCache.SetPolygonMode(Wireframe ? GL_LINE : GL_FILL);
@@ -307,10 +305,10 @@ namespace Cell
                     glViewport(0, 0, m_ShadowRenderTargets[shadowRtIndex]->Width, m_ShadowRenderTargets[shadowRtIndex]->Height);
                     glClear(GL_DEPTH_BUFFER_BIT);
 
-                    math::mat4 lightProjection = math::orthographic(-20.0f, 20.0f, 20.0f, -20.0f, -15.0f, 20.0f);
-                    math::mat4 lightView = math::lookAt(-light->Direction * 10.0f, math::vec3(0.0), math::vec3::UP);
+                    math::mat4 lightProjection                       = math::orthographic(-20.0f, 20.0f, 20.0f, -20.0f, -15.0f, 20.0f);
+                    math::mat4 lightView                             = math::lookAt(-light->Direction * 10.0f, math::vec3(0.0), math::vec3::UP);
                     m_DirectionalLights[i]->LightSpaceViewProjection = lightProjection * lightView;
-                    m_DirectionalLights[i]->ShadowMapRT = m_ShadowRenderTargets[shadowRtIndex];
+                    m_DirectionalLights[i]->ShadowMapRT              = m_ShadowRenderTargets[shadowRtIndex];
                     for (int j = 0; j < shadowRenderCommands.size(); ++j)
                     {
                         renderShadowCastCommand(&shadowRenderCommands[j], lightProjection, lightView);
@@ -339,7 +337,7 @@ namespace Cell
         m_GBuffer->GetColorTexture(0)->Bind(0);
         m_GBuffer->GetColorTexture(1)->Bind(1);
         m_GBuffer->GetColorTexture(2)->Bind(2);
-        
+
         // ambient lighting
         renderDeferredAmbient();
 
@@ -371,16 +369,15 @@ namespace Cell
         glBindFramebuffer(GL_READ_FRAMEBUFFER, m_GBuffer->ID);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_CustomTarget->ID); // write to default framebuffer
         glBlitFramebuffer(
-            0, 0, m_GBuffer->Width, m_GBuffer->Height, 0, 0, m_RenderSize.x, m_RenderSize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST
-        );
+            0, 0, m_GBuffer->Width, m_GBuffer->Height, 0, 0, m_RenderSize.x, m_RenderSize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
-        // 6. custom forward render pass 
-        // push default render target to the end of the render target buffer s.t. we always render 
+        // 6. custom forward render pass
+        // push default render target to the end of the render target buffer s.t. we always render
         // the default buffer last.
-        m_RenderTargetsCustom.push_back(nullptr);        
+        m_RenderTargetsCustom.push_back(nullptr);
         for (unsigned int targetIndex = 0; targetIndex < m_RenderTargetsCustom.size(); ++targetIndex)
         {
-            RenderTarget *renderTarget = m_RenderTargetsCustom[targetIndex];
+            RenderTarget* renderTarget = m_RenderTargetsCustom[targetIndex];
             if (renderTarget)
             {
                 glViewport(0, 0, renderTarget->Width, renderTarget->Height);
@@ -389,17 +386,17 @@ namespace Cell
                     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
                 else
                     glClear(GL_COLOR_BUFFER_BIT);
-                m_Camera->SetPerspective(m_Camera->FOV, 
-                                         (float)renderTarget->Width / (float)renderTarget->Height, 
-                                         0.1, 100.0f); 
+                m_Camera->SetPerspective(m_Camera->FOV,
+                                         (float)renderTarget->Width / (float)renderTarget->Height,
+                                         0.1, 100.0f);
             }
             else
             {
-                // don't render to default framebuffer, but to custom target framebuffer which 
+                // don't render to default framebuffer, but to custom target framebuffer which
                 // we'll use for post-processing.
                 glViewport(0, 0, m_RenderSize.x, m_RenderSize.y);
                 glBindFramebuffer(GL_FRAMEBUFFER, m_CustomTarget->ID);
-                m_Camera->SetPerspective(m_Camera->FOV, m_RenderSize.x / m_RenderSize.y, 0.1, 
+                m_Camera->SetPerspective(m_Camera->FOV, m_RenderSize.x / m_RenderSize.y, 0.1,
                                          100.0f);
             }
 
@@ -432,18 +429,18 @@ namespace Cell
                 m_MaterialLibrary->debugLightMaterial->SetVector("lightColor", (*it)->Color * (*it)->Intensity * 0.25f);
 
                 RenderCommand command;
-                command.Material = m_MaterialLibrary->debugLightMaterial;
-                command.Mesh = m_DebugLightMesh;
+                command.material = m_MaterialLibrary->debugLightMaterial;
+                command.mesh     = m_DebugLightMesh;
                 math::mat4 model;
                 math::translate(model, (*it)->Position);
                 math::scale(model, math::vec3(0.25f));
-                command.Transform = model;
+                command.transform = model;
 
                 renderCustomCommand(&command, nullptr);
             }
         }
 
-        // 8. post-processing stage after all lighting calculations 
+        // 8. post-processing stage after all lighting calculations
         m_PostProcessor->ProcessPostLighting(this, m_GBuffer, m_CustomTarget, m_Camera);
 
         // 9. render debug visuals
@@ -458,12 +455,12 @@ namespace Cell
                 m_MaterialLibrary->debugLightMaterial->SetVector("lightColor", (*it)->Color);
 
                 RenderCommand command;
-                command.Material = m_MaterialLibrary->debugLightMaterial;
-                command.Mesh = m_DebugLightMesh;
+                command.material = m_MaterialLibrary->debugLightMaterial;
+                command.mesh     = m_DebugLightMesh;
                 math::mat4 model;
                 math::translate(model, (*it)->Position);
                 math::scale(model, math::vec3((*it)->Radius));
-                command.Transform = model;
+                command.transform = model;
 
                 renderCustomCommand(&command, nullptr);
             }
@@ -482,8 +479,8 @@ namespace Cell
             // ping-pong between render textures
             bool even = i % 2 == 0;
             Blit(even ? m_CustomTarget->GetColorTexture(0) : m_PostProcessTarget1->GetColorTexture(0),
-                 even ? m_PostProcessTarget1 : m_CustomTarget, 
-                 postProcessingCommands[i].Material);
+                 even ? m_PostProcessTarget1 : m_CustomTarget,
+                 postProcessingCommands[i].material);
         }
 
         // 11. final post-processing steps, blitting to default framebuffer
@@ -501,8 +498,8 @@ namespace Cell
     }
     // ------------------------------------------------------------------------
     void Renderer::Blit(Texture*      src,
-                        RenderTarget* dst, 
-                        Material*     material, 
+                        RenderTarget* dst,
+                        Material*     material,
                         std::string   textureUniformName)
     {
         // if a destination target is given, bind to its framebuffer
@@ -534,10 +531,10 @@ namespace Cell
         }
         // render screen-space material to quad which will be displayed in dst's buffers.
         RenderCommand command;
-        command.Material = material;
-        command.Mesh = m_NDCPlane;
+        command.material = material;
+        command.mesh     = m_NDCPlane;
         renderCustomCommand(&command, nullptr);
-    }   
+    }
     // ------------------------------------------------------------------------
     void Renderer::SetSkyCapture(PBRCapture* pbrEnvironment)
     {
@@ -556,50 +553,50 @@ namespace Cell
     // ------------------------------------------------------------------------
     void Renderer::BakeProbes(SceneNode* scene)
     {
-        if(!scene)
+        if (!scene)
         {
             // if no scene node was provided, use root node (capture all)
             scene = Scene::Root;
         }
         scene->UpdateTransform();
         // build a command list of nodes within the reflection probe's capture box/radius.
-        CommandBuffer commandBuffer(this);
+        CommandBuffer          commandBuffer(this);
         std::vector<Material*> materials;
-     
+
         // originally a recursive function but transformed to iterative version
         std::stack<SceneNode*> sceneStack;
         sceneStack.push(scene);
         while (!sceneStack.empty())
         {
-            SceneNode *node = sceneStack.top();
+            SceneNode* node = sceneStack.top();
             sceneStack.pop();
-            if (node->Mesh)
+            if (node->mesh != nullptr)
             {
-                auto samplerUniforms = *(node->Material->GetSamplerUniforms());
+                auto samplerUniforms = *(node->material->GetSamplerUniforms());
                 if (samplerUniforms.find("TexAlbedo") != samplerUniforms.end())
                 {
                     materials.push_back(new Material(m_PBR->m_ProbeCaptureShader));
-                    materials[materials.size() - 1]->SetTexture("TexAlbedo", samplerUniforms["TexAlbedo"].Texture, 0);
+                    materials[materials.size() - 1]->SetTexture("TexAlbedo", samplerUniforms["TexAlbedo"].texture, 0);
                     if (samplerUniforms.find("TexNormal") != samplerUniforms.end())
                     {
-                        materials[materials.size() - 1]->SetTexture("TexNormal", samplerUniforms["TexNormal"].Texture, 1);
+                        materials[materials.size() - 1]->SetTexture("TexNormal", samplerUniforms["TexNormal"].texture, 1);
                     }
                     if (samplerUniforms.find("TexMetallic") != samplerUniforms.end())
                     {
-                        materials[materials.size() - 1]->SetTexture("TexMetallic", samplerUniforms["TexMetallic"].Texture, 2);
+                        materials[materials.size() - 1]->SetTexture("TexMetallic", samplerUniforms["TexMetallic"].texture, 2);
                     }
                     if (samplerUniforms.find("TexRoughness") != samplerUniforms.end())
                     {
-                        materials[materials.size() - 1]->SetTexture("TexRoughness", samplerUniforms["TexRoughness"].Texture, 3);
+                        materials[materials.size() - 1]->SetTexture("TexRoughness", samplerUniforms["TexRoughness"].texture, 3);
                     }
-                    commandBuffer.Push(node->Mesh, materials[materials.size() - 1], node->GetTransform());
+                    commandBuffer.Push(node->mesh, materials[materials.size() - 1], node->GetTransform());
                 }
                 else if (samplerUniforms.find("background") != samplerUniforms.end())
-                {   // we have a background scene node, add those as well
+                { // we have a background scene node, add those as well
                     materials.push_back(new Material(m_PBR->m_ProbeCaptureBackgroundShader));
-                    materials[materials.size() - 1]->SetTextureCube("background", samplerUniforms["background"].TextureCube, 0);
-                    materials[materials.size() - 1]->DepthCompare = node->Material->DepthCompare;
-                    commandBuffer.Push(node->Mesh, materials[materials.size() - 1], node->GetTransform());
+                    materials[materials.size() - 1]->SetTextureCube("background", samplerUniforms["background"].textureCube, 0);
+                    materials[materials.size() - 1]->DepthCompare = node->material->DepthCompare;
+                    commandBuffer.Push(node->mesh, materials[materials.size() - 1], node->GetTransform());
                 }
             }
             for (unsigned int i = 0; i < node->GetChildCount(); ++i)
@@ -624,18 +621,18 @@ namespace Cell
         {
             delete materials[i];
         }
-    }  
+    }
     // ------------------------------------------------------------------------
     void Renderer::renderCustomCommand(RenderCommand* command, Camera* customCamera, bool updateGLSettings)
     {
-        Material *material = command->Material;
-        Mesh     *mesh     = command->Mesh;
+        Material* material = command->material;
+        Mesh*     mesh     = command->mesh;
 
         // update global GL blend state based on material
         if (updateGLSettings)
         {
             m_GLCache.SetBlend(material->Blend);
-            if(material->Blend)
+            if (material->Blend)
             {
                 m_GLCache.SetBlendFunc(material->BlendSrc, material->BlendDst);
             }
@@ -645,24 +642,24 @@ namespace Cell
             m_GLCache.SetCullFace(material->CullFace);
         }
 
-        // default uniforms that are always configured regardless of shader configuration (see them 
+        // default uniforms that are always configured regardless of shader configuration (see them
         // as a default set of shader uniform variables always there); with UBO
         material->GetShader()->Use();
         if (customCamera) // pass custom camera specific uniform
         {
             material->GetShader()->SetMatrix("projection", customCamera->Projection);
-            material->GetShader()->SetMatrix("view",       customCamera->View);
-            material->GetShader()->SetVector("CamPos",     customCamera->Position);
+            material->GetShader()->SetMatrix("view", customCamera->View);
+            material->GetShader()->SetVector("CamPos", customCamera->Position);
         }
-        material->GetShader()->SetMatrix("model", command->Transform);
-        material->GetShader()->SetMatrix("prevModel", command->PrevTransform);
+        material->GetShader()->SetMatrix("model", command->transform);
+        material->GetShader()->SetMatrix("prevModel", command->prevTransform);
 
         material->GetShader()->SetBool("ShadowsEnabled", Shadows);
         if (Shadows && material->Type == MATERIAL_CUSTOM && material->ShadowReceive)
         {
             for (int i = 0; i < m_DirectionalLights.size(); ++i)
             {
-                if (m_DirectionalLights[i]->ShadowMapRT)
+                if (m_DirectionalLights[i]->ShadowMapRT != nullptr)
                 {
                     material->GetShader()->SetMatrix("lightShadowViewProjection" + std::to_string(i + 1), m_DirectionalLights[i]->LightSpaceViewProjection);
                     m_DirectionalLights[i]->ShadowMapRT->GetDepthStencilTexture()->Bind(10 + i);
@@ -675,9 +672,9 @@ namespace Cell
         for (auto it = samplers->begin(); it != samplers->end(); ++it)
         {
             if (it->second.Type == SHADER_TYPE_SAMPLERCUBE)
-                it->second.TextureCube->Bind(it->second.Unit);
+                it->second.textureCube->Bind(it->second.Unit);
             else
-                it->second.Texture->Bind(it->second.Unit);
+                it->second.texture->Bind(it->second.Unit);
         }
 
         // set uniform state of material
@@ -722,24 +719,24 @@ namespace Cell
         renderMesh(mesh, material->GetShader());
     }
     // ------------------------------------------------------------------------
-    void Renderer::renderToCubemap(SceneNode* scene,
-        TextureCube* target,
-        math::vec3   position,
-        unsigned int mipLevel)
+    void Renderer::renderToCubemap(SceneNode*   scene,
+                                   TextureCube* target,
+                                   math::vec3   position,
+                                   unsigned int mipLevel)
     {
-        // create a command buffer specifically for this operation (as to not conflict with main 
+        // create a command buffer specifically for this operation (as to not conflict with main
         // command buffer)
         CommandBuffer commandBuffer(this);
-        commandBuffer.Push(scene->Mesh, scene->Material, scene->GetTransform());
+        commandBuffer.Push(scene->mesh, scene->material, scene->GetTransform());
         // recursive function transformed to iterative version by maintaining a stack
         std::stack<SceneNode*> childStack;
         for (unsigned int i = 0; i < scene->GetChildCount(); ++i)
             childStack.push(scene->GetChildByIndex(i));
         while (!childStack.empty())
         {
-            SceneNode *child = childStack.top();
+            SceneNode* child = childStack.top();
             childStack.pop();
-            commandBuffer.Push(child->Mesh, child->Material, child->GetTransform());
+            commandBuffer.Push(child->mesh, child->material, child->GetTransform());
             for (unsigned int i = 0; i < child->GetChildCount(); ++i)
                 childStack.push(child->GetChildByIndex(i));
         }
@@ -753,23 +750,22 @@ namespace Cell
     {
         // define 6 camera directions/lookup vectors
         Camera faceCameras[6] = {
-            Camera(position, math::vec3(1.0f,  0.0f,  0.0f), math::vec3(0.0f, -1.0f,  0.0f)),
-            Camera(position, math::vec3(-1.0f,  0.0f,  0.0f), math::vec3(0.0f, -1.0f,  0.0f)),
-            Camera(position, math::vec3(0.0f,  1.0f,  0.0f), math::vec3(0.0f,  0.0f,  1.0f)),
-            Camera(position, math::vec3(0.0f, -1.0f,  0.0f), math::vec3(0.0f,  0.0f,-1.0f)),
-            Camera(position, math::vec3(0.0f,  0.0f,  1.0f), math::vec3(0.0f, -1.0f,  0.0f)),
-            Camera(position, math::vec3(0.0f,  0.0f, -1.0f), math::vec3(0.0f, -1.0f,  0.0f))
-        };
+            Camera(position, math::vec3(1.0f, 0.0f, 0.0f), math::vec3(0.0f, -1.0f, 0.0f)),
+            Camera(position, math::vec3(-1.0f, 0.0f, 0.0f), math::vec3(0.0f, -1.0f, 0.0f)),
+            Camera(position, math::vec3(0.0f, 1.0f, 0.0f), math::vec3(0.0f, 0.0f, 1.0f)),
+            Camera(position, math::vec3(0.0f, -1.0f, 0.0f), math::vec3(0.0f, 0.0f, -1.0f)),
+            Camera(position, math::vec3(0.0f, 0.0f, 1.0f), math::vec3(0.0f, -1.0f, 0.0f)),
+            Camera(position, math::vec3(0.0f, 0.0f, -1.0f), math::vec3(0.0f, -1.0f, 0.0f))};
 
         // resize target dimensions based on mip level we're rendering.
-        float width = (float)target->FaceWidth * pow(0.5, mipLevel);
-        float height = (float)target->FaceHeight * pow(0.5, mipLevel);
+        float width  = (float)target->FaceWidth * std::pow(0.5, mipLevel);
+        float height = (float)target->FaceHeight * std::pow(0.5, mipLevel);
 
         glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferCubemap);
         glBindRenderbuffer(GL_RENDERBUFFER, m_CubemapDepthRBO);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
-            m_CubemapDepthRBO);
+                                  m_CubemapDepthRBO);
 
         // resize relevant buffers
         glViewport(0, 0, width, height);
@@ -777,15 +773,15 @@ namespace Cell
 
         for (unsigned int i = 0; i < 6; ++i)
         {
-            Camera *camera = &faceCameras[i];
+            Camera* camera = &faceCameras[i];
             camera->SetPerspective(math::Deg2Rad(90.0f), width / height, 0.1f, 100.0f);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, target->ID, mipLevel);
+                                   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, target->ID, mipLevel);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             for (unsigned int i = 0; i < renderCommands.size(); ++i)
             {
-                // cubemap generation only works w/ custom materials 
-                assert(renderCommands[i].Material->Type == MATERIAL_CUSTOM);
+                // cubemap generation only works w/ custom materials
+                assert(renderCommands[i].material->Type == MATERIAL_CUSTOM);
                 renderCustomCommand(&renderCommands[i], camera);
             }
         }
@@ -808,8 +804,8 @@ namespace Cell
     {
         glBindBuffer(GL_UNIFORM_BUFFER, m_GlobalUBO);
         // transformation matrices
-        glBufferSubData(GL_UNIFORM_BUFFER,   0, sizeof(math::mat4), &(m_Camera->Projection * m_Camera->View)[0][0]); // sizeof(math::mat4) = 64 bytes
-        glBufferSubData(GL_UNIFORM_BUFFER,  64, sizeof(math::mat4), &m_PrevViewProjection[0][0]); 
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(math::mat4), &(m_Camera->Projection * m_Camera->View)[0][0]); // sizeof(math::mat4) = 64 bytes
+        glBufferSubData(GL_UNIFORM_BUFFER, 64, sizeof(math::mat4), &m_PrevViewProjection[0][0]);
         glBufferSubData(GL_UNIFORM_BUFFER, 128, sizeof(math::mat4), &m_Camera->Projection[0][0]);
         glBufferSubData(GL_UNIFORM_BUFFER, 192, sizeof(math::mat4), &m_Camera->View[0][0]);
         glBufferSubData(GL_UNIFORM_BUFFER, 256, sizeof(math::mat4), &m_Camera->View[0][0]); // TODO: make inv function in math library
@@ -819,12 +815,12 @@ namespace Cell
         unsigned int stride = 2 * sizeof(math::vec4);
         for (unsigned int i = 0; i < m_DirectionalLights.size() && i < 4; ++i) // no more than 4 directional lights
         {
-            glBufferSubData(GL_UNIFORM_BUFFER, 336 + i * stride,                      sizeof(math::vec4), &m_DirectionalLights[i]->Direction[0]);
+            glBufferSubData(GL_UNIFORM_BUFFER, 336 + i * stride, sizeof(math::vec4), &m_DirectionalLights[i]->Direction[0]);
             glBufferSubData(GL_UNIFORM_BUFFER, 336 + i * stride + sizeof(math::vec4), sizeof(math::vec4), &m_DirectionalLights[i]->Color[0]);
         }
         for (unsigned int i = 0; i < m_PointLights.size() && i < 8; ++i) //  constrained to max 8 point lights in forward context
         {
-            glBufferSubData(GL_UNIFORM_BUFFER, 464 + i * stride,                      sizeof(math::vec4), &m_PointLights[i]->Position[0]);
+            glBufferSubData(GL_UNIFORM_BUFFER, 464 + i * stride, sizeof(math::vec4), &m_PointLights[i]->Position[0]);
             glBufferSubData(GL_UNIFORM_BUFFER, 464 + i * stride + sizeof(math::vec4), sizeof(math::vec4), &m_PointLights[i]->Color[0]);
         }
     }
@@ -836,8 +832,8 @@ namespace Cell
     // --------------------------------------------------------------------------------------------
     void Renderer::renderDeferredAmbient()
     {
-        PBRCapture* skyCapture = m_PBR->GetSkyCapture();
-        auto irradianceProbes = m_PBR->m_CaptureProbes;
+        PBRCapture* skyCapture       = m_PBR->GetSkyCapture();
+        auto        irradianceProbes = m_PBR->m_CaptureProbes;
 
         // if irradiance probes are present, use these as ambient lighting
         if (IrradianceGI && irradianceProbes.size() > 0)
@@ -894,7 +890,7 @@ namespace Cell
         dirShader->Use();
         dirShader->SetVector("camPos", m_Camera->Position);
         dirShader->SetVector("lightDir", light->Direction);
-        dirShader->SetVector("lightColor", math::normalize(light->Color) * light->Intensity); 
+        dirShader->SetVector("lightColor", math::normalize(light->Color) * light->Intensity);
         dirShader->SetBool("ShadowsEnabled", Shadows);
 
         if (light->ShadowMapRT)
@@ -902,13 +898,13 @@ namespace Cell
             dirShader->SetMatrix("lightShadowViewProjection", light->LightSpaceViewProjection);
             light->ShadowMapRT->GetDepthStencilTexture()->Bind(3);
         }
-            
+
         renderMesh(m_NDCPlane, dirShader);
     }
     // --------------------------------------------------------------------------------------------
     void Renderer::renderDeferredPointLight(PointLight* light)
     {
-        Shader *pointShader = m_MaterialLibrary->deferredPointShader;
+        Shader* pointShader = m_MaterialLibrary->deferredPointShader;
 
         pointShader->Use();
         pointShader->SetVector("camPos", m_Camera->Position);
@@ -921,7 +917,7 @@ namespace Cell
         math::scale(model, math::vec3(light->Radius));
         pointShader->SetMatrix("model", model);
 
-        renderMesh(m_DeferredPointMesh, pointShader);    
+        renderMesh(m_DeferredPointMesh, pointShader);
     }
     // --------------------------------------------------------------------------------------------
     void Renderer::renderShadowCastCommand(RenderCommand* command, const math::mat4& projection, const math::mat4& view)
@@ -930,8 +926,8 @@ namespace Cell
 
         shadowShader->SetMatrix("projection", projection);
         shadowShader->SetMatrix("view", view);
-        shadowShader->SetMatrix("model", command->Transform);
+        shadowShader->SetMatrix("model", command->transform);
 
-        renderMesh(command->Mesh, shadowShader);
+        renderMesh(command->mesh, shadowShader);
     }
 }

@@ -3,7 +3,6 @@
 
 #include <math/linear_algebra/vector.h>
 #include <math/linear_algebra/matrix.h>
-#
 
 namespace Cell
 {
@@ -24,7 +23,7 @@ namespace Cell
         float Intensity      = 1.0f;
 
         bool CastShadows = true;
-        RenderTarget* ShadowMapRT;
+        RenderTarget* ShadowMapRT{nullptr};
         math::mat4    LightSpaceViewProjection;
     };
 }

@@ -68,22 +68,22 @@ namespace Cell
             // if we only have one mesh, this node itself contains the mesh/material.
             if (aNode->mNumMeshes == 1)
             {
-                node->Mesh = mesh;
+                node->mesh = mesh;
                 if (setDefaultMaterial)
                 {
-                    node->Material = material;
+                    node->material = material;
                 }
-                node->BoxMin = boxMin;
-                node->BoxMax = boxMax;
+                node->boxMin = boxMin;
+                node->boxMax = boxMax;
             }
             // otherwise, the meshes are considered on equal depth of its children
             else
             {
                 SceneNode* child = new SceneNode(0);
-                child->Mesh = mesh;
-                child->Material = material;
-                child->BoxMin = boxMin;
-                child->BoxMax = boxMax;
+                child->mesh = mesh;
+                child->material = material;
+                child->boxMin = boxMin;
+                child->boxMax = boxMax;
                 node->AddChild(child);
             }
         }

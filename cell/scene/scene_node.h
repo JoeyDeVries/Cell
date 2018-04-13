@@ -28,15 +28,15 @@ namespace Cell
     {
     public:
         // each node contains relevant render state
-        Mesh*     Mesh;
-        Material* Material;
+        Mesh*     mesh{nullptr};
+        Material* material{nullptr};
 
         // bounding box 
-        math::vec3 BoxMin = math::vec3(-99999.0f);
-        math::vec3 BoxMax = math::vec3( 99999.0f);
+        math::vec3 boxMin = math::vec3(-99999.0f);
+        math::vec3 boxMax = math::vec3( 99999.0f);
     private:
         std::vector<SceneNode*> m_Children;
-        SceneNode *m_Parent;
+        SceneNode *m_Parent{nullptr};
 
         // per-node transform (w/ parent-child relationship)
         math::mat4 m_Transform;
@@ -46,7 +46,7 @@ namespace Cell
         math::vec3 m_Scale = math::vec3(1.0f);
 
         // mark the current node's tranform as dirty if it needs to be re-calculated this frame
-        bool m_Dirty;
+        bool m_Dirty{true};
 
         // each node is uniquely identified by a 32-bit incrementing unsigned integer
         unsigned int m_ID;

@@ -1,8 +1,9 @@
 #include "cell.h"
 
 #include <utility/logging/log.h>
+#include <limits>
 
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 #include "imgui/imgui.h"
 
 #include "renderer/PostProcessor.h"
@@ -561,7 +562,8 @@ namespace Cell
         }
         else
         {
-            io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
+            // float FLT_MAX = ;
+            io.MousePos = ImVec2(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
         }
 
         for (int i = 0; i < 3; i++)

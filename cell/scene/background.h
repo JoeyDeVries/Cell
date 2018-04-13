@@ -21,8 +21,8 @@ namespace Cell
     class Background : public SceneNode
     {
     private:
-        TextureCube *m_CubeMap;
-        Shader      *m_Shader;
+        TextureCube *m_CubeMap{nullptr};
+        Shader      *m_Shader{nullptr};
 
     public:
         Background();

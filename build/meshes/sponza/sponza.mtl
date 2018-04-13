@@ -66,9 +66,9 @@ newmtl Material__298
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
 	map_Ks Dielectric_metallic.tga
-	map_Kd Background_Albedo.tga
-	disp Background_Normal.tga
-	bump Background_Normal.tga
+	map_Kd Background_albedo.tga
+	disp Background_normal.tga
+	bump Background_normal.tga
 	map_NS Background_roughness.tga
 
 newmtl bricks
@@ -83,10 +83,10 @@ newmtl bricks
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
 	map_Ks Dielectric_metallic.tga
-	map_Kd Sponza_Bricks_a_Albedo.tga
-	disp Sponza_Bricks_a_Normal.tga
-	map_Ns Sponza_Bricks_a_Roughness.tga
-	bump Sponza_Bricks_a_Normal.tga
+	map_Kd Sponza_Bricks_a_albedo.tga
+	disp Sponza_Bricks_a_normal.tga
+	map_Ns Sponza_Bricks_a_roughness.tga
+	bump Sponza_Bricks_a_normal.tga
 
 newmtl arch
 	Ns 10.0000
@@ -337,12 +337,12 @@ newmtl chain
 	Kd 0.5880 0.5880 0.5880
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
-	map_Ks ChainTexture_Metallic.tga
-	map_Kd ChainTexture_Albedo_alpha.tga
+	map_Ks ChainTexture_metallic.tga
+	map_Kd ChainTexture_albedo_alpha.tga
 	map_d chain_texture_mask.tga
-	disp ChainTexture_Normal.tga
-	bump ChainTexture_Normal.tga
-	map_Ns ChainTexture_Roughness.tga
+	disp ChainTexture_normal.tga
+	bump ChainTexture_normal.tga
+	map_Ns ChainTexture_roughness.tga
 
 newmtl vase_hanging
 	Ns 10.0000
@@ -390,10 +390,10 @@ newmtl Material__25
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
 	map_Ks Dielectric_metallic.tga
-	map_Kd Lion_Albedo.tga
-	disp Lion_Normal.tga
-	bump Lion_Normal.tga
-	map_Ns Lion_Roughness.tga
+	map_Kd Lion_albedo.tga
+	disp Lion_normal.tga
+	bump Lion_normal.tga
+	map_Ns Lion_roughness.tga
 
 newmtl roof
 	Ns 10.0000

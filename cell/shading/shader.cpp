@@ -110,6 +110,8 @@ namespace Cell
         {
             glGetProgramInfoLog(ID, 1024, NULL, log);
             Log::Message("Shader program linking error: \n" + std::string(log), LOG_ERROR);
+
+            throw std::runtime_error("Shader linker error.");
         }
 
         glDeleteShader(vs);

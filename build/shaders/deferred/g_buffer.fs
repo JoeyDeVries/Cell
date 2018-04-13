@@ -1,4 +1,4 @@
-#version 330 core
+#version 420 core
 layout (location = 0) out vec4 gPositionMetallic;
 layout (location = 1) out vec4 gNormalRoughness;
 layout (location = 2) out vec4 gAlbedoAO;

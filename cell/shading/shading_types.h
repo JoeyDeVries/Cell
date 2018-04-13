@@ -1,8 +1,8 @@
 #ifndef CELL_SHADING_SHADING_TYPES_H
 #define CELL_SHADING_SHADING_TYPES_H
 
-#include <math/linear_algebra/vector.h>
 #include <math/linear_algebra/matrix.h>
+#include <math/linear_algebra/vector.h>
 
 #include <string>
 
@@ -39,13 +39,12 @@ namespace Cell
     struct UniformValue
     {
         SHADER_TYPE Type;
-        // TODO(Joey): now each element takes up the space of its largest 
+        // TODO(Joey): now each element takes up the space of its largest
         // element (mat4) which is 64 bytes; come up with a better solution!
-        union
-        {
-            bool       Bool;
-            int        Int;
-            float      Float;
+        union {
+            bool  Bool;
+            int   Int;
+            float Float;
 
             math::vec2 Vec2;
             math::vec3 Vec3;
@@ -62,10 +61,9 @@ namespace Cell
     {
         SHADER_TYPE  Type;
         unsigned int Unit;
-        union 
-        {
-            Texture     *Texture;
-            TextureCube *TextureCube;
+        union {
+            Texture*     texture;
+            TextureCube* textureCube;
         };
 
         UniformValueSampler() {}

@@ -17,27 +17,28 @@ namespace Cell
         Scene::Root->AddChild(this);
 
         m_Shader  = Resources::LoadShader("background", "shaders/background.vs", "shaders/background.fs");
-        Material  = new Cell::Material(m_Shader);
-        Mesh      = new Cell::Cube;
-        BoxMin    = math::vec3(-99999.0);
-        BoxMax    = math::vec3( 99999.0);
+        material  = new Cell::Material(m_Shader);
+        mesh      = new Cell::Cube;
+        boxMin    = math::vec3(-99999.0);
+        boxMax    = math::vec3( 99999.0);
 
         // default material configuration
-        Material->SetFloat("Exposure", 1.0f);
-        Material->DepthCompare = GL_LEQUAL;
-        Material->Cull = false;
-        Material->ShadowCast = false;
-        Material->ShadowReceive = false;
+        material->SetFloat("Exposure", 1.0f);
+        material->DepthCompare = GL_LEQUAL;
+        material->Cull = false;
+        material->ShadowCast = false;
+        material->ShadowReceive = false;
     }
     // --------------------------------------------------------------------------------------------
     Background::~Background()
     {
-
+        delete material;
+        delete mesh;
     }
     // --------------------------------------------------------------------------------------------
     void Background::SetCubemap(TextureCube* cubemap)
     {
         m_CubeMap = cubemap;
-        Material->SetTextureCube("background", m_CubeMap, 0);
+        material->SetTextureCube("background", m_CubeMap, 0);
     }
 };

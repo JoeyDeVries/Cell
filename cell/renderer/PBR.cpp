@@ -41,8 +41,8 @@ namespace Cell
 
         m_PBRCaptureCube = new Cube();
         m_SceneEnvCube = new SceneNode(0);
-        m_SceneEnvCube->Mesh = m_PBRCaptureCube;
-        m_SceneEnvCube->Material = m_PBRHdrToCubemap;
+        m_SceneEnvCube->mesh = m_PBRCaptureCube;
+        m_SceneEnvCube->material = m_PBRHdrToCubemap;
 
         // - brdf integration
         m_Renderer->Blit(nullptr, m_RenderTargetBRDFLUT, m_PBRIntegrateBRDF);
@@ -110,7 +110,7 @@ namespace Cell
     PBRCapture* PBR::ProcessEquirectangular(Texture* envMap)
     {
         // convert HDR radiance image to HDR environment cubemap
-        m_SceneEnvCube->Material = m_PBRHdrToCubemap;
+        m_SceneEnvCube->material = m_PBRHdrToCubemap;
         m_PBRHdrToCubemap->SetTexture("environment", envMap, 0);
         Cell::TextureCube hdrEnvMap;
         hdrEnvMap.DefaultInitialize(128, 128, GL_RGB, GL_FLOAT);
@@ -127,7 +127,7 @@ namespace Cell
         captureProbe->Irradiance = new TextureCube;
         captureProbe->Irradiance->DefaultInitialize(32, 32, GL_RGB, GL_FLOAT);
         m_PBRIrradianceCapture->SetTextureCube("environment", capture, 0);
-        m_SceneEnvCube->Material = m_PBRIrradianceCapture;
+        m_SceneEnvCube->material = m_PBRIrradianceCapture;
         m_Renderer->renderToCubemap(m_SceneEnvCube, captureProbe->Irradiance, math::vec3(0.0f), 0);
         // prefilter 
         if (prefilter)
@@ -136,7 +136,7 @@ namespace Cell
             captureProbe->Prefiltered->FilterMin = GL_LINEAR_MIPMAP_LINEAR;
             captureProbe->Prefiltered->DefaultInitialize(128, 128, GL_RGB, GL_FLOAT, true);
             m_PBRPrefilterCapture->SetTextureCube("environment", capture, 0);
-            m_SceneEnvCube->Material = m_PBRPrefilterCapture;
+            m_SceneEnvCube->material = m_PBRPrefilterCapture;
             // calculate prefilter for multiple roughness levels
             unsigned int maxMipLevels = 5;
             for (unsigned int i = 0; i < maxMipLevels; ++i)

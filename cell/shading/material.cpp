@@ -73,7 +73,7 @@ namespace Cell
     void Material::SetTexture(std::string name, Texture* value, unsigned int unit)
     {
         m_SamplerUniforms[name].Unit    = unit;
-        m_SamplerUniforms[name].Texture = value;
+        m_SamplerUniforms[name].texture = value;
 
         switch (value->Target)
         {
@@ -102,7 +102,7 @@ namespace Cell
     {
         m_SamplerUniforms[name].Unit        = unit;
         m_SamplerUniforms[name].Type        = SHADER_TYPE_SAMPLERCUBE;
-        m_SamplerUniforms[name].TextureCube = value;
+        m_SamplerUniforms[name].textureCube = value;
 
         if (m_Shader)
         {

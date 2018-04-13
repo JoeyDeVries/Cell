@@ -1,4 +1,4 @@
-#version 330 core
+#version 420 core
 out vec4 FragColor;
 
 in vec3 color;
@@ -6,7 +6,10 @@ in vec2 TexCoords;
 in vec3 FragPos;
 in vec3 Normal;
 
-#include common/uniforms.glsl
+// #include common/uniforms.glsl
+uniform vec4 camPos;
+uniform vec4 dirLight0_Dir;
+uniform vec4 dirLight0_Col;
 
 uniform sampler2D TexAlbedo;
 uniform sampler2D TexNormal;

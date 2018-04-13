@@ -6,6 +6,7 @@
 
 // NOTE(Nabil/htmlboss): Going to try to use the built in OpenMP to speed up Matrix operations
 #include <omp.h>
+#include <cmath>
 
 namespace math
 {
@@ -17,7 +18,7 @@ namespace math
         T result = {};
         for(std::size_t i = 0; i < n; ++i)
             result += vec[i] * vec[i];
-        return sqrt(result);
+        return std::sqrt(result);
     }
     // NOTE(Joey): often we only care about the relative length differences 
     // between vectors and not their exact length values. Seeing as a square 
@@ -87,8 +88,8 @@ namespace math
 
     // NOTE(Joey): matrix algebraic operations
     // ---------------------------------------
-    template <unsigned int m, unsigned int n, typename T>
-    inline matrix<m, n, T> transpose(matrix<m, n, T>& mat)
+    template < std::size_t m,  std::size_t n, typename T>
+    inline matrix<m, n, T> transpose(const matrix<m, n, T>& mat)
     {
         matrix<n, m, T> result;
 
